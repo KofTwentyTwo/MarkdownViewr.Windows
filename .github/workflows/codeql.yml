@@ -1,0 +1,31 @@
+# CodeQL static analysis (K22-CI-22): security-extended queries for C# (a manual x64
+# build of the solution) and for the workflows themselves, blocking high severity.
+name: codeql
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "41 6 * * 1"
+
+  workflow_call:
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  codeql:
+    uses: KofTwentyTwo/standards/.github/workflows/codeql.yml@fdf5ed029603c938615a32b1beca3628b8787945 # v0.1.2
+    permissions:
+      contents: read         # check out the code
+      security-events: write # upload CodeQL results to code scanning
+    with:
+      languages: '["csharp", "actions", "javascript-typescript"]'
+      build-mode: manual
+      build-command: dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64
+      runs-on: windows-latest
+      setup-dotnet: true

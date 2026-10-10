@@ -1,0 +1,20 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/MarkdownViewr.Windows/MarkdownViewr.Windows.csproj">
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="src/MarkdownViewr.Windows.Core/MarkdownViewr.Windows.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MarkdownViewr.Windows.Core.Tests/MarkdownViewr.Windows.Core.Tests.csproj" />
+    <Project Path="tests/MarkdownViewr.Windows.UiTests/MarkdownViewr.Windows.UiTests.csproj" />
+    <Project Path="tests/MarkdownViewr.Windows.UpdateProbe/MarkdownViewr.Windows.UpdateProbe.csproj" />
+  </Folder>
+</Solution>
