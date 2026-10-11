@@ -171,7 +171,7 @@ public sealed partial class MainWindow : Window, IDisposable
          if(!_closed)
          {
             StatusText.Text = "The file picker could not complete. Please try again.";
-            App.Log.Warning("The native document picker could not complete.");
+            App.Log.Warning(FormattableString.Invariant($"The native document picker could not complete. Exception={exception.GetType().Name}; HRESULT=0x{exception.HResult:X8}."));
          }
       }
    }

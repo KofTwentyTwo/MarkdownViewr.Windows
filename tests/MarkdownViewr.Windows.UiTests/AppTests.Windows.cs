@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
+using FlaUI.Core.Patterns;
 using FlaUI.Core.WindowsAPI;
 
 
@@ -31,7 +33,11 @@ public partial class AppTests
       Assert.Equal(2, DocumentWindows(session).Length);
       first.SetForeground();
       WaitForWindowElement(session, first, "ZoomInButton").Patterns.Invoke.Pattern.Invoke();
-      session.WaitFor(() => firstHeading.BoundingRectangle.Height > firstHeight && WaitForWindowElement(session, first, "ZoomResetButton").IsEnabled ? firstHeading : null, "the first window's actual larger glyph");
+      session.WaitFor(() =>
+      {
+         AutomationElement? current = first.FindFirstDescendant(cf => cf.ByAutomationId("mv-heading-0"));
+         return current is not null && current.BoundingRectangle.Height > firstHeight && WaitForWindowElement(session, first, "ZoomResetButton").IsEnabled ? current : null;
+      }, "the first window's actual larger glyph after its document navigation");
       Assert.Equal(secondHeight, secondHeading.BoundingRectangle.Height);
       Assert.Equal("Actual size (100%)", WaitForWindowElement(session, second, "ZoomResetButton").Name);
       first.SetForeground();
@@ -68,6 +74,7 @@ public partial class AppTests
       Assert.Null(blank.FindFirstDescendant(cf => cf.ByAutomationId("mv-heading-0")));
       Assert.Equal(3, DocumentWindows(session).Length);
       InvokeDocumentMenu(session, blank, "RecentDocument:" + Array.IndexOf(history, Path.Combine(session.DataDirectory, "one.md")), recent: true);
+      session.WaitFor(() => GetForegroundWindow() == first.Properties.NativeWindowHandle.Value ? first : null, "the actual original reader brought to the native foreground by its recent entry");
       Assert.Equal(3, DocumentWindows(session).Length);
       Assert.Equal(history, ReadRecentDocuments(session));
       InvokeDocumentMenu(session, blank, "CloseWindowMenuItem");
@@ -81,9 +88,14 @@ public partial class AppTests
       Assert.Equal(history, ReadRecentDocuments(session));
       InvokeDocumentMenu(session, missing, "ClearRecentDocuments", recent: true);
       Assert.Empty(ReadRecentDocuments(session));
-      InvokeDocumentMenu(session, first, "SourceToggle", menuName: "View");
-      session.WaitFor(() => first.FindFirstDescendant(cf => cf.ByAutomationId("SourceText")), "the first window saving its source preference");
+      // This window loaded the nonempty history before Clear; its next preference save must not resurrect that stale snapshot.
+      InvokeDocumentMenu(session, missing, "SourceToggle", menuName: "View");
+      session.WaitFor(() => missing.FindFirstDescendant(cf => cf.ByAutomationId("SourceText")), "the older-history window saving its source preference after Clear");
       Assert.Empty(ReadRecentDocuments(session));
+      using(var saved = JsonDocument.Parse(session.ReadSettings()))
+      {
+         Assert.True(saved.RootElement.GetProperty("ShowSource").GetBoolean());
+      }
       Assert.True(File.Exists(Path.Combine(session.DataDirectory, "one.md")));
       RetainDocumentWindow(session, first, "cleared-history-reader");
       InvokeDocumentMenu(session, first, "ExitMenuItem");
@@ -105,7 +117,7 @@ public partial class AppTests
       Window original = WaitForDocumentWindow(session, "original.txt");
       WaitForWindowHeading(session, original, "Original picker reader");
       InvokeDocumentMenu(session, original, "OpenMenuItem");
-      AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the real Windows multi-file picker filename field");
+      AutomationElement filename = WaitForOpenPickerFilename(session);
       string paths = "\"" + Path.Combine(session.DataDirectory, "picked & caf\u00e9.mdown") + "\" \"" + Path.Combine(session.DataDirectory, "picked two.mkd") + "\"";
       EnterPickerFilename(session, filename, paths);
       session.ClickButton("Open");
@@ -118,7 +130,7 @@ public partial class AppTests
       string[] history = ReadRecentDocuments(session);
       Assert.Equal(3, history.Length);
       InvokeDocumentMenu(session, original, "OpenMenuItem");
-      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the reopened native file picker");
+      WaitForOpenPickerFilename(session);
       session.ClickButton("Cancel");
       session.WaitForElementGone("1001");
       Assert.Equal(3, DocumentWindows(session).Length);
@@ -126,6 +138,12 @@ public partial class AppTests
       Assert.NotNull(original.FindFirstDescendant(cf => cf.ByName("Original picker reader")));
       RetainDocumentWindow(session, first, "multiple-picker-reader");
    }
+
+
+
+   /// <summary>Observes actual native foreground ownership without relying on a mirrored application property.</summary>
+   [LibraryImport("user32.dll")]
+   private static partial nint GetForegroundWindow();
 
 
 
@@ -174,8 +192,50 @@ public partial class AppTests
          submenu.Patterns.ExpandCollapse.Pattern.Expand();
       }
       AutomationElement item = session.WaitFor(() => session.TopLevelWindows().Select(root => root.FindFirstDescendant(cf => cf.ByAutomationId(id))).FirstOrDefault(element => element is not null), "the requested native " + id + " command");
-      item.Patterns.Invoke.Pattern.Invoke();
+      if(item.Patterns.Invoke.TryGetPattern(out IInvokePattern? invoke))
+      {
+         invoke.Invoke();
+      }
+      else
+      {
+         Assert.True(item.TryGetClickablePoint(out System.Drawing.Point point));
+         NativeMouse.MoveTo(point);
+         Wait.UntilInputIsProcessed();
+         AutomationElement? hit = session.Automation.FromPoint(Mouse.Position);
+         bool target = false;
+         for(int depth = 0; hit is not null && depth < 8; depth++, hit = hit.Parent)
+         {
+            if(hit.Equals(item))
+            {
+               target = true;
+               break;
+            }
+         }
+         Assert.True(target, "The actual native pointer must be over the requested menu item or its child.");
+         Assert.Equal(session.App.ProcessId, session.Automation.FromPoint(Mouse.Position).Properties.ProcessId.ValueOrDefault);
+         Mouse.Down(MouseButton.Left);
+         Wait.UntilInputIsProcessed();
+         Mouse.Up(MouseButton.Left);
+      }
       Wait.UntilInputIsProcessed();
+   }
+
+
+
+   /// <summary>Retains actual owned native picker controls and nonsensitive app errors when the exact filename lookup fails.</summary>
+   private static AutomationElement WaitForOpenPickerFilename(AppSession session)
+   {
+      try
+      {
+         return session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the real Windows multi-file picker filename field");
+      }
+      catch(TimeoutException exception)
+      {
+         string windows = string.Join(Environment.NewLine, session.TopLevelWindows().Select(window =>
+            "Window=" + window.Name + "; " + string.Join(Environment.NewLine, window.FindAllDescendants().Take(180).Select(element =>
+               "Id=" + element.Properties.AutomationId.ValueOrDefault + "; Name=" + element.Properties.Name.ValueOrDefault + "; Type=" + element.Properties.ControlType.ValueOrDefault))));
+         throw new TimeoutException(exception.Message + " Logs: " + session.ReadLogs() + "; Owned native windows: " + windows + "; Main tree: " + session.DescribeDocumentStatus(), exception);
+      }
    }
 
 

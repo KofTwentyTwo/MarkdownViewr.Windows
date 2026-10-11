@@ -76,7 +76,19 @@ protects sibling settings and cleared history from stale window snapshots.
 Signed/DCOe48a08c implements this milestone. Local376 core tests/100% lines and
 zero-warning build/format/docs/hooks pass. Three new hosted-only
 native lifecycle cases compile; no local GUI input. ADR-0004 and threat model
-updated. These tests have not run. Association/activation registration remains
+updated. 1cfc07f / CI38129552334 native54/57, zero skips: all original54 pass,
+three new cases fail. First caches a glyph across zoom navigation; second requests
+unsupported Invoke from SourceToggle after actual New/Recent/Close/missing/clear
+steps; third cannot find Open picker's filename field. Fresh glyph lookup and
+verified owned physical menu input retain all state/reload/history assertions.
+Picker diagnostics now retain owned tree and generic exception/HRESULT; no selector
+change is guessed. Actual native foreground focus and source preference persistence are required.
+The missing-file window loaded nonempty history before Clear; its later preference
+save must not resurrect that snapshot.
+Retain native red log: artifacts/windows-first-native-38129552334.log. Published process timed out at300seconds after two recorded new-case failures;
+no TRX/installed-channel outcomes. Retained partial output/screenshots:
+artifacts/windows-first-failed-installed-38129552334. Outer full-UI-suite budget
+now600seconds; all individual10/30second waits/assertions unchanged. Association/activation registration remains
 required. Full reference audit also retains theme ordering/enable/delete/cycle,
 JSON import/export conflicts, all typography/global CSS/content width and four
 configurable rendering extensions in PRODUCT/TODO; none is claimed complete.
