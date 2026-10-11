@@ -2,6 +2,35 @@
 
 Updated: 2026-10-11
 
+## Source correction passes full native acceptance; cleanup local - 2026-10-11
+
+Exact signed9994eda CI38176727468 passes focused20/20 and full native98/98,
+zero failures/skips. The original source focus, both-direction actual heading
+alignment and physical wheel case pass without changed bounds or deadlines.
+Core586/586 retains100% measured line coverage; build/format pass. Retain actual
+TRX under artifacts/reader-regressions-38176727468 and native/core9994eda logs.
+The published/installed job114580574833 remains live; preserve that run before
+pushing another head. No installed or signed release claim follows from native.
+
+Remove temporary source color/coordinate/scroll and collapsed-index probes only;
+keep production painting, hit-testing, offscreen geometry and actual regression
+assertions. This cleanup has local zero-warning Release/format passing and needs
+fresh exact-head hosted acceptance after the current installed job is terminal.
+
+Shared defaults: AppKit PR29 signedf58aac9 passes115unit/100% core+updates,
+14/14 native WinUI/WPF and build/format. Starter PR4 signede4c4a50 passes8/8 native,
+both generated variants20core/8native each, CLI14, plus installed update jobs.
+Its pinned analyzer combined pass crashed; signed2688e3f is pushed after terminal
+evidence with all-rule casing partition mitigation. All build scripts pass every
+configured rule locally; new exact-head gates remain pending. No PR merged.
+
+Still required: actual default chooser/Explorer/hook lifecycle and stable/dev
+coexistence, full reference fidelity/standards inventory, reviewed published
+signing builder, verified repository Azure identity/profile/signer and final
+shipped signatures, owner design acceptance and genuine current-head human
+review. Stable1.0/dev publication is authorized only after these requirements.
+Preserve preview55472, no local desktop input, no further Azure login attempts.
+
 ## Full source acceptance advanced; geometry correction pending - 2026-10-11
 
 Exact signed6374611 CI38174602145 is terminal: focused19/20, native97/98,

@@ -162,7 +162,6 @@ internal sealed partial class DocumentBrowser
          return;
       }
       await ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const h=document.getElementById('mv-heading-{index}'); if(h){{ for(let p=h.parentElement;p;p=p.parentElement) p.hidden=false; h.scrollIntoView({{block:'start'}}); }}}})()"));
-      await TraceCollapsedSectionsAsync("jump", index);
    }
 
 
@@ -176,7 +175,6 @@ internal sealed partial class DocumentBrowser
       }
       Uri document = _policy.DocumentUri;
       string? result = await ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const e=document.querySelector('[data-mv-body=\"{index}\"]'); if(e) return e.hidden=!e.hidden;}})()"));
-      await TraceCollapsedSectionsAsync("toggle", index);
       if(document == _policy.DocumentUri && _findCollapsed is { } collapsed && result is "true" or "false")
       {
          _findCollapsed = string.Equals(result, "true", StringComparison.Ordinal) ? collapsed.Append(index).Distinct().ToArray() : collapsed.Where(value => value != index).ToArray();
@@ -195,18 +193,6 @@ internal sealed partial class DocumentBrowser
          _findCollapsed = collapsed ? Enumerable.Range(0, _headings.Count).ToArray() : [];
       }
    }
-
-
-   /// <summary>Temporary fixture-only evidence contains generated section indices, never authored text or resource paths.</summary>
-   private async Task TraceCollapsedSectionsAsync(string operation, int index)
-   {
-      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
-      {
-         string? collapsed = await ExecuteDocumentScriptAsync("Array.from(document.querySelectorAll('[data-mv-body]')).filter(e=>e.hidden).map(e=>Number(e.dataset.mvBody))");
-         App.Log.Info(FormattableString.Invariant($"[DEBUG-outline-collapse] {operation}; index={index}; collapsed={collapsed}; navigation={_navigationId}."));
-      }
-   }
-
 
 
    /// <summary>Fixed host operations run only on the ready intercepted document; content script execution remains disabled.</summary>

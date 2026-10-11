@@ -10,8 +10,8 @@ The full port and public release are not complete; do not add a conformance badg
 | Required inventory | `K22-REPO-42` fails: add MarkdownViewr.Windows to standards `MAINTAINERS.md` in a reviewed PR, with Product tier and adoption-in-progress status. Do not represent this as already registered. |
 | Shared community defaults | `K22-REPO-10` warns: no owner `.github` repository. App governance/security/contributing files exist; shared owner defaults remain optional setup work. |
 | Workflow reviews | `K22-CI-02/03/31` require review of PR/push tests, documented command alignment and full release gate reuse. Current callers visibly run PR/push(main) CI and the release reuses CI/security. No human review acknowledgement is inferred. |
-| Test evidence | Clean reader2639e2d passes49 native/published and48 per installed channel, no failures/skips. Original3 native print/PDF cases pass ec5f98f/38125751638; full cleaned printing suites and broader output comparisons remain pending.363 core tests/100% measured lines and55 script tests pass. |
-| Release | Stable/dev synthetic installed updates call AppKit apply/restart successfully. Actual verified Azure identity/profile/signer permissions and exact signed distributed artifacts remain deferred. No production release is authorized. |
+| Test evidence | Exact9994eda passes586 core tests/100% measured lines, focused20/20 and full native98/98, zero skips. Published/installed acceptance is still live in CI38176727468. Diagnostic cleanup needs fresh exact-head acceptance. |
+| Release | Stable/dev synthetic installed updates call AppKit apply/restart successfully. Actual verified Azure identity/profile/signer permissions and exact signed distributed artifacts remain deferred. Owner authorized stable1.0/dev publication after all requirements pass; signing and review requirements remain unmet. |
 
 Full acceptance remains in `docs/PRODUCT.md` and `docs/TODO.md`; maintainer review,
 Best Practices owner attestations and final signing cannot be replaced by local
