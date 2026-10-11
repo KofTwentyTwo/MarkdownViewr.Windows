@@ -26,7 +26,7 @@ Reference source inspected at commit `6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021`.
 | Rendering | GitHub Flavored Markdown, tables, tasks, strikethrough, fenced code, local images/links; independently configurable highlight, superscript, subscript and underline extensions |
 | Reload | Watch saves, including atomic replacements; debounce changes, preserve scroll, report deletion/recovery |
 | Themes | 20 built-ins; editable body/heading/code fonts, sizes and palette; theme/global CSS; content width; theme order, enable/disable/delete/restore and cycling; JSON import/export with overwrite/keep-both/skip conflicts; persistent settings |
-| Navigation | Resizable table of contents, depth control, heading jumps, collapsible sections and per-window font zoom (30–500%, Ctrl+plus/minus/0) |
+| Navigation | Resizable table of contents, depth control, configurable wrapping or ellipsis/full-title tooltip, optional heading-depth markers, heading jumps, collapsible sections and per-window font zoom (30–500%, Ctrl+plus/minus/0) |
 | Source | Optional source pane, synchronized headings/scroll and collapse state; theme-aware syntax highlighting; draggable split opening at50/50 (#16/#17) |
 | Find | Match counts, next/previous matches, search in both panes and vim-style shortcuts |
 | Keys | j/k, Ctrl+d/u, gg/G, ]]/[[, /, n/N; Windows Ctrl-based equivalents for native commands |

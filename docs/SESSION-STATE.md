@@ -2,6 +2,28 @@
 
 Updated: 2026-10-11
 
+## Native General and Contents options prepared - 2026-10-11
+
+Move new-window Contents/Source defaults and Default Apps guidance into General;
+splash/startup update controls remain Advanced. Add persisted Contents wrapping
+and optional depth markers using native TextBlock/ListView/ToggleSwitch controls.
+Unwrapped titles use one line/ellipsis and full-title tooltips; wrapped titles have
+no two-line cap. Preserve heading identities, selected row, per-window depth and
+visibility. Checked persistence precedes sibling broadcasts and baseline updates.
+Category switches reset ordinary scroll position without discarding CSS drafts.
+
+All593 core tests pass with100% measured line coverage; zero-warning Release build
+passes. A new actual native case checks long-title geometry, live sibling markers,
+unrelated-save persistence, Settings reopening and restoration; focused/full/
+distributed suites retain every previous case and deadline. It has compiled but
+not executed. Retain actual Settings-window screenshots in the hosted case.
+
+Signed local5803fc1 inline-heading fix and this preparation remain unpushed while
+exact53755ab installed114596717826 is verified live; focused21/native99 on537
+pass. Do not cancel the current full job or claim new installed/chooser/signing
+results. Issue21 remains open for full Settings redesign/default status/Printing/
+theme previews and owner acceptance. No local desktop input or production release.
+
 ## Mac screenshot comparison and inline-heading correction - 2026-10-11
 
 Reviewed all eight owner-provided Mac screenshots; issue #21 records the concrete

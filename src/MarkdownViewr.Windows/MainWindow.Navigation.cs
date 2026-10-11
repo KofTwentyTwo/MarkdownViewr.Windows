@@ -76,8 +76,30 @@ public sealed partial class MainWindow
       {
          foreach(Core.Documents.DocumentHeading heading in _outline.Headings.Where(heading => heading.Level <= _settings.OutlineDepth))
          {
-            var label = new TextBlock { Tag = heading, Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxLines = 2, Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0) };
-            var item = new ListViewItem { Content = label, Tag = heading };
+            var label = new TextBlock
+            {
+               Tag = heading,
+               Text = heading.Title,
+               TextWrapping = _settings.WrapOutlineEntries ? TextWrapping.Wrap : TextWrapping.NoWrap,
+               TextTrimming = _settings.WrapOutlineEntries ? TextTrimming.None : TextTrimming.CharacterEllipsis,
+               MaxLines = _settings.WrapOutlineEntries ? 0 : 1,
+            };
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(label, "OutlineTitle:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            var row = new Grid { Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0), ColumnSpacing = 6 };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            if(_settings.ShowOutlineDepthMarkers)
+            {
+               var marker = new TextBlock { Text = "●○▪▫–·"[(heading.Level - 1)..heading.Level], VerticalAlignment = VerticalAlignment.Top, Width = 16 };
+               Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(marker, "OutlineDepthMarker:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
+               Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(marker, "Heading level " + heading.Level.ToString(System.Globalization.CultureInfo.InvariantCulture));
+               row.Children.Add(marker);
+            }
+            Grid.SetColumn(label, 1);
+            row.Children.Add(label);
+            var item = new ListViewItem { Content = row, Tag = heading, HorizontalContentAlignment = HorizontalAlignment.Stretch };
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, heading.Title);
+            ToolTipService.SetToolTip(item, new TextBlock { Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxWidth = 320 });
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "OutlineHeading:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
             OutlineList.Items.Add(item);
             if(heading == selected)

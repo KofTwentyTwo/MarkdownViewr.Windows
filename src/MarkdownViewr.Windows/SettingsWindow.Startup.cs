@@ -40,15 +40,6 @@ internal sealed partial class SettingsWindow
       page.Children.Add(_showSplash);
       page.Children.Add(_splashDuration);
       page.Children.Add(_checkStartupUpdates);
-      page.Children.Add(new TextBlock { Text = "New document windows", FontSize = 20, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
-      page.Children.Add(new TextBlock { Text = "Contents and Source start hidden by default. Toolbar changes affect only the current window.", TextWrapping = TextWrapping.Wrap });
-      AutomationProperties.SetAutomationId(_showOutlineByDefault, "SettingsDefaultContentsToggle");
-      AutomationProperties.SetAutomationId(_showSourceByDefault, "SettingsDefaultSourceToggle");
-      _showOutlineByDefault.Toggled += (_, _) => SaveStartup();
-      _showSourceByDefault.Toggled += (_, _) => SaveStartup();
-      page.Children.Add(_showOutlineByDefault);
-      page.Children.Add(_showSourceByDefault);
-      AddDefaultFileTypes(page);
       return page;
    }
 

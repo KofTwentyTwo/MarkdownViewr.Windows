@@ -114,6 +114,16 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>Long Contents entries wrap in full; otherwise they use one line with an ellipsis and full-title tooltip.</summary>
+   public bool WrapOutlineEntries { get; set; }
+
+
+
+   /// <summary>Optional native depth markers distinguish heading levels without changing titles or identities.</summary>
+   public bool ShowOutlineDepthMarkers { get; set; }
+
+
+
    /// <summary>Last native sidebar width in device-independent pixels.</summary>
    public double OutlineWidth { get; set; } = 220;
 

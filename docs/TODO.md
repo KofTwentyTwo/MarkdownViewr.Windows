@@ -1,5 +1,8 @@
 # Development Tasks
 
+- [x] Prepare native General Contents wrapping/depth-marker controls with checked sibling-safe persistence;593 core/100% measured lines and zero-warning Release pass.
+- [ ] Execute the actual long-title/sibling/persistence/restoration test and inspect Settings screenshots on its exact pushed head.
+
 - [x] Review all eight Mac screenshots and record verified Settings gaps in issue #21 without private content.
 - [ ] Implement/accept the native Windows Settings organization, General default-viewer status, Contents options, theme previews/defaults and Printing page.
 - [x] Reproduce/correct multiline inline raw-heading fold loss;592 core tests/100% measured lines and zero-warning Release pass.

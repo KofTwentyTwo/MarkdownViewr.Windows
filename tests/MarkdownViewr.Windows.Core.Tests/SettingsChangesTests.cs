@@ -49,6 +49,31 @@ public sealed class SettingsChangesTests
 
 
 
+   /// <summary>Legacy settings use truncated unmarked Contents; saved presentation choices survive an unrelated stale-reader edit.</summary>
+   [Fact]
+   public void Merge_ContentsPresentation_PersistsWithoutChangingPanelDefaults()
+   {
+      var before = new AppSettings();
+      Assert.False(before.WrapOutlineEntries);
+      Assert.False(before.ShowOutlineDepthMarkers);
+      AppSettings edited = SettingsChanges.Copy(before);
+      edited.OutlineDepth = 5;
+      edited.ShowOutline = true;
+      var current = new AppSettings { WrapOutlineEntries = true, ShowOutlineDepthMarkers = true, DocumentTheme = "Nord" };
+      AppSettings result = SettingsChanges.Copy(SettingsChanges.Merge(current, before, edited));
+      Assert.True(result.WrapOutlineEntries);
+      Assert.True(result.ShowOutlineDepthMarkers);
+      Assert.True(result.ShowOutline);
+      Assert.Equal(5, result.OutlineDepth);
+      Assert.Equal("Nord", result.DocumentTheme);
+      Assert.False(result.ShowOutlineByDefault);
+      Assert.False(result.ShowSourceByDefault);
+      Assert.False(before.WrapOutlineEntries);
+      Assert.False(before.ShowOutlineDepthMarkers);
+   }
+
+
+
    /// <summary>A window's source change preserves newer history, theme, editor and print choices from its sibling.</summary>
    [Fact]
    public void Merge_StaleWindow_PreservesUnchangedSiblingPreferences()

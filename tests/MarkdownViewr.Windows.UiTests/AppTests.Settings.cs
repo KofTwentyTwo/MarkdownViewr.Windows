@@ -25,7 +25,7 @@ public partial class AppTests
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineDepth")));
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("SourceText")));
       session.InvokeMenuItem("File", "SettingsMenuItem");
-      session.WaitForElement("SettingsAdvancedTab").Patterns.SelectionItem.Pattern.Select();
+      session.WaitForElement("SettingsAppearanceTab").Patterns.SelectionItem.Pattern.Select();
       AutomationElement contents = session.WaitForElement("SettingsDefaultContentsToggle");
       AutomationElement source = session.WaitForElement("SettingsDefaultSourceToggle");
       Assert.Equal(ToggleState.Off, contents.Patterns.Toggle.Pattern.ToggleState.Value);
@@ -52,6 +52,55 @@ public partial class AppTests
       Assert.True(depth.BoundingRectangle.Width > 0);
       Assert.Null(original.FindFirstDescendant(cf => cf.ByAutomationId("SourceText")));
       Assert.Null(original.FindFirstDescendant(cf => cf.ByAutomationId("OutlineDepth")));
+   }
+
+
+
+   /// <summary>Native long titles wrap without truncation, depth markers update sibling windows and unrelated saves retain both choices.</summary>
+   [Fact]
+   public void Settings_ContentsPresentation_UpdatesLiveSiblingsAndPersists()
+   {
+      const string Title = "A deliberately long heading that must wrap across several lines in a narrow Contents panel without losing its full title";
+      const string Document = "# Contents display fixture\n\n## " + Title + "\nBody";
+      using var session = new AppSession(document: Document, documentFileName: "contents.md",
+         additionalDocuments: new Dictionary<string, string>(StringComparer.Ordinal) { ["sibling.md"] = Document });
+      Window primary = WaitForDocumentWindow(session, "contents.md");
+      Window sibling = WaitForDocumentWindow(session, "sibling.md");
+      WaitForWindowHeading(session, sibling, "Contents display fixture");
+      session.WaitForElement("mv-heading-0");
+      InvokeDocumentMenu(session, primary, "OutlineToggle", menuName: "View");
+      InvokeDocumentMenu(session, sibling, "OutlineToggle", menuName: "View");
+      AutomationElement title = WaitForWindowElement(session, primary, "OutlineTitle:1");
+      double oneLineHeight = title.BoundingRectangle.Height;
+      Assert.True(oneLineHeight > 0);
+      Assert.Equal(Title, WaitForWindowElement(session, primary, "OutlineHeading:1").Name);
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineDepthMarker:1")));
+      InvokeDocumentMenu(session, primary, "SettingsMenuItem");
+      AutomationElement wrap = session.WaitForElement("SettingsContentsWrapToggle");
+      AutomationElement markers = session.WaitForElement("SettingsContentsDepthMarkersToggle");
+      Assert.Equal(ToggleState.Off, wrap.Patterns.Toggle.Pattern.ToggleState.Value);
+      Assert.Equal(ToggleState.Off, markers.Patterns.Toggle.Pattern.ToggleState.Value);
+      wrap.Patterns.Toggle.Pattern.Toggle();
+      markers.Patterns.Toggle.Pattern.Toggle();
+      RetainDocumentWindow(session, session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow(), "general-contents-settings");
+      CloseSettings(session);
+      session.WaitFor(() => primary.FindFirstDescendant(cf => cf.ByAutomationId("OutlineTitle:1")) is { } label && label.BoundingRectangle.Height > oneLineHeight * 1.8 ? label : null, "the fully wrapped Contents title");
+      Assert.Equal("Heading level 2", WaitForWindowElement(session, primary, "OutlineDepthMarker:1").Name);
+      Assert.Equal("Heading level 2", WaitForWindowElement(session, sibling, "OutlineDepthMarker:1").Name);
+      Assert.True(WaitForWindowElement(session, sibling, "OutlineTitle:1").BoundingRectangle.Height > oneLineHeight * 1.8);
+      InvokeDocumentMenu(session, sibling, "SourceToggle", menuName: "View");
+      AssertSavedContentsPreferences(session, enabled: true);
+      InvokeDocumentMenu(session, primary, "SettingsMenuItem");
+      Assert.Equal(ToggleState.On, session.WaitForElement("SettingsContentsWrapToggle").Patterns.Toggle.Pattern.ToggleState.Value);
+      Assert.Equal(ToggleState.On, session.WaitForElement("SettingsContentsDepthMarkersToggle").Patterns.Toggle.Pattern.ToggleState.Value);
+      session.WaitForElement("SettingsContentsWrapToggle").Patterns.Toggle.Pattern.Toggle();
+      session.WaitForElement("SettingsContentsDepthMarkersToggle").Patterns.Toggle.Pattern.Toggle();
+      CloseSettings(session);
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineDepthMarker:1")));
+      session.WaitFor(() => primary.FindFirstDescendant(cf => cf.ByAutomationId("OutlineTitle:1")) is { } label && label.BoundingRectangle.Height <= oneLineHeight * 1.2 ? label : null, "the restored single-line Contents title");
+      Assert.Equal(Title, WaitForWindowElement(session, primary, "OutlineHeading:1").Name);
+      AssertSavedContentsPreferences(session, enabled: false);
+      RetainDocumentWindow(session, primary, "contents-truncation-and-markers");
    }
 
 
@@ -170,7 +219,7 @@ public partial class AppTests
       using var session = new AppSession(document: "# Default file settings fixture");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Default file settings fixture")), "the default file settings fixture", TimeSpan.FromSeconds(30));
       session.InvokeMenuItem("File", "SettingsMenuItem");
-      session.WaitForElement("SettingsAdvancedTab").Patterns.SelectionItem.Pattern.Select();
+      session.WaitForElement("SettingsAppearanceTab").Patterns.SelectionItem.Pattern.Select();
       AutomationElement guidance = session.WaitForElement("SettingsDefaultFilesGuidance");
       Assert.Contains(".md", guidance.Name, StringComparison.Ordinal);
       Assert.Contains(".txt) is optional", guidance.Name, StringComparison.Ordinal);
@@ -197,6 +246,18 @@ public partial class AppTests
       CloseSettings(session);
       Assert.NotNull(session.WaitForElement("mv-heading-0"));
       RetainDocumentWindow(session, session.MainWindow, "default-file-settings");
+   }
+
+
+
+   /// <summary>Reads the actual saved presentation choices and proves they did not opt new windows into either pane.</summary>
+   private static void AssertSavedContentsPreferences(AppSession session, bool enabled)
+   {
+      using var saved = JsonDocument.Parse(session.ReadSettings());
+      Assert.Equal(enabled, saved.RootElement.GetProperty("WrapOutlineEntries").GetBoolean());
+      Assert.Equal(enabled, saved.RootElement.GetProperty("ShowOutlineDepthMarkers").GetBoolean());
+      Assert.False(saved.RootElement.GetProperty("ShowOutlineByDefault").GetBoolean());
+      Assert.False(saved.RootElement.GetProperty("ShowSourceByDefault").GetBoolean());
    }
 
 

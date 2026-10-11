@@ -40,7 +40,7 @@ public sealed partial class MainWindow
       }
       if(_settingsWindow is null)
       {
-         _settingsWindow = new SettingsWindow(_settings, SaveReadingAppearanceAsync, SaveStartupSettings, RunSettingsActionAsync);
+         _settingsWindow = new SettingsWindow(_settings, SaveReadingAppearanceAsync, SaveStartupSettings, SaveContentsSettings, RunSettingsActionAsync);
          WinUIShell.ApplyTheme((FrameworkElement)_settingsWindow.Content, _settings.ThemeKind);
          _settingsWindow.Closed += (_, _) => _settingsWindow = null;
       }
@@ -109,6 +109,41 @@ public sealed partial class MainWindow
       _settings.ShowOutlineByDefault = _lastSavedSettings.ShowOutlineByDefault = settings.ShowOutlineByDefault;
       _settings.ShowSourceByDefault = _lastSavedSettings.ShowSourceByDefault = settings.ShowSourceByDefault;
       _settingsWindow?.UpdateStartup(settings);
+   }
+
+
+
+   /// <summary>Only Contents presentation fields change in the latest store, preserving sibling reader and CSS preferences.</summary>
+   private bool SaveContentsSettings(bool wrap, bool depthMarkers)
+   {
+      if(_closed)
+      {
+         return false;
+      }
+      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
+      settings.WrapOutlineEntries = wrap;
+      settings.ShowOutlineDepthMarkers = depthMarkers;
+      if(!AppIdentity.SettingsStore.Save(settings))
+      {
+         return false;
+      }
+      ((App)Application.Current).ApplyContentsSettings(settings);
+      return true;
+   }
+
+
+
+   /// <summary>Committed Contents presentation refreshes live headings and the baseline without changing visibility or depth selection.</summary>
+   internal void ApplyContentsSettings(Core.AppSettings settings)
+   {
+      if(_closed)
+      {
+         return;
+      }
+      _settings.WrapOutlineEntries = _lastSavedSettings.WrapOutlineEntries = settings.WrapOutlineEntries;
+      _settings.ShowOutlineDepthMarkers = _lastSavedSettings.ShowOutlineDepthMarkers = settings.ShowOutlineDepthMarkers;
+      RefreshOutline();
+      _settingsWindow?.UpdateContents(settings);
    }
 
 

@@ -33,13 +33,14 @@ internal sealed partial class SettingsWindow : Window
 
 
    /// <summary>Settings is a separate window; routine layout saves immediately and advanced CSS has an explicit Apply action.</summary>
-   public SettingsWindow(Core.AppSettings current, Func<ReadingAppearance, Task<bool>> saveAppearance, Func<bool, int, bool, bool, bool, bool> saveStartup, Func<string, Task> runAction)
+   public SettingsWindow(Core.AppSettings current, Func<ReadingAppearance, Task<bool>> saveAppearance, Func<bool, int, bool, bool, bool, bool> saveStartup, Func<bool, bool, bool> saveContents, Func<string, Task> runAction)
    {
       Title = AppIdentity.Info.DisplayName + " — Settings";
       SystemBackdrop = new MicaBackdrop();
       _appearance = new ReadingAppearanceEditor(current.ReadingAppearance);
       _savedCss = current.GlobalCss;
       _saveStartup = saveStartup;
+      _saveContents = saveContents;
       _saveAppearance = saveAppearance;
       _runAction = runAction;
       _root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -55,7 +56,7 @@ internal sealed partial class SettingsWindow : Window
       AutomationProperties.SetLiveSetting(_status, AutomationLiveSetting.Polite);
       _root.Children.Add(_status);
       Content = _root;
-      AddPage("SettingsAppearanceTab", "Appearance", Symbol.Font, AppearancePage());
+      AddPage("SettingsAppearanceTab", "General", Symbol.Home, AppearancePage(current));
       AddPage("SettingsThemesTab", "Document themes", Symbol.Library, ThemesPage());
       AddPage("SettingsEditorsTab", "Editors", Symbol.Edit, EditorsPage());
       AddPage("SettingsAdvancedTab", "Advanced", Symbol.Setting, AdvancedPage(current));
@@ -139,14 +140,17 @@ internal sealed partial class SettingsWindow : Window
       _navigation.Header = title;
       _pageScroll.Content = null;
       _pageScroll.Content = page;
+      _pageScroll.ChangeView(null, 0, null, disableAnimation: true);
    }
 
 
 
    /// <summary>Native layout controls save their validated changes; unsubmitted CSS stays a separate draft.</summary>
-   private StackPanel AppearancePage()
+   private StackPanel AppearancePage(Core.AppSettings current)
    {
       var page = new StackPanel { Spacing = 16, MaxWidth = 720, HorizontalAlignment = HorizontalAlignment.Stretch };
+      AddDefaultFileTypes(page);
+      AddContentsPreferences(page, current);
       page.Children.Add(_appearance.Fields);
       var apply = new Button { Content = "Apply custom CSS", HorizontalAlignment = HorizontalAlignment.Left };
       AutomationProperties.SetAutomationId(apply, "SettingsApplyCss");
