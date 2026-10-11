@@ -7,7 +7,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Input;
 using FlaUI.Core.Patterns;
+using FlaUI.Core.WindowsAPI;
 using Xunit.Abstractions;
 
 
@@ -523,6 +525,147 @@ public class AppTests
 
 
 
+   /// <summary>Physical vim keys move the actual browser by lines, half-pages and document ends.</summary>
+   [Fact]
+   public void ReadingKeys_ScrollCommands_MoveActualBrowserViewport()
+   {
+      string body = string.Join("\n\n", Enumerable.Range(0, 180).Select(index => "Vim scrolling paragraph " + index));
+      using var session = new AppSession(document: "# Vim scroll fixture\n\n" + body);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Vim scroll fixture")), "the vim heading", TimeSpan.FromSeconds(30));
+      AutomationElement scroller = FindDocumentScroller(session);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.KEY_J);
+      WaitForReaderScroll(session, scroller, value => value > 0.001, "j scrolling one line");
+      SendReadingKey(VirtualKeyShort.KEY_K);
+      WaitForReaderScroll(session, scroller, value => value < 0.01, "k returning one line");
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_D);
+      WaitForReaderScroll(session, scroller, value => value > 0.1, "Ctrl+D scrolling half a viewport");
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_U);
+      WaitForReaderScroll(session, scroller, value => value < 0.01, "Ctrl+U returning half a viewport");
+      SendReadingKey(VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_G);
+      WaitForReaderScroll(session, scroller, value => value > 99, "G reaching the document end");
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_B);
+      WaitForReaderScroll(session, scroller, value => value < 99, "Ctrl+B returning a viewport");
+      Keyboard.Type(VirtualKeyShort.KEY_G, VirtualKeyShort.KEY_G);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => value < 0.01, "gg returning to the document start");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Vim scroll fixture")));
+   }
+
+
+
+   /// <summary>Slash opens native find; n/N wrap matches while real typing remains in the query control.</summary>
+   [Fact]
+   public void ReadingKeys_FindAndTextFocus_PreserveLiteralInput()
+   {
+      string body = string.Join("\n\n", Enumerable.Range(0, 100).Select(index => "Vim find filler " + index));
+      using var session = new AppSession(document: "# Vim find fixture\n\nFirst needle\n\n" + body + "\n\nLast needle");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Vim find fixture")), "the vim find heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement scroller = FindDocumentScroller(session);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.OEM_2);
+      session.WaitForElement("FindText");
+      session.EnterText("FindText", "needle");
+      WaitForFindCount(session, "1 of 2");
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.KEY_N);
+      WaitForFindCount(session, "2 of 2");
+      WaitForReaderScroll(session, scroller, value => value > 80, "n moving to the final native match");
+      SendReadingKey(VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_N);
+      WaitForFindCount(session, "1 of 2");
+      WaitForReaderScroll(session, scroller, value => value < 10, "N moving to the first native match");
+      SendReadingKey(VirtualKeyShort.OEM_2);
+      AutomationElement query = session.WaitForElement("FindText");
+      query.Focus();
+      SendReadingKey(VirtualKeyShort.KEY_J);
+      SendReadingKey(VirtualKeyShort.KEY_K);
+      SendReadingKey(VirtualKeyShort.KEY_G);
+      Assert.Equal("jkg", query.AsTextBox().Text);
+      WaitForFindCount(session, "0 of 0");
+      Assert.True(scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value < 10);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.ESCAPE);
+      session.WaitForElementGone("FindText");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Vim find fixture")));
+   }
+
+
+
+   /// <summary>Heading sequences move between actual visible headings and skip a collapsed nested descendant.</summary>
+   [Fact]
+   public void ReadingKeys_HeadingSequences_SkipCollapsedDescendant()
+   {
+      string body = string.Join("\n\n", Enumerable.Range(0, 60).Select(index => "Vim heading filler " + index));
+      using var session = new AppSession(document: "# Vim root\n\n" + body + "\n\n## Vim middle\n\nMiddle body\n\n### Hidden vim child\n\n" + body + "\n\n## Vim end\n\n" + body);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Vim root")), "the vim root heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-2")), "the collapsed nested vim heading");
+      AutomationElement scroller = FindDocumentScroller(session);
+      FocusBrowser(session);
+      Keyboard.Type(VirtualKeyShort.KEY_G, VirtualKeyShort.KEY_G);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => value < 0.01, "gg starting visible-heading navigation");
+      Keyboard.Type(VirtualKeyShort.OEM_6, VirtualKeyShort.OEM_6);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => value > 0.001, "the first visible heading");
+      Keyboard.Type(VirtualKeyShort.OEM_6, VirtualKeyShort.OEM_6);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => value > 20, "the middle visible heading");
+      double middle = scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
+      Keyboard.Type(VirtualKeyShort.OEM_6, VirtualKeyShort.OEM_6);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => value > middle + 0.01, "the final heading after skipping its hidden predecessor");
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("mv-heading-2")));
+      AutomationElement finalHeading = session.WaitForElement("mv-heading-3");
+      double viewportTop = session.WaitForElement("DocumentView").BoundingRectangle.Top;
+      Assert.InRange(finalHeading.BoundingRectangle.Top - viewportTop, -2, 10);
+      Keyboard.Type(VirtualKeyShort.OEM_4, VirtualKeyShort.OEM_4);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, scroller, value => Math.Abs(value - middle) < 0.1, "the previous visible middle heading");
+   }
+
+
+
+   /// <summary>Focuses only the owned reader before injecting real virtual-key events.</summary>
+   private static void FocusBrowser(AppSession session)
+   {
+      session.MainWindow.SetForeground();
+      session.WaitForElement("DocumentView").Focus();
+      Wait.UntilInputIsProcessed();
+   }
+
+
+
+   /// <summary>Uses actual Windows keydown/up messages, including simultaneous modifiers.</summary>
+   private static void SendReadingKey(params VirtualKeyShort[] keys)
+   {
+      Keyboard.TypeSimultaneously(keys);
+      Wait.UntilInputIsProcessed();
+   }
+
+
+
+   /// <summary>Retains the owned fixture's focus/provider/viewport evidence when a physical reading key fails.</summary>
+   private void WaitForReaderScroll(AppSession session, AutomationElement scroller, Func<double, bool> matches, string description)
+   {
+      try
+      {
+         session.WaitFor(() => matches(scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value) ? scroller : null, description);
+      }
+      catch(TimeoutException)
+      {
+         AutomationElement focused = session.Automation.FocusedElement();
+         _output.WriteLine($"Reading focus Id={focused.Properties.AutomationId.ValueOrDefault}; Type={focused.Properties.ControlType.ValueOrDefault}; PID={focused.Properties.ProcessId.ValueOrDefault}; viewport={scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value}.");
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
+   }
+
+
    /// <summary>A physical local-fragment click reveals a hidden generated heading without loading another page.</summary>
    [Fact]
    public void Outline_LocalFragmentClick_RevealsCollapsedTarget()
@@ -795,10 +938,11 @@ public class AppTests
    /// <summary>Finds the browser's actual scroll provider, which is separate from the native window.</summary>
    private static AutomationElement FindDocumentScroller(AppSession session)
    {
+      AutomationElement browser = session.WaitForElement("DocumentView");
       return session.WaitFor(
-         () => session.MainWindow.FindAllDescendants().FirstOrDefault(element =>
+         () => browser.FindAllDescendants().Prepend(browser).FirstOrDefault(element =>
             element.Patterns.Scroll.TryGetPattern(out IScrollPattern? scroll) && scroll.VerticallyScrollable.Value),
-         "the browser scroll provider");
+         "the owned browser scroll provider");
    }
 
 

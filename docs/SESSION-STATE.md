@@ -262,3 +262,32 @@ The physical test repeats collapse/link/reveal and retains owned point/bounds ch
 and actual heading/body outcomes. Hosted acceptance remains required. Retained log:
 artifacts/editor-find-ui-38110140930.log. Existing installed producer is still
 being observed; no new push supersedes a live producer. Full product scope active.
+
+## Vim increment prepared after fragment correction
+
+Pushed fragment-event head 5a9af6328f490eda4c67d1ab6aa58a161bab46a5:
+CI 38110726381 native/UI job 114385547259 SUCCESS, 41 tests. This includes
+same-fragment reveal after recollapse and all configured-editor/paired-find cases.
+Build/format, CodeQL 38110726336, scripts 38110725744, security 38110726260
+and PR gates 38110726369 passed. Installed producer 114385547073 now SUCCESS;
+retained TRX proves published 41/41 and stable/dev 40/40 each, zero skips. Four
+payload gates verify 536 files per payload. Evidence is retained in
+artifacts/fragment-installed-verified-38110726381 and verified job logs; fixtures
+remain synthetic/unsigned and do not prove production signing. Prior 9edd982 is terminal
+40/41 native/published; installed channels were not reached.
+
+Local next increment implements j/k, Ctrl+d/u, gg/G, ]]/[[, slash, n/N and Escape;
+Windows Ctrl+F owns native find and Ctrl+B reverse-page remains. Core now passes
+239 tests/100% lines. Prefixes use injected monotonic milliseconds, expire after
+500 ms and reject held-key imitation; lifecycle resets and focus/Alt/Windows/Shift
+controls preserve native typing. The existing owned-thread adapter translates only
+reading keys using the actual layout without mutating dead-key state, sends bounded
+enums and rechecks focus on queued dispatch. No authored script/message bridge.
+Three physical-key tests measure real browser viewport/heading/find behavior and
+query typing; browser scroll provider lookup is now scoped inside DocumentView so
+source scrolling cannot satisfy browser assertions. Hosted acceptance is pending.
+
+No local GUI input, merge/tag/release or Azure attempt. Full PRODUCT.md remains;
+source heading/scroll/collapse sync, broader editor/reference/theme/rendering/link
+parity, print, windows/activation/recents, standards inventory/review and production
+signed stable/dev final bytes remain. Preserve Darin's MIT navigation attribution.

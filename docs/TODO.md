@@ -22,13 +22,16 @@
 - [x] Implement literal read-only source pane, saved visibility/width and shared committed reload snapshots (issue #10).
 - [x] Verify source visibility/read-only/literal/reload and physical resize in native, published and both installed builds on 4bf0b81.
 - [x] Implement paired native browser/source find with bounded literal terms, shared counts, wraparound and reload guards (issue #10).
-- [ ] Verify actual Ctrl+F typing, source ranges, native match viewport, collapse restoration and literal/reload queries.
-- [ ] Add synchronized headings/scroll/collapse and vim keys (issue #10); audit find/source collapse parity against the pinned reference.
+- [x] Verify paired find and repeated local-fragment reveal on 5a9af63: 41 native/published and 40 per installed channel, zero skips.
+- [x] Implement all required vim reading/find/heading commands, timed prefixes and native focus/modifier guards (issue #10).
+- [ ] Verify physical vim browser viewport, collapsed-heading and query-typing acceptance in native/published/installed builds.
+- [ ] Add synchronized source headings/scroll/collapse (issue #10); audit find/source collapse parity against the pinned reference.
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [x] Verify actual code-font size 17 editing in hosted UI runs.
 - [x] Verify actual hosted frontmatter mode switching on 4bf0b81 (including both installed channels).
 - [x] Implement bounded persisted editor selection and deliberate native launch using one literal process argument (issue #11).
-- [ ] Verify real hosted editor fixture launch, validation/cancel and missing-executable acceptance; audit editor list/folder parity.
+- [x] Verify actual editor fixture launch, validation/cancel and missing-executable acceptance on 5a9af63 in native/published/installed builds.
+- [ ] Audit editor list selection/reordering/removal and folder-opening parity (issue #11).
 - [ ] Add native printing/theme/layout options and screen-state restoration.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.

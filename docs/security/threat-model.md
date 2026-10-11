@@ -71,14 +71,18 @@ does not establish working release signing.
 
 ## Owned-window keyboard boundary
 
-Browser-focus shortcuts cannot rely on XAML menu/root acceleration alone. The
-Windows adapter uses a current-UI-thread `WH_GETMESSAGE` hook, requires this
-foreground window or its children, recognizes only Ctrl+F without additional
-modifiers, and queues the existing native find command. Other messages pass
-through; closing the window removes the callback. No global keyboard registration,
-other-process input capture, arbitrary command dispatch, browser bridge or text
-logging is introduced. Actual hosted browser-focus acceptance is still required.
-See Microsoft's [thread-hook contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexw).
+Browser-focus shortcuts use a current-UI-thread `WH_GETMESSAGE` hook requiring the
+active owned window/child. Ctrl+F remains a native window command. Vim keys require
+the actual passive-browser/read-only-source focus; native text controls retain input.
+Alt/Windows and extra Ctrl modifiers do not become reading commands. Only bounded
+enums leave the key model; prefixes expire/reset and held prefix keys do not complete
+sequences. Layout translation uses ToUnicode flag 4 to preserve dead-key state;
+non-reading input is not translated. Dispatch rechecks focus. Other messages pass
+through; closing removes the callback. No global hook, other-process capture,
+arbitrary command, browser bridge or text logging is introduced. Fixture-only focus
+traces contain native control names/types, never query or source text. Actual hosted
+physical keyboard acceptance is required.
+See Microsoft's [thread-hook contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexw) and [layout conversion contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-tounicode).
 
 ## Configured editor boundary
 

@@ -68,8 +68,18 @@ Disable browser feature accelerators so the host owns find/print/reload commands
 Typing is debounced and native searches serialized. Check the current page/navigation
 before applying results; repeat the current term after reload/theme navigation. Search
 reveals sections temporarily and restores their saved choices on close, incorporating
-explicit native section commands during search. Source synchronization, mirrored collapse
-and vim keys remain separate work. Browser scripts, messages and host objects remain disabled.
+explicit native section commands during search. Source synchronization and mirrored collapse
+remain separate work. Authored scripts, messages and host objects remain disabled.
+
+Reading keys use the current app UI thread's existing message hook, bounded native
+command enums and exact browser/read-only-source focus. Find/dialog controls retain
+normal input. Translate only reading input with the active keyboard layout and
+ToUnicode flag 4, preserving dead-key state; Alt/Windows/extra Ctrl modifiers are
+ignored. Timed prefixes reset on focus/page/window transitions; held keys cannot
+imitate gg/heading sequences. Dispatch rechecks focus. Browser scrolling and visible
+heading operations use fixed host scripts and generated numeric identities only.
+No content script, native bridge or dependency is added. Physical-key browser and
+text-entry acceptance remains distinct from pure key-model tests.
 
 ## Verification and follow-up
 

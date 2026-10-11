@@ -42,6 +42,7 @@ public sealed partial class MainWindow : Window, IDisposable
       InitializeOutline();
       InitializeSource();
       InitializeFind();
+      InitializeKeyboard();
       RefreshEditorCommands();
       InitializeInputDiagnostics();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
@@ -286,6 +287,7 @@ public sealed partial class MainWindow : Window, IDisposable
       _browser.Show(files, outline.Html, Path.GetFileName(path), viewport, outline.Headings);
       _find = null;
       _findGeneration++;
+      _documentKeyboard?.Reset();
       _sourceMarkdown = files.Markdown;
       RefreshSource();
       _outline = outline;
