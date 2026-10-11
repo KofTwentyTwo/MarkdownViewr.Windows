@@ -99,7 +99,7 @@ internal sealed partial class DocumentBrowser
       _pageReady = false;
       _restoreViewport = true;
       _policy = new Core.Documents.DocumentResourcePolicy();
-      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{_theme.GetStyles(_zoomScale)}</style></head><body>{sanitizedHtml}</body></html>""");
+      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style media="screen">{_theme.GetStyles(_zoomScale)}</style></head><body>{sanitizedHtml}</body></html>""");
       _view.CoreWebView2.Navigate(_policy.DocumentUri.AbsoluteUri);
    }
 

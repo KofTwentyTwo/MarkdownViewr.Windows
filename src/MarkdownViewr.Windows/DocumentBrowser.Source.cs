@@ -15,6 +15,7 @@ internal sealed partial class DocumentBrowser
       ulong navigation = _navigationId;
       string? json = await ExecuteDocumentScriptAsync(FormattableString.Invariant($$"""
          (()=>{
+            if(window.matchMedia('print').matches)return null;
             const s=document.scrollingElement;if(!s)return null;
             const y=s.scrollTop;const headings=[];const collapsed=[];
             for(let i=0;i<{{_headings.Count}};i++){

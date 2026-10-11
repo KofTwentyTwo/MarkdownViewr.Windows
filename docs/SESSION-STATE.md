@@ -11,6 +11,19 @@ draft PR #3. Owner authorizes signed/DCO commits, pushes, configuration and tick
 No merges, tags/releases, new Azure sign-ins or fabricated human review.
 Hosted Windows UI tests are authorized; no current local desktop reservation.
 
+## Print implementation in progress
+
+Native File/Print and Ctrl+P open a copied draft: print theme, images/backgrounds,
+font zoom, full/document width, borders and pixel padding. Screen/print styles are
+independent; no screen/DOM/find/collapse completion callback is guessed from void
+ShowPrintUI. Save PDF uses Windows' picker and awaited WebView2 output. ADR-0003
+is proposed for review. Core363/100% measured lines and build/format pass.
+Three hosted cases cover keyboard draft cancel, native print UI cancel and actual
+PDFs rasterized by Windows' built-in renderer; they have not run yet. UI SDK
+target aligns with the app, without a new PDF dependency. Full suites now expect
+52 native/published and51 per installed channel. Temporary filtered print workflow
+is a feedback loop; all required full gates remain.
+
 ## Current outcome
 
 Signed 690be07 fixes repeated outline activation. Native ItemClick supplies the
@@ -23,11 +36,13 @@ job114416668837, including source focus preservation, actual source/reader middl
 glyphs, repeated last-heading activation and the final physical-wheel assertion.
 TRX retained under artifacts/source-clicked-content-verified-38121389088.
 Temporary workflow, tagged probes and source geometry logs are removed.
-Full cleaned-head native/published/stable/dev acceptance remains required.
+Cleaned2639e2d fullCI38121762124 passed: native49/49,published49/49, installed
+stable/dev48/48, zero failures/skips. All other producers pass. Evidence retained
+under artifacts/source-clean-verified-installed-38121762124. New print acceptance remains pending.
 
 Font zoom and named editors are implemented. Prior016c745 native/published48/49,
 zero skips; only repeat navigation failed. Zoom actual glyph/menu/toolbar/Ctrl/
-reset/reload and named-editor cases pass. Core330 tests/100% measured lines,
+reset/reload and named-editor cases pass. Core363 tests/100% measured lines,
 script boundary55 tests; zero-warning build and formatting verified.
 
 ## Verified baseline and evidence

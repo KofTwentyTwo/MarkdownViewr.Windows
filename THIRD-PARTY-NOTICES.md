@@ -139,3 +139,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+The print defaults, Clean Printing palette and print-media layout rules in
+`Core/Printing/` and the native print adapter are adapted from Darin Kelkhoff's
+MIT-licensed markdownViewr (`6d08bc9`), with original/adaptation copyright headers
+retained. Actual PDF acceptance uses the built-in Windows PDF API; no additional
+PDF renderer/parser package is shipped.

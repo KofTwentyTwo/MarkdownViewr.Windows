@@ -87,6 +87,9 @@ public sealed partial class MainWindow
       {
          switch(command)
          {
+            case Core.Navigation.ReaderCommand.Print:
+               await PrintDocumentAsync();
+               break;
             case Core.Navigation.ReaderCommand.FocusFind:
                OpenFind();
                break;

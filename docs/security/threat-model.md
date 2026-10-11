@@ -1,7 +1,7 @@
 # Threat model: MarkdownViewr
 
 - **Version reviewed:** first reader implementation
-- **Last reviewed:** 2026-10-10
+- **Last reviewed:** 2026-10-11
 - **Method:** data flow and STRIDE; review again for each attack-surface change.
 
 ## Product and boundaries
@@ -22,6 +22,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Picker / literal process argument | Read-only bounded snapshot; no shell interpolation |
 | Frontmatter | Bounded by document limit; complete leading delimiters only; metadata values HTML-escaped; Markdown mode uses the same sanitizer; no YAML execution or native commands |
 | Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
+| Native print/PDF | Deliberate File/Print/Ctrl+P; ready passive document only; copied bounded settings; Windows destination picker; JSON-serialized CSS text in host-owned print stylesheet; same navigation checked after preparation; no authored command/output path; no document/path logs |
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
 | Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
@@ -145,3 +146,17 @@ uses existing matching-page viewport/collapse guards and ready-page find replay.
 Ctrl zoom commands require reading focus; editor/theme/find text input retains
 native ownership. 330 core tests/100% measured lines pass; actual glyph/key/reload
 acceptance is pending. Native menus/toolbar do not imply production release proof.
+
+## Print lifecycle
+
+Reading and print styles have separate `screen`/`print` media attributes. Even
+custom CSS braces cannot escape a stylesheet's media restriction. Printing never
+changes reading theme data, source text, find state or generated collapse flags;
+print CSS exposes folded bodies only in print media. Native source feedback pauses
+through the settings/PDF operation, and geometry queries reject print-media frames.
+WebView2 native print UI has no completion callback: opening it is not proof of a
+successful job. Native PDF output is awaited and written only to the user-chosen
+Windows picker destination. PDF export disables headers/footers; fixture acceptance
+cancels print UI and renders owned generated PDFs, never submits a physical job.
+The existing CSP, denied remote requests and opened-handle image containment apply.
+See ADR-0003; full hosted/output/layout verification remains pending.

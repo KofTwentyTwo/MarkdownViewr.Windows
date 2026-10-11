@@ -51,6 +51,7 @@ jobs:
             artifacts/installed-smoke-*/*.log
             artifacts/installed-smoke-*/*.trx
             artifacts/installed-smoke-*/*.png
+            artifacts/installed-smoke-*/*.pdf
           retention-days: 7
   ci:
     uses: KofTwentyTwo/standards/.github/workflows/dotnet.yml@fdf5ed029603c938615a32b1beca3628b8787945 # v0.1.2

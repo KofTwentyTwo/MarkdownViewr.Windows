@@ -76,6 +76,10 @@ public sealed class ReaderKeyboard
       {
          return ReaderCommand.None;
       }
+      if(readingFocused && char.ToUpperInvariant(key.Character) == 'P')
+      {
+         return ReaderCommand.Print;
+      }
       if(char.ToUpperInvariant(key.Character) == 'F')
       {
          return ReaderCommand.FocusFind;

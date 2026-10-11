@@ -66,10 +66,16 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>Saved print choices are independent of the reading theme and window-local zoom.</summary>
+   public Printing.PrintOptions Print { get; set; } = new();
+
+
+
    /// <inheritdoc/>
    public override void Sanitize()
    {
       base.Sanitize();
+      Print = (Print ?? new Printing.PrintOptions()).Sanitize();
       ExternalEditor = Editors.EditorLaunch.IsExecutablePath(ExternalEditor) ? ExternalEditor : "";
       ConfiguredEditors = Editors.EditorConfiguration.Sanitize(ConfiguredEditors);
       if(ConfiguredEditors.Length == 0 && ExternalEditor.Length > 0)

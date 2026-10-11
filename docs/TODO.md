@@ -27,7 +27,7 @@
 - [x] Verify physical vim viewport, collapsed-heading and query-typing acceptance on 6bf125d: CI 38112298176, 44 native/published and 43 per installed channel, zero skips.
 - [x] Map sanitized surviving headings to original parser-derived source offsets (Setext/fences/raw HTML/frontmatter/duplicates); source UI synchronization remains pending.
 - [x] Implement literal nested source folding and bidirectional heading-based scroll synchronization (issue #10), preserving canonical find/reload snapshots.
-- [ ] Verify actual native/browser heading positions, physical source scrolling and fold/find/reload restoration in hosted and installed builds.
+- [x] Verify actual native/browser heading positions, physical source scrolling and fold/find/reload restoration: `2639e2d` / CI38121762124, published49/49 and installed stable/dev48/48, no skips.
 - [ ] Audit find/source collapse parity against the pinned reference, including multiline and same-line raw HTML headings (issue #10).
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [x] Verify actual code-font size 17 editing in hosted UI runs.
@@ -35,10 +35,11 @@
 - [x] Implement bounded persisted editor selection and deliberate native launch using one literal process argument (issue #11).
 - [x] Verify actual editor fixture launch, validation/cancel and missing-executable acceptance on 5a9af63 in native/published/installed builds.
 - [x] Audit and implement named editor lists, stable migration, selection/reordering/removal, cancel-safe drafts and folder-opening parity (issue #11).
-- [ ] Verify actual editor-list/menu order, file/folder probe arguments, cancellation and final removal in hosted/installed builds.
+- [x] Verify actual editor-list/menu order, file/folder probe arguments, cancellation and final removal: `2639e2d` native/published/installed stable/dev, no skips.
 - [x] Implement native menu/toolbar per-window font zoom, 30–500% bounds and guarded Ctrl+plus/minus/0 commands (issue #13); 330 core tests/100% measured lines.
 - [ ] Verify actual zoom glyph/key/reload/theme/find/collapse behavior in native, published and both installed channels.
-- [ ] Add native printing/theme/layout options and screen-state restoration (issue #12).
+- [x] Implement print-only themes/options, native Windows print UI and explicit PDF save (issue #12); core363/100% lines; no new renderer dependency.
+- [ ] Verify actual native print cancellation, saved PDF image/background/font/layout output and unchanged reading/source/find/collapse state in all channels.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
 - [ ] Verify hosted checks on each actual implementation head.

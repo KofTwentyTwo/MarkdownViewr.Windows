@@ -27,4 +27,5 @@ public enum ReaderCommand
    ZoomIn,
    ZoomOut,
    ZoomReset,
+   Print,
 }

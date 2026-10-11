@@ -156,7 +156,7 @@ public sealed partial class MainWindow
    /// <summary>Applies only current snapshot/query/page geometry and prevents reverse feedback after its own native movements.</summary>
    private async Task SynchronizeSourceAsync()
    {
-      if(_closed || _sourceSyncRunning || !_settings.ShowSource || _finding || !_browser.IsReady || _sourceDocument is not { } source)
+      if(_closed || _printing || _sourceSyncRunning || !_settings.ShowSource || _finding || !_browser.IsReady || _sourceDocument is not { } source)
       {
          return;
       }

@@ -12,6 +12,7 @@
    <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged" KeyboardAcceleratorPlacementMode="Hidden">
       <Grid.KeyboardAccelerators>
          <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="Find_Invoked" />
+         <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="Print_Invoked" />
       </Grid.KeyboardAccelerators>
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
@@ -33,6 +34,7 @@
                   </MenuFlyoutItem.KeyboardAccelerators>
                </MenuFlyoutItem>
                <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="PrintMenuItem" Text="Print..." Click="Print_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+P" />
                <MenuFlyoutSeparator />
                <MenuFlyoutItem x:Name="OpenEditorMenuItem" Text="Open in editor" Click="OpenEditor_Click" IsEnabled="False" />
                <MenuFlyoutSubItem x:Name="OpenEditorChoices" Text="Open in editor" Visibility="Collapsed" />

@@ -20,7 +20,7 @@ namespace MarkdownViewr.Windows.UiTests;
 /// UI tests share one desktop, so they never run in parallel.
 /// </summary>
 [Collection("Desktop")]
-public class AppTests
+public partial class AppTests
 {
    private readonly ITestOutputHelper _output;
 

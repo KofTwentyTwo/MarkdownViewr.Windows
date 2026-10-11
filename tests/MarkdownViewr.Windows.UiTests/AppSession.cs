@@ -32,7 +32,7 @@ public sealed class AppSession : IDisposable
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md")
+   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null)
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
@@ -40,6 +40,11 @@ public sealed class AppSession : IDisposable
       File.WriteAllText(
           Path.Combine(DataDirectory, "settings.json"),
           $$"""{ "ShowSplashScreen": {{(showSplash ? "true" : "false")}}, "CheckForUpdatesOnStartup": false }""");
+
+      foreach((string name, byte[] bytes) in documentAssets ?? new Dictionary<string, byte[]>(StringComparer.Ordinal))
+      {
+         File.WriteAllBytes(Path.Combine(DataDirectory, name), bytes);
+      }
 
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
       startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
