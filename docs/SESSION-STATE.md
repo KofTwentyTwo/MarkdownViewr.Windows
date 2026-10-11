@@ -11,6 +11,25 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Confirmed WinUI clicked-content identity fix — 2026-10-11
+
+Signed dcddefb pushed. Focused source 38121148429/job 114415967219 fails
+at the added real browser assertion after repeat activation. The trace proves
+ItemClick dispatches TextBlock twice (initial and repeated clicks), refreshing=False,
+index=-1. Owned physical pointer is over the expected OutlineHeading:2. No reader
+geometry change follows the repeated click. Thus content/container mismatch,
+not source feedback or missing native event, explains the repeat-navigation bug.
+Evidence: artifacts/source-activation-boundary-38121148429.log.
+
+Attach the existing numeric DocumentHeading tag to the native TextBlock as well
+as its ListViewItem; ItemClick accepts the tagged FrameworkElement. No title
+lookup, arbitrary source command, extra state or changed scroll mapping.
+Keep keyboard SelectionChanged and the actual browser/source/wheel regression.
+Retain opted-in trace until original/full acceptance, then remove temporary probes.
+The focused original red case is retained. Supersede remaining dcddefb diagnostic
+CI with this confirmed fix; cancelled predecessor jobs are not acceptance proof.
+Require complete fixed-head native/published/stable/dev results before cleanup.
+
 ## Activation boundary trace after physical reproduction — 2026-10-11
 
 016c745 focused source 38120650945/job 114414500506 still fails at the

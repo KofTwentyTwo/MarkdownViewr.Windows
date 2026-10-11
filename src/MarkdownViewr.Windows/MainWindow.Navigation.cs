@@ -74,7 +74,7 @@ public sealed partial class MainWindow
       {
          foreach(Core.Documents.DocumentHeading heading in _outline.Headings.Where(heading => heading.Level <= _settings.OutlineDepth))
          {
-            var label = new TextBlock { Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxLines = 2, Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0) };
+            var label = new TextBlock { Tag = heading, Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxLines = 2, Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0) };
             var item = new ListViewItem { Content = label, Tag = heading };
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "OutlineHeading:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
             OutlineList.Items.Add(item);
@@ -108,10 +108,10 @@ public sealed partial class MainWindow
    {
       if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
       {
-         int index = (args.ClickedItem as ListViewItem)?.Tag is Core.Documents.DocumentHeading clicked ? clicked.Index : -1;
+         int index = (args.ClickedItem as FrameworkElement)?.Tag is Core.Documents.DocumentHeading clicked ? clicked.Index : -1;
          App.Log.Info($"[DEBUG-outline-activation] clicked type={args.ClickedItem?.GetType().Name}; refreshing={_refreshingOutline}; index={index}.");
       }
-      if(!_refreshingOutline && args.ClickedItem is ListViewItem { Tag: Core.Documents.DocumentHeading heading })
+      if(!_refreshingOutline && args.ClickedItem is FrameworkElement { Tag: Core.Documents.DocumentHeading heading })
       {
          await _browser.JumpToHeadingAsync(heading.Index);
       }
