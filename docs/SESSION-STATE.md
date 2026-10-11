@@ -2,51 +2,52 @@
 
 Updated: 2026-10-10
 
-## First reader implementation
+## Live reload milestone
 
-Active project: MarkdownViewr.Windows. Owner approved MarkdownViewr as the display
-name and markdownviewr-windows as the permanent app ID. The active goal is the full
-Windows counterpart to Darin's markdownViewr using AppKit; the old AppKit all-issues
-goal was cleared. Work is on feat/windows-viewer, draft PR #3, issues #1 and #4.
+Active project: MarkdownViewr.Windows, feat/windows-viewer, draft PR #3.
+Owner approved MarkdownViewr / MarkdownViewr.Windows / markdownviewr-windows.
+The goal remains the full Windows counterpart to Darin's markdownViewr using AppKit.
 
-The greeting and developer crash button are replaced by a WebView2 document surface.
-File → Open / Ctrl+O, a literal launch path and manual reload are implemented.
-Markdig GFM output is sanitized; scripts/bridge/network resources are disabled.
-Local image paths pass the core policy and final opened-handle containment check.
-Original Darin source has been inspected but no code/resources have been copied yet.
-ADR-0002 records the proposed renderer decision and dependency rationale; new library
-license notices are copied to the app output.
+First reader commit f1756d21ede53e95a7ff5ef8bd1490ef9495cb25 is published. Its hosted
+CI 38098965780 fully passed: build/test, format, 13 actual native/UI tests and both
+installed update channels. CodeQL 38098965738 and security 38098965817 also passed.
+Scripts 38098965365 failed inside PSScriptAnalyzer 1.25.0 with a null-reference engine
+exception, tracked in #5. No scripts/settings/workflow were changed; no retry or
+suppression. The initial scripts run 38097167189 is terminal cancelled, not live.
 
-Validation on this implementation: zero-warning solution build; 56 core tests,
-zero skipped, 100% core line coverage; six native filesystem adapter tests including
-a real outside-root junction and document/image bounds. The prior 71-test result
-included 15 now-removed greeting tests. Keep actual counts clear.
+Current next implementation adds a directory watcher with 350 ms debounce. It
+survives atomic replacement, rename-away and deletion/recreation. Missing files keep
+the last displayed snapshot; brief editor locks get bounded retries. Watchers dispose
+on close and ignore stale selected-document callbacks. A core load scheduler coalesces
+reloads while preserving picker selections and refreshes after a failed new open. Scroll capture/restore matches
+Darin's relative scroll behavior when document height changes. Authored scripts and
+native messaging stay disabled; fixed native queries check the current document URI,
+and results are validated finite fractions before numeric-only restoration.
 
-Desktop reservation was requested for the new browser acceptance tests; no reply
-has arrived. Do not run input tests until the desktop is available. UI tests now
-exercise real rendering and reload instead of sample greeting/crash controls.
-Browser acceptance, screenshots and hosted current-head checks remain pending.
+Local evidence: zero-warning solution build; 82 core tests, zero skipped, 100% core
+line coverage; 12 native filesystem/watcher tests passed. Browser replacement,
+deletion/recreation, editor lock, relative-scroll and remote-image denial tests have
+been added but not run locally. Desktop reservation remains unanswered; do not drive
+this desktop without availability. Hosted current-head acceptance will be the next
+runtime proof. Issues #4 (reader boundary), #6 (reload) and #1 (full scope) remain open.
 
-## Repository and release state
+## Repository and authorization
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).
-Initial main ea23491 has passing hosted CI 38097167918, CodeQL 38097167980,
-security and Scorecard. Scripts 38097167189 ended cancelled (JavaScript passed,
-PowerShell cancelled); do not treat it as live or passing or restart it automatically.
-Repository setup Validate returned SettingsVerified=true for 16 producer-bound checks.
-Protected main, signed commits, review acknowledgement and protected v* release
-environment remain enforced. Never fabricate human review.
+Setup Validate verified 16 producer-bound contexts, protected main and release tags,
+selected Actions and the protected release environment. Signed/DCO topic commits,
+current-SHA human acknowledgement and required checks remain enforced.
 
-Owner authorized commits, pushes and configuration. Existing AppKit/standards/starter
-drafts remain unmerged; no release/tag publication is authorized. Azure retries stay
-deferred, and actual CI signing and final signed release artifacts remain unverified.
-Published AppKit 0.1.0 is used; do not substitute unpublished 0.2.0 APIs.
+Owner authorized commit/push/configuration, not merges, tags or releases. Existing
+AppKit/standards/starter drafts remain unmerged. Azure retries stay deferred; actual
+CI signing and final signed release artifacts remain unverified. Published AppKit
+0.1.0 is used; do not substitute unpublished 0.2.0 APIs.
 
 ## Next work
 
-Complete browser acceptance and capture actual UI evidence. Then implement the
-remaining PRODUCT.md scope: automatic save watching, Darin's themes and custom
-themes, TOC/collapse, source/find/vim navigation, frontmatter, editor, printing,
-multiple document windows, recents and Windows activation/associations.
-A basic reader is not the finished port. Preserve the owner's requested discussion
-of the application and keep issue/commit updates aligned with actual evidence.
+Verify reload/browser network acceptance and preserve its exact hosted handles.
+Then port Darin's themes and implement TOC/collapse, source/find/vim navigation,
+frontmatter, editor, print, multiple windows, recents and Windows associations.
+Original reference is pinned at 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 under
+AppKit/artifacts/markdownviewr-reference. No original code/resources copied yet;
+retain Darin's MIT notices when adapting them. Full PRODUCT.md scope remains open.

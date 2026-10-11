@@ -33,6 +33,7 @@
    <ItemGroup>
       <!-- Exercise the actual native file adapter without loading WinUI or reserving the desktop. -->
       <Compile Include="..\..\src\MarkdownViewr.Windows\DocumentFiles.cs" Link="WindowsAdapters\DocumentFiles.cs" />
+      <Compile Include="..\..\src\MarkdownViewr.Windows\DocumentWatcher.cs" Link="WindowsAdapters\DocumentWatcher.cs" />
    </ItemGroup>
 
 </Project>

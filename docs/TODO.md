@@ -7,13 +7,15 @@
 - [x] Replace the greeting/crash controls with file opening, rendered Markdown and manual reload.
 - [x] Test physical image containment, including junction escapes, and input size limits.
 - [x] Update the threat model, renderer attributions and shipped library notices.
-- [ ] Complete actual browser/desktop acceptance and screenshots for the first reader.
+- [x] Verify first-reader hosted browser acceptance: 13 native/UI tests passed on f1756d2.
+- [ ] Verify new live-reload/browser network scenarios on the exact next implementation head; capture UI screenshots.
 - [ ] Discuss the desired first release and Windows-specific behavior with the owner.
-- [ ] Add automatic reload on saves/atomic replacements with preserved scroll and deletion recovery.
+- [x] Implement/test directory watching and validated relative viewport state for saves/replacements/deletion recovery.
+- [ ] Complete actual browser save/lock/replacement/deletion/scroll acceptance (issue #6).
 - [ ] Port Darin's built-in themes; add editable user themes, custom CSS and code font settings.
 - [ ] Add TOC, section collapse, source pane, synchronized navigation, find and vim keys.
 - [ ] Add YAML frontmatter modes, safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
-- [ ] Verify hosted checks on each actual implementation head; scripts baseline ended cancelled.
+- [ ] Verify hosted checks on each actual implementation head; PSScriptAnalyzer engine crash remains tracked in #5.
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.
 - [ ] Verify actual signed stable/dev installers and exact shipped bytes before release publication.

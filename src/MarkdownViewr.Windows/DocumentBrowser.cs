@@ -33,6 +33,11 @@ internal sealed class DocumentBrowser
    private Core.Documents.DocumentResourcePolicy _policy = new();
    private DocumentFiles? _files;
    private byte[] _html = [];
+   private Core.Documents.DocumentViewport _viewport;
+   private ulong _navigationId;
+   private bool _pageReady;
+   private bool _restoreViewport;
+   private bool _closed;
 
 
 
@@ -49,7 +54,15 @@ internal sealed class DocumentBrowser
    public async Task InitializeAsync()
    {
       _environment = await CoreWebView2Environment.CreateWithOptionsAsync(null, Path.Combine(AppIdentity.Paths.DataRoot, "WebView2"), null);
+      if(_closed)
+      {
+         return;
+      }
       await _view.EnsureCoreWebView2Async(_environment);
+      if(_closed)
+      {
+         return;
+      }
       CoreWebView2 core = _view.CoreWebView2;
       core.Settings.IsScriptEnabled = false;
       core.Settings.AreHostObjectsAllowed = false;
@@ -62,13 +75,7 @@ internal sealed class DocumentBrowser
       core.NewWindowRequested += (_, args) => args.Handled = true;
       core.FrameNavigationStarting += (_, args) => args.Cancel = true;
       core.NavigationStarting += NavigationStarting;
-      core.NavigationCompleted += (_, args) =>
-      {
-         if(!args.IsSuccess)
-         {
-            _status("The document surface could not be displayed.");
-         }
-      };
+      core.NavigationCompleted += NavigationCompleted;
       core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
       core.WebResourceRequested += ResourceRequested;
       Show(null, "<h1>MarkdownViewr</h1><p>Choose File → Open to read a Markdown document.</p>", "MarkdownViewr");
@@ -77,9 +84,12 @@ internal sealed class DocumentBrowser
 
 
    /// <summary>Replaces the document capability and navigates to an intercepted HTTPS response, with no HTTP server.</summary>
-   public void Show(DocumentFiles? files, string sanitizedHtml, string title)
+   public void Show(DocumentFiles? files, string sanitizedHtml, string title, Core.Documents.DocumentViewport viewport = default)
    {
       _files = files;
+      _viewport = viewport;
+      _pageReady = false;
+      _restoreViewport = true;
       _policy = new Core.Documents.DocumentResourcePolicy();
       _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{Styles}</style></head><body>{sanitizedHtml}</body></html>""");
       _view.CoreWebView2.Navigate(_policy.DocumentUri.AbsoluteUri);
@@ -87,13 +97,93 @@ internal sealed class DocumentBrowser
 
 
 
+   /// <summary>Marks pending browser continuations inactive before closing the native surface.</summary>
+   public void Close()
+   {
+      _closed = true;
+      _view.Close();
+   }
+
+
+
+   /// <summary>Queries only fixed viewport data on the current document; content scripts and messages remain disabled.</summary>
+   public async Task<Core.Documents.DocumentViewport> CaptureViewportAsync()
+   {
+      Uri document = _policy.DocumentUri;
+      ulong navigation = _navigationId;
+      if(!_closed && _pageReady && IsCurrentDocument())
+      {
+         string result = await _view.CoreWebView2.ExecuteScriptAsync("[window.scrollX/Math.max(1,document.documentElement.scrollWidth-innerWidth),window.scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)]");
+         if(!_closed && document == _policy.DocumentUri && navigation == _navigationId && IsCurrentDocument())
+         {
+            _viewport = Core.Documents.DocumentViewport.FromBrowserResult(result);
+         }
+      }
+      return _viewport;
+   }
+
+
+
+   /// <summary>Restores scroll after the matching navigation completes, using validated invariant numeric arguments.</summary>
+   private async void NavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+   {
+      if(_closed || args.NavigationId != _navigationId || !IsCurrentDocument())
+      {
+         return;
+      }
+      if(!args.IsSuccess)
+      {
+         _status("The document surface could not be displayed.");
+         return;
+      }
+      if(!_restoreViewport)
+      {
+         return;
+      }
+      _restoreViewport = false;
+      try
+      {
+         string script = FormattableString.Invariant($"if(location.href.split('#')[0] === '{_policy.DocumentUri.AbsoluteUri}') window.scrollTo({_viewport.HorizontalFraction:R}*Math.max(0,document.documentElement.scrollWidth-innerWidth),{_viewport.VerticalFraction:R}*Math.max(0,document.documentElement.scrollHeight-innerHeight));");
+         await sender.ExecuteScriptAsync(script);
+         if(!_closed && args.NavigationId == _navigationId && IsCurrentDocument())
+         {
+            _pageReady = true;
+         }
+      }
+      catch(COMException)
+      {
+         if(!_closed)
+         {
+            _status("The document scroll position could not be restored.");
+         }
+      }
+   }
+
+
+
+   /// <summary>Native script calls must address the active intercepted document, including only an optional fragment.</summary>
+   private bool IsCurrentDocument()
+   {
+      return Uri.TryCreate(_view.CoreWebView2.Source, UriKind.Absolute, out Uri? source) &&
+         source.Query.Length == 0 &&
+         string.Equals(source.GetLeftPart(UriPartial.Path), _policy.DocumentUri.AbsoluteUri, StringComparison.Ordinal);
+   }
+
+
+
    /// <summary>Allows only the current document and fragment navigation; external links require an actual user gesture.</summary>
    private async void NavigationStarting(CoreWebView2 sender, CoreWebView2NavigationStartingEventArgs args)
    {
+      if(_closed)
+      {
+         args.Cancel = true;
+         return;
+      }
       if(Uri.TryCreate(args.Uri, UriKind.Absolute, out Uri? uri) &&
          string.Equals(uri.GetLeftPart(UriPartial.Path), _policy.DocumentUri.AbsoluteUri, StringComparison.Ordinal) &&
          uri.Query.Length == 0)
       {
+         _navigationId = args.NavigationId;
          return;
       }
       args.Cancel = true;

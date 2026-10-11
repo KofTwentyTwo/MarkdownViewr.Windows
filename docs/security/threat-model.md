@@ -21,6 +21,8 @@ physical directory. It does not authorize native commands or remote resource acc
 | --- | --- |
 | Picker / literal process argument | Read-only bounded snapshot; no shell interpolation |
 | Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
+| File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
+| Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
 | Remote resources | Denied by CSP and resource interception |
@@ -45,7 +47,8 @@ physical directory. It does not authorize native commands or remote resource acc
 ## Remaining risks and work
 
 This is a first reader, not a completed port. User themes, external editor commands,
-save watching, print and any future browser bridge need their own controls and tests.
+print and any future browser bridge need their own controls and tests. Save watching is
+implemented; real browser replacement/deletion/scroll acceptance remains pending.
 Local links to other documents and mailto links are currently blocked. WebView2 uses
 the installed evergreen runtime; installed deployment acceptance remains required.
 
@@ -57,4 +60,5 @@ does not establish working release signing.
 
 | Date | Reviewer | Changes |
 | --- | --- | --- |
+| 2026-10-10 | Codex (GPT-6) | Added directory watching and guarded numeric viewport preservation; hosted reload acceptance pending |
 | 2026-10-10 | Codex (GPT-6) | Replaced template-only interfaces with actual document and browser boundaries; recorded separate unit/native/browser evidence |

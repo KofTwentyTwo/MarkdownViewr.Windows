@@ -1,6 +1,6 @@
 # MarkdownViewr
 
-> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The first reader implementation opens Markdown, renders GFM and supports manual reload. Live reload, document themes, navigation and printing are still in development; desktop acceptance is pending. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
+> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The first reader implementation opens Markdown, renders GFM and supports manual and automatic reload. Document themes, navigation and printing are still in development; hosted automatic-reload acceptance is pending. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
 
 A Windows Markdown viewer with live reload, themes and document navigation.
 
@@ -29,7 +29,8 @@ Prerelease tags (`v1.2.3-beta.1`) publish to the `dev` channel
 ## Usage
 
 - **File → Open / Ctrl+O:** choose a Markdown document. A literal file path can also be supplied when launching the executable.
-- **File → Reload:** reread the current file. Local images stay within the document folder; remote images and authored scripts/styles are blocked.
+- **Live reload:** saves automatically refresh the document, including replacement saves. Deletion keeps the last version visible until the file is restored. The relative reading position is preserved.
+- **File → Reload:** reread the current file manually. Local images stay within the document folder; remote images and authored scripts/styles are blocked.
 - **View:** choose the light, dark, or system theme; turn the startup splash and the
   startup update check on or off. Choices are saved immediately.
 - **Help → Activity log:** a live view of the app's log, with an errors-only filter and a

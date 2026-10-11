@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
+using System.Net;
+using System.Net.Sockets;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Patterns;
 using Xunit.Abstractions;
 
 
@@ -124,6 +127,107 @@ public class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("After reload")), "the reloaded heading");
       Assert.Null(session.FindInApp(cf => cf.ByName("Before reload")));
    }
+
+   /// <summary>Saving through a replacement file updates the real browser without invoking Reload.</summary>
+   [Fact]
+   public void LiveReload_AtomicReplacement_ShowsNewContent()
+   {
+      using var session = new AppSession(document: "# Before automatic reload");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Before automatic reload")), "the initial heading", TimeSpan.FromSeconds(30));
+      string replacement = Path.Combine(session.DataDirectory, "replacement.tmp");
+      File.WriteAllText(replacement, "# After automatic reload");
+      File.Move(replacement, Path.Combine(session.DataDirectory, "document.md"), overwrite: true);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("After automatic reload")), "the automatically reloaded heading");
+      Assert.Contains("Reloaded a Markdown document.", session.ReadLogs(), StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>A missing file preserves the displayed snapshot and recovers when the path reappears.</summary>
+   [Fact]
+   public void LiveReload_DeletedThenRecreated_PreservesAndRecovers()
+   {
+      using var session = new AppSession(document: "# Last readable version");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last readable version")), "the initial heading", TimeSpan.FromSeconds(30));
+      string path = Path.Combine(session.DataDirectory, "document.md");
+      File.Delete(path);
+      session.WaitFor(
+         () => session.FindInApp(cf => cf.ByName("The document is missing. Showing the last version; it will reload when restored.")),
+         "the missing-file status");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Last readable version")));
+      File.WriteAllText(path, "# Recovered document");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Recovered document")), "the recreated document heading");
+   }
+
+
+
+   /// <summary>The application retries a brief exclusive editor lock instead of dropping its pending save.</summary>
+   [Fact]
+   public void LiveReload_EditorTemporarilyLocksFile_Retries()
+   {
+      using var session = new AppSession(document: "# Before editor lock");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Before editor lock")), "the initial heading", TimeSpan.FromSeconds(30));
+      using(var file = new FileStream(Path.Combine(session.DataDirectory, "document.md"), FileMode.Create, FileAccess.Write, FileShare.None))
+      {
+         using var writer = new StreamWriter(file);
+         writer.Write("# After editor lock");
+         writer.Flush();
+         Thread.Sleep(800);
+      }
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("After editor lock")), "the unlocked save");
+   }
+
+
+
+   /// <summary>Reload retains relative position when a save changes the document's total height.</summary>
+   [Fact]
+   public void LiveReload_HeightChanges_RetainsRelativeScroll()
+   {
+      string paragraphs = string.Join("\n\n", Enumerable.Range(0, 200).Select(index => $"Paragraph {index}: a document long enough to scroll."));
+      using var session = new AppSession(document: "# Scroll before\n\n" + paragraphs);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Scroll before")), "the initial heading", TimeSpan.FromSeconds(30));
+      AutomationElement scroller = FindDocumentScroller(session);
+      scroller.Patterns.Scroll.Pattern.SetScrollPercent(-1, 80);
+      session.WaitFor(
+         () => scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value > 75 ? scroller : null,
+         "the document to scroll");
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Scroll after\n\n" + paragraphs + "\n\n" + paragraphs);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Scroll after")), "the reloaded heading");
+      session.WaitFor(
+         () =>
+         {
+            AutomationElement updated = FindDocumentScroller(session);
+            return updated.Patterns.Scroll.Pattern.VerticalScrollPercent.Value > 75 ? updated : null;
+         },
+         "relative scroll restoration");
+   }
+
+
+
+   /// <summary>Remote image markup cannot connect to a listening server even when the parser retains its URL.</summary>
+   [Fact]
+   public void OpenDocument_RemoteImage_DoesNotConnect()
+   {
+      using var listener = new TcpListener(IPAddress.Loopback, 0);
+      listener.Start();
+      int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+      using var session = new AppSession(document: $"# Network boundary\n\n![remote image](http://127.0.0.1:{port}/remote.png)");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Network boundary")), "the rendered document heading", TimeSpan.FromSeconds(30));
+      Thread.Sleep(1500);
+      Assert.False(listener.Pending(), "The document attempted to fetch its remote image.");
+   }
+
+
+
+   /// <summary>Finds the browser's actual scroll provider, which is separate from the native window.</summary>
+   private static AutomationElement FindDocumentScroller(AppSession session)
+   {
+      return session.WaitFor(
+         () => session.MainWindow.FindAllDescendants().FirstOrDefault(element =>
+            element.Patterns.Scroll.TryGetPattern(out IScrollPattern? scroll) && scroll.VerticallyScrollable.Value),
+         "the browser scroll provider");
+   }
+
 
 }
 

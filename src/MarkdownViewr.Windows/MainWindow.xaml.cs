@@ -16,7 +16,7 @@ namespace MarkdownViewr.Windows;
 /// The main window: the AppKit shell (splash, About, activity log, update checks, theme)
 /// around the app's content. Handlers here only route to AppKit or to view models in Core.
 /// </summary>
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : Window, IDisposable
 {
    private readonly AppSettings _settings = AppIdentity.SettingsStore.Load();
    private readonly UpdateCoordinator _updates;
@@ -24,6 +24,9 @@ public sealed partial class MainWindow : Window
    private Task? _browserInitialization;
    private string? _documentPath;
    private bool _loaded;
+   private bool _closed;
+   private readonly Core.Documents.DocumentLoadScheduler _loads = new();
+   private DocumentWatcher? _watcher;
 
 
 
@@ -48,11 +51,7 @@ public sealed partial class MainWindow : Window
       (_settings.ThemeKind switch { AppTheme.Light => ThemeLight, AppTheme.Dark => ThemeDark, _ => ThemeSystem }).IsChecked = true;
 
       SplashOverlay.ShowOver(RootGrid, AppIdentity.Info, _settings);
-      Closed += (_, _) =>
-      {
-         DocumentView.Close();
-         LogWindow.CloseCurrent();
-      };
+      Closed += (_, _) => Dispose();
 
       if(_settings.CheckForUpdatesOnStartup)
       {
@@ -87,6 +86,10 @@ public sealed partial class MainWindow : Window
       try
       {
          await _browserInitialization;
+         if(_closed)
+         {
+            return;
+         }
          StatusText.Text = "Choose File → Open to read a Markdown document.";
          string[] arguments = Environment.GetCommandLineArgs();
          if(arguments.Length == 2)
@@ -120,47 +123,157 @@ public sealed partial class MainWindow : Window
 
 
 
-   /// <summary>Reopens the selected file explicitly; automatic save watching will build on this path.</summary>
+   /// <summary>Reopens the selected file explicitly and retains the current scroll position.</summary>
    private async void Reload_Click(object sender, RoutedEventArgs e)
    {
       if(_documentPath is not null)
       {
-         await OpenDocumentAsync(_documentPath);
+         await OpenDocumentAsync(_documentPath, reload: true);
       }
    }
 
 
 
    /// <summary>Reads and parses outside the UI thread; a failed open preserves the previous document.</summary>
-   private async Task OpenDocumentAsync(string path)
+   private async Task OpenDocumentAsync(string path, bool reload = false)
    {
+      if(_closed)
+      {
+         return;
+      }
+      if(!_loads.TryBegin(path, reload))
+      {
+         return;
+      }
       OpenMenuItem.IsEnabled = false;
       ReloadMenuItem.IsEnabled = false;
       try
       {
          _browserInitialization ??= _browser.InitializeAsync();
          await _browserInitialization;
-         (DocumentFiles files, string html) = await Task.Run(() =>
+         Core.Documents.DocumentViewport viewport = reload ? await _browser.CaptureViewportAsync() : default;
+         (DocumentFiles files, string html) = await ReadDocumentAsync(path);
+         if(_closed)
          {
-            var document = DocumentFiles.Open(path);
-            return (document, new Core.Documents.MarkdownRenderer().Render(document.Markdown));
-         });
-         _browser.Show(files, html, Path.GetFileName(path));
-         _documentPath = Path.GetFullPath(path);
-         Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;
-         StatusText.Text = "Opened " + Path.GetFileName(path);
-         App.Log.Info("Opened a Markdown document.");
+            return;
+         }
+         ShowDocument(files, html, path, viewport, reload);
       }
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.COMException)
       {
-         StatusText.Text = "Could not open this document: " + exception.Message;
+         if(!_closed)
+         {
+            StatusText.Text = reload && exception is FileNotFoundException
+               ? "The document is missing. Showing the last version; it will reload when restored."
+               : "Could not open this document: " + exception.Message;
+         }
          App.Log.Warning("Could not open a Markdown document.");
       }
       finally
       {
-         OpenMenuItem.IsEnabled = true;
-         ReloadMenuItem.IsEnabled = _documentPath is not null;
+         (string Path, bool Reload)? next = _loads.Complete(_documentPath);
+         if(!_closed)
+         {
+            if(next is { } request)
+            {
+               await OpenDocumentAsync(request.Path, request.Reload);
+            }
+            else
+            {
+               OpenMenuItem.IsEnabled = true;
+               ReloadMenuItem.IsEnabled = _documentPath is not null;
+            }
+         }
       }
+   }
+
+
+
+   /// <summary>Directory watching survives atomic replacement and file recreation; callbacks only enqueue UI work.</summary>
+   private void StartWatching()
+   {
+      _watcher?.Dispose();
+      _watcher = null;
+      string watchedPath = _documentPath!;
+      try
+      {
+         _watcher = new DocumentWatcher(
+            _documentPath!,
+            () => DispatcherQueue.TryEnqueue(() =>
+            {
+               if(string.Equals(_documentPath, watchedPath, StringComparison.Ordinal))
+               {
+                  _ = OpenDocumentAsync(watchedPath, reload: true);
+               }
+            }),
+            () => DispatcherQueue.TryEnqueue(() =>
+            {
+               if(!_closed)
+               {
+                  StatusText.Text = "Live reload encountered a filesystem error. Use File → Reload if changes stop appearing.";
+                  App.Log.Warning("The document watcher reported a filesystem error.");
+               }
+            }));
+      }
+      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException)
+      {
+         StatusText.Text = "Live reload is unavailable for this folder. Use File → Reload.";
+         App.Log.Warning("Could not start the document watcher.");
+      }
+   }
+
+
+
+   /// <summary>Retries only transient missing/sharing violations from an editor's replace/save operation.</summary>
+   private static async Task<(DocumentFiles Files, string Html)> ReadDocumentAsync(string path)
+   {
+      for(int attempt = 0; ; attempt++)
+      {
+         try
+         {
+            return await Task.Run(() =>
+            {
+               var document = DocumentFiles.Open(path);
+               return (document, new Core.Documents.MarkdownRenderer().Render(document.Markdown));
+            });
+         }
+         catch(IOException exception) when(attempt < 3 && (exception.HResult & 0xFFFF) is 2 or 3 or 32 or 33)
+         {
+            await Task.Delay(200);
+         }
+      }
+   }
+
+
+
+   /// <summary>Commits a fully parsed snapshot and changes the watcher only when the selected document changes.</summary>
+   private void ShowDocument(DocumentFiles files, string html, string path, Core.Documents.DocumentViewport viewport, bool reload)
+   {
+      _browser.Show(files, html, Path.GetFileName(path), viewport);
+      _documentPath = Path.GetFullPath(path);
+      Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;
+      StatusText.Text = (reload ? "Reloaded " : "Opened ") + Path.GetFileName(path);
+      App.Log.Info(reload ? "Reloaded a Markdown document." : "Opened a Markdown document.");
+      if(!reload)
+      {
+         StartWatching();
+      }
+   }
+
+
+
+   /// <summary>Closing the window releases its browser and directory subscription before any queued work can run.</summary>
+   public void Dispose()
+   {
+      if(!_closed)
+      {
+         _closed = true;
+         _watcher?.Dispose();
+         _watcher = null;
+         _browser.Close();
+         LogWindow.CloseCurrent();
+      }
+      GC.SuppressFinalize(this);
    }
 
 

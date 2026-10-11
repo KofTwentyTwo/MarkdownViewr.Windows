@@ -44,10 +44,15 @@ Bound documents to 16 Mi characters and individual images to 16 MiB.
 
 ## Consequences
 
-The first slice supports reading, a picker, literal launch arguments and manual reload.
-It does not yet reproduce Darin's themes, syntax colors or navigation. Any later trusted
-JavaScript or native message bridge requires a revised CSP, origin/nonce/schema checks
-and tests before enabling it. Custom CSS must not introduce network or file access.
+The reader supports a picker, literal launch arguments, manual reload and debounced save watching.
+It does not yet reproduce Darin's themes, syntax colors or navigation. Automatic save
+reload uses fixed native ExecuteScriptAsync queries on the checked current document;
+this API works while authored scripts remain disabled. Browser results must be exactly
+two finite numeric fractions, clamped to 0–1; only invariant numeric arguments enter the
+fixed restore expression. No strings from documents become executable script.
+
+Any later document-created JavaScript or native message bridge requires a revised CSP,
+origin/nonce/schema checks and tests before enabling it. Custom CSS must not introduce network or file access.
 
 ## Verification and follow-up
 
@@ -57,7 +62,7 @@ a real junction pointing outside the document folder. Browser/UI acceptance is a
 separate gate; these unit tests do not prove browser behavior or release signing.
 
 - [ ] Review this decision and complete document UI acceptance.
-- [ ] Add save watching, navigation, themes, source/find and print from PRODUCT.md.
+- [ ] Complete hosted save/replacement/deletion/scroll acceptance; add navigation, themes, source/find and print from PRODUCT.md.
 - [ ] Verify WebView2 runtime deployment and exact signed installed release artifacts.
 
 ## References
@@ -65,4 +70,5 @@ separate gate; these unit tests do not prove browser behavior or release signing
 - [Markdig](https://github.com/xoofx/markdig)
 - [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer)
 - [Microsoft WebView2 security guidance](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security)
+- [Native WebView2 script execution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/winrt/microsoft_web_webview2_core/corewebview2)
 - [GetFinalPathNameByHandleW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfinalpathnamebyhandlew)
