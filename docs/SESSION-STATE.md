@@ -2,7 +2,25 @@
 
 Updated: 2026-10-11
 
-## Current native result and deterministic IPC fix - 2026-10-11
+## Current full-run variants and queued source repaint - 2026-10-11
+
+Exact9fdfc2d full native job114560940480 is terminal93/97,4failures,zero
+skips (8m59s), despite focused14/15. Retain artifacts/current-native-9fdfc2d.log:
+failures are disconnected peer, nested outline expansion, initial source Light
+palette and source focus alignment. Initial-color failure now follows verified
+UIA Toggle ThemeLight(before=Off), so it is not explained by mouse fallback.
+Both exact highlighting cases passing the focused run do not establish full
+acceptance. Installed job114560940485 is still live at last verified read.
+
+Signed/DCO2fe5853 adds the locally proven native IPC cleanup and test-only source
+coordinate probe (25runs/100cases,zero failures/skips); it has not yet been
+pushed while the prior installed job remains live. A subsequent source change
+queues semantic repaint until after native theme propagation, preserving range
+classification, selection and read-only state. Existing actual color assertions
+remain; no success claim before exact hosted proof. The focused gate also adds
+the nested outline variant without excluding any prior case.
+
+## Previous native result and deterministic IPC fix - 2026-10-11
 
 Signed/DCO9fdfc2d is pushed. Exact CI38170170551 focused job114560940302
 passes14/15,one failure,zero skips. Source reopen/50:50, both native highlighting

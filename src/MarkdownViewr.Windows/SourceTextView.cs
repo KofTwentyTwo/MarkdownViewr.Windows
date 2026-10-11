@@ -125,8 +125,14 @@ public sealed partial class SourceTextView : RichEditBox, IDisposable
 
 
 
-   /// <summary>Mode changes use native Windows colors; document CSS cannot style or execute within this control.</summary>
-   private void ThemeChanged(FrameworkElement sender, object args) => _ = PaintAsync();
+   /// <summary>Repaints after native theme propagation finishes so inherited foreground updates cannot erase semantic ranges.</summary>
+   private void ThemeChanged(FrameworkElement sender, object args) => DispatcherQueue.TryEnqueue(() =>
+   {
+      if(!_disposed)
+      {
+         _ = PaintAsync();
+      }
+   });
 
 
 
