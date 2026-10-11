@@ -1,5 +1,8 @@
 # Development Tasks
 
+- [x] Exact6374611: native97/98 and published97/98, focused19/20, zero skips; actual sustained colors/hover/focus and outline pass.
+- [ ] Verify full native content-client geometry correction against unchanged bidirectional source test (remaining failure: reader middle-heading alignment at line490). Remove temporary probes before release.
+
 - [x] Generate and publish the GUI-only AppKit application with the approved identity.
 - [x] Configure/read back repository protections and establish the initial hosted CI baseline.
 - [x] Inspect pinned markdownViewr source and record the full parity scope in PRODUCT.md.

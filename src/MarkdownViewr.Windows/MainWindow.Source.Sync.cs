@@ -230,6 +230,26 @@ public sealed partial class MainWindow
       if(sourceMoved && double.IsFinite(_sourceReaderLastY))
       {
          double target = Core.Documents.DocumentScrollState.MapPosition(sourceY, scroller.ScrollableHeight, frame.Maximum, anchors.Select(pair => (pair.Source, pair.Reader)));
+         if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+         {
+            App.Log.Info(FormattableString.Invariant($"[DEBUG-source-scroll] source movement; sourceY={sourceY}; sourceMaximum={scroller.ScrollableHeight}; readerY={frame.Position}; readerMaximum={frame.Maximum}; target={target}."));
+            foreach(Core.Documents.DocumentSourceHeading heading in source.Headings.Where(heading => heading.Start < SourceText.TextLength).Take(8))
+            {
+               try
+               {
+                  Microsoft.UI.Text.ITextRange range = SourceText.Document.GetRange(heading.Start, Math.Min(heading.Start + 1, SourceText.TextLength));
+                  range.GetPoint(Microsoft.UI.Text.HorizontalCharacterAlignment.Left, Microsoft.UI.Text.VerticalCharacterAlignment.Top,
+                     Microsoft.UI.Text.PointOptions.ClientCoordinates | Microsoft.UI.Text.PointOptions.AllowOffClient | Microsoft.UI.Text.PointOptions.Start, out global::Windows.Foundation.Point point);
+                  range.GetRect(Microsoft.UI.Text.PointOptions.ClientCoordinates | Microsoft.UI.Text.PointOptions.AllowOffClient, out global::Windows.Foundation.Rect raw, out _);
+                  global::Windows.Foundation.Rect rectangle = SourceText.GetRectFromCharacterIndex(heading.Start, trailingEdge: false);
+                  App.Log.Info(FormattableString.Invariant($"[DEBUG-source-scroll] heading={heading.Index}; nativePointY={point.Y}; rawRectangleY={raw.Y}; rawRectangleHeight={raw.Height}; shimY={rectangle.Y}; shimHeight={rectangle.Height}; readerTop={frame.Headings.GetValueOrDefault(heading.Index)}."));
+               }
+               catch(System.Runtime.InteropServices.COMException exception)
+               {
+                  App.Log.Info(FormattableString.Invariant($"[DEBUG-source-scroll] native coordinate probe unavailable; heading={heading.Index}; error=0x{exception.HResult:X8}."));
+               }
+            }
+         }
          _sourceSyncHoldUntil = Environment.TickCount64 + 200;
          await _browser.ScrollToSourcePositionAsync(target);
          _sourceLastY = sourceY;

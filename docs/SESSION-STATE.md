@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Full source acceptance advanced; geometry correction pending - 2026-10-11
+
+Exact signed6374611 CI38174602145 is terminal: focused19/20, native97/98,
+published97/98, zero skips. Actual initial/sustained native colors, physical
+hover and focus, explicit System→Light, and nested outline pass these variants.
+The original bidirectional source test advances to line490: source middle glyph
+alignment passes, but the reader heading remains offscreen. Retain terminal
+logs current-native-6374611.log/current-installed-6374611.log and distributed
+TRX under artifacts/current-installed-evidence-38174602145. Installed channel
+acceptance has not run because published acceptance remains red.
+
+The next correction uses full native content-client character points with
+AllowOffClient, without adding ScrollViewer.VerticalOffset twice. It also removes
+the obsolete scroller search. Bounded opt-in numeric probes compare native points,
+old raw rectangles, anchors and mapped targets. No document content/path is logged.
+Original physical bidirectional assertions, deadlines and geometry bounds remain.
+Local zero-warning Release and formatting gates must pass before signed push;
+hosted verification of this correction remains pending. Remove temporary probes
+before release. Preserve owner preview55472 and avoid local desktop input.
+
+Default-app chooser/Explorer/install lifecycle, real stable/dev coexistence,
+original fidelity/standards, verified Azure/shipped signatures and genuine
+current-head human review remain required. No release publication claim.
+
 ## Sustained source palette candidate - 2026-10-11
 
 Exact91877f7 CI38173447118 is terminal:18/20 focused,97/98 native,

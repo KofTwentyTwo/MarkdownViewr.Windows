@@ -10,7 +10,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using NativeText = Microsoft.UI.Text;
 
 
@@ -108,14 +107,15 @@ public sealed partial class SourceTextView : RichEditBox, IDisposable
 
 
 
-   /// <summary>Returns native paragraph geometry in unscrolled control coordinates, preserving the source scroll contract.</summary>
+   /// <summary>Returns full native content-client geometry, including offscreen characters, without adding the scroll offset again.</summary>
    public global::Windows.Foundation.Rect GetRectFromCharacterIndex(int index, bool trailingEdge)
    {
       int position = Math.Clamp(index + (trailingEdge ? 1 : 0), 0, TextLength);
-      Document.GetRange(position, Math.Min(position + 1, TextLength)).GetRect(NativeText.PointOptions.ClientCoordinates | NativeText.PointOptions.AllowOffClient, out global::Windows.Foundation.Rect rectangle, out _);
-      ScrollViewer? scroller = FindScroller(this);
-      rectangle.Y += scroller?.VerticalOffset ?? 0;
-      return rectangle;
+      NativeText.ITextRange range = Document.GetRange(position, Math.Min(position + 1, TextLength));
+      const NativeText.PointOptions Options = NativeText.PointOptions.ClientCoordinates | NativeText.PointOptions.AllowOffClient | NativeText.PointOptions.Start;
+      range.GetPoint(NativeText.HorizontalCharacterAlignment.Left, NativeText.VerticalCharacterAlignment.Top, Options, out global::Windows.Foundation.Point first);
+      range.GetPoint(NativeText.HorizontalCharacterAlignment.Right, NativeText.VerticalCharacterAlignment.Bottom, Options, out global::Windows.Foundation.Point last);
+      return new global::Windows.Foundation.Rect(first.X, first.Y, Math.Max(0, last.X - first.X), Math.Max(0, last.Y - first.Y));
    }
 
 
@@ -206,25 +206,6 @@ public sealed partial class SourceTextView : RichEditBox, IDisposable
       {
          IsReadOnly = true;
       }
-   }
-
-
-
-   /// <summary>Recurses only through this source control's native template; no desktop or unrelated application is queried.</summary>
-   private static ScrollViewer? FindScroller(DependencyObject element)
-   {
-      if(element is ScrollViewer scroller)
-      {
-         return scroller;
-      }
-      for(int index = 0; index < VisualTreeHelper.GetChildrenCount(element); index++)
-      {
-         if(FindScroller(VisualTreeHelper.GetChild(element, index)) is { } found)
-         {
-            return found;
-         }
-      }
-      return null;
    }
 
 
