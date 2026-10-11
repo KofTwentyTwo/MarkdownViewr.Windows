@@ -27,6 +27,8 @@
             <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
          </MenuBarItem>
          <MenuBarItem Title="View">
+            <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
+            <MenuFlyoutSeparator />
             <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
             <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
             <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />

@@ -1,0 +1,37 @@
+{
+    "name": "Nord",
+    "colors": {
+        "background": "#2e3440",
+        "text": "#d8dee9",
+        "heading1": "#88c0d0",
+        "heading2": "#81a1c1",
+        "heading3": "#5e81ac",
+        "heading4": "#b48ead",
+        "heading5": "#a3be8c",
+        "heading6": "#ebcb8b",
+        "link": "#88c0d0",
+        "codeBackground": "#3b4252",
+        "codeText": "#a3be8c",
+        "blockquoteBorder": "#81a1c1",
+        "blockquoteBackground": "#3b4252",
+        "highlightBackground": "#ebcb8b",
+        "highlightText": "#2e3440"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

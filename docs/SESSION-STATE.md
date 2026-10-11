@@ -43,6 +43,7 @@ name and content view. The deletion assertion remains unchanged; it also require
 the initial Opened status to be accessible. Build and formatting pass locally;
 hosted recovery proof is pending. Accessibility head 23928bc still failed the initial status lookup (24/25 UI tests passed); properties alone did not resolve it. The next diagnostic retains the native tree and fixture-window PNG in hosted installed evidence. No deletion assertion is weakened. Scripts 38100976565 reproduced the analyzer
 engine crash; no scripts/settings/workflow changed and issue #5 remains open.
+
 ## Repository and authorization
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).
@@ -58,12 +59,12 @@ CI signing and final signed release artifacts remain unverified. Published AppKi
 ## Next work
 
 Verify reload/browser network acceptance and preserve its exact hosted handles.
-Then port Darin's themes and implement TOC/collapse, source/find/vim navigation,
+Built-in theme implementation now loads all 20 original resources, with persistent document selection, Windows font fallbacks and viewport retention. 117 core tests pass at 100% coverage; zero-warning build and formatting pass. User-theme editing and actual browser selection acceptance remain pending. Continue TOC/collapse, source/find/vim navigation,
 frontmatter, editor, print, multiple windows, recents and Windows associations.
 Original reference is pinned at 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 under
-AppKit/artifacts/markdownviewr-reference. No original code/resources copied yet;
+AppKit/artifacts/markdownviewr-reference. The 20 original JSON themes are embedded unchanged in the core assembly; their full MIT notice ships with the app.
 retain Darin's MIT notices when adapting them. Full PRODUCT.md scope remains open.
 
 Reference preparation: all 20 original JSON themes have been downloaded into
 AppKit/artifacts/markdownviewr-reference/markdownViewr/Resources/themes and checked
-against their Git blob hashes at the pinned commit. They are not yet in the app.
+against their Git blob hashes at the pinned commit. They now match the embedded app resources by Git blob hash.

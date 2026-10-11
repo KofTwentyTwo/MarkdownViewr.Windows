@@ -16,17 +16,6 @@ namespace MarkdownViewr.Windows;
 internal sealed class DocumentBrowser
 {
    private const string SecurityHeaders = "Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nCache-Control: no-store";
-   private const string Styles = """
-      :root { color-scheme: light dark; font: 16px/1.65 system-ui, sans-serif; }
-      body { max-width: 900px; margin: 0 auto; padding: 32px; overflow-wrap: anywhere; }
-      h1,h2,h3,h4,h5,h6 { line-height: 1.25; margin-top: 1.5em; }
-      pre { padding: 16px; overflow: auto; background: light-dark(#f3f4f6,#22272e); border-radius: 6px; }
-      code,kbd { font-family: Consolas, monospace; }
-      table { border-collapse: collapse; } th,td { border: 1px solid #888; padding: 6px 12px; }
-      blockquote { margin-left: 0; padding-left: 20px; border-left: 4px solid #888; }
-      img { max-width: 100%; height: auto; } a { color: light-dark(#0969da,#58a6ff); }
-      """;
-
    private readonly WebView2 _view;
    private readonly Action<string> _status;
    private CoreWebView2Environment? _environment;
@@ -38,14 +27,18 @@ internal sealed class DocumentBrowser
    private bool _pageReady;
    private bool _restoreViewport;
    private bool _closed;
+   private Core.Themes.ReaderTheme _theme;
+   private string _sanitizedHtml = "";
+   private string _title = "MarkdownViewr";
 
 
 
    /// <summary>Attaches a native status callback; the document itself cannot invoke host commands.</summary>
-   public DocumentBrowser(WebView2 view, Action<string> status)
+   public DocumentBrowser(WebView2 view, Action<string> status, Core.Themes.ReaderTheme theme)
    {
       _view = view;
       _status = status;
+      _theme = theme;
    }
 
 
@@ -87,14 +80,28 @@ internal sealed class DocumentBrowser
    public void Show(DocumentFiles? files, string sanitizedHtml, string title, Core.Documents.DocumentViewport viewport = default)
    {
       _files = files;
+      _sanitizedHtml = sanitizedHtml;
+      _title = title;
       _viewport = viewport;
       _pageReady = false;
       _restoreViewport = true;
       _policy = new Core.Documents.DocumentResourcePolicy();
-      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{Styles}</style></head><body>{sanitizedHtml}</body></html>""");
+      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{_theme.Styles}</style></head><body>{sanitizedHtml}</body></html>""");
       _view.CoreWebView2.Navigate(_policy.DocumentUri.AbsoluteUri);
    }
 
+
+
+   /// <summary>Changes only the document appearance and preserves its current relative viewport.</summary>
+   public async Task ApplyThemeAsync(Core.Themes.ReaderTheme theme)
+   {
+      Core.Documents.DocumentViewport viewport = await CaptureViewportAsync();
+      _theme = theme;
+      if(!_closed)
+      {
+         Show(_files, _sanitizedHtml, _title, viewport);
+      }
+   }
 
 
    /// <summary>Marks pending browser continuations inactive before closing the native surface.</summary>

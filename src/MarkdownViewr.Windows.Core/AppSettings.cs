@@ -8,7 +8,9 @@ using KofTwentyTwo.AppKit.Settings;
 
 namespace MarkdownViewr.Windows.Core;
 
-/// <summary>Persistent AppKit shell preferences; document preferences will extend this type.</summary>
+/// <summary>Persistent AppKit shell and Markdown reading preferences.</summary>
 public sealed class AppSettings : ShellSettings
 {
+   /// <summary>The selected document theme; independent of the Windows shell theme.</summary>
+   public string DocumentTheme { get; set; } = "Catppuccin Mocha";
 }

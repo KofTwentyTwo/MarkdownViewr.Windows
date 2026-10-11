@@ -12,7 +12,8 @@
 - [ ] Discuss the desired first release and Windows-specific behavior with the owner.
 - [x] Implement/test directory watching and validated relative viewport state for saves/replacements/deletion recovery.
 - [ ] Complete actual browser save/lock/replacement/deletion/scroll acceptance (issue #6).
-- [ ] Port Darin's built-in themes; add editable user themes, custom CSS and code font settings.
+- [x] Port Darin's 20 built-in themes and persistent document selection; validate schema, font escaping and invariant CSS.
+- [ ] Verify hosted theme selection/viewport acceptance; add editable user themes, custom CSS and code font settings.
 - [ ] Add TOC, section collapse, source pane, synchronized navigation, find and vim keys.
 - [ ] Add YAML frontmatter modes, safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.

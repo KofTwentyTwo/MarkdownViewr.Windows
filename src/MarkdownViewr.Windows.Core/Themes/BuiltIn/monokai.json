@@ -1,0 +1,37 @@
+{
+    "name": "Monokai",
+    "colors": {
+        "background": "#272822",
+        "text": "#f8f8f2",
+        "heading1": "#f92672",
+        "heading2": "#66d9ef",
+        "heading3": "#a6e22e",
+        "heading4": "#e6db74",
+        "heading5": "#fd971f",
+        "heading6": "#ae81ff",
+        "link": "#66d9ef",
+        "codeBackground": "#1e1f1c",
+        "codeText": "#a6e22e",
+        "blockquoteBorder": "#f92672",
+        "blockquoteBackground": "#2e2f2a",
+        "highlightBackground": "#e6db74",
+        "highlightText": "#272822"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

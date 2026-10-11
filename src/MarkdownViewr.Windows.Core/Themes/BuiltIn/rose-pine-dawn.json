@@ -1,0 +1,37 @@
+{
+    "name": "Rosé Pine Dawn",
+    "colors": {
+        "background": "#faf4ed",
+        "text": "#575279",
+        "heading1": "#907aa9",
+        "heading2": "#286983",
+        "heading3": "#286983",
+        "heading4": "#56949f",
+        "heading5": "#56949f",
+        "heading6": "#56949f",
+        "link": "#286983",
+        "codeBackground": "#f2e9e1",
+        "codeText": "#d7827e",
+        "blockquoteBorder": "#907aa9",
+        "blockquoteBackground": "#f2e9e1",
+        "highlightBackground": "#f6c177",
+        "highlightText": "#575279"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

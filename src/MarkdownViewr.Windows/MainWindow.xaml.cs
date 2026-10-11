@@ -7,6 +7,7 @@ using KofTwentyTwo.AppKit.Settings;
 using KofTwentyTwo.AppKit.Updates;
 using KofTwentyTwo.AppKit.WinUI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Storage.Pickers;
 
 
@@ -34,7 +35,8 @@ public sealed partial class MainWindow : Window, IDisposable
    public MainWindow()
    {
       InitializeComponent();
-      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message);
+      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, Core.Themes.ThemeCatalog.Find(_settings.DocumentTheme));
+      CreateDocumentThemeMenu();
       Title = AppIdentity.Info.DisplayName;
       this.ResizeForDpi(1100, 760);
       this.SetMinimumSize(640, 420);
@@ -282,6 +284,44 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>File, Exit.</summary>
    private void Exit_Click(object sender, RoutedEventArgs e) => Close();
 
+
+
+   /// <summary>Builds the original document theme choices without mixing them with the AppKit shell theme.</summary>
+   private void CreateDocumentThemeMenu()
+   {
+      string selected = Core.Themes.ThemeCatalog.Find(_settings.DocumentTheme).Name;
+      foreach(Core.Themes.ReaderTheme theme in Core.Themes.ThemeCatalog.BuiltIn)
+      {
+         var item = new RadioMenuFlyoutItem { Text = theme.Name, Tag = theme, GroupName = "DocumentTheme", IsChecked = string.Equals(selected, theme.Name, StringComparison.Ordinal) };
+         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "DocumentTheme:" + theme.Name);
+         item.Click += DocumentTheme_Click;
+         DocumentThemesMenu.Items.Add(item);
+      }
+   }
+
+
+
+   /// <summary>Persists the document palette and redisplays the current snapshot at its reading position.</summary>
+   private async void DocumentTheme_Click(object sender, RoutedEventArgs e)
+   {
+      var theme = (Core.Themes.ReaderTheme)((FrameworkElement)sender).Tag;
+      _settings.DocumentTheme = theme.Name;
+      Save();
+      try
+      {
+         _browserInitialization ??= _browser.InitializeAsync();
+         await _browserInitialization;
+         await _browser.ApplyThemeAsync(theme);
+      }
+      catch(System.Runtime.InteropServices.COMException exception)
+      {
+         if(!_closed)
+         {
+            StatusText.Text = "The document theme could not be displayed.";
+            App.Log.Error("The document theme could not be displayed.", exception);
+         }
+      }
+   }
 
 
    /// <summary>View, theme: applies the chosen theme to the window and saves it.</summary>

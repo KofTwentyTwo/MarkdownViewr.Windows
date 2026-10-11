@@ -1,0 +1,37 @@
+{
+    "name": "One Dark",
+    "colors": {
+        "background": "#282c34",
+        "text": "#abb2bf",
+        "heading1": "#e06c75",
+        "heading2": "#61afef",
+        "heading3": "#c678dd",
+        "heading4": "#e5c07b",
+        "heading5": "#98c379",
+        "heading6": "#56b6c2",
+        "link": "#61afef",
+        "codeBackground": "#21252b",
+        "codeText": "#98c379",
+        "blockquoteBorder": "#c678dd",
+        "blockquoteBackground": "#2c313c",
+        "highlightBackground": "#e5c07b",
+        "highlightText": "#282c34"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

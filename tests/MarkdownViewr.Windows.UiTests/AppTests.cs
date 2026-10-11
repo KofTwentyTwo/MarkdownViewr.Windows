@@ -89,6 +89,22 @@ public class AppTests
 
 
 
+   /// <summary>The original document themes persist independently and keep the displayed document intact.</summary>
+   [Fact]
+   public void DocumentTheme_ChangedChoice_PersistsAndRetainsDocument()
+   {
+      using var session = new AppSession(document: "# Theme acceptance");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "DocumentThemesMenu");
+      session.ClickElement("DocumentTheme:GitHub Light");
+      session.WaitFor(
+         () => session.ReadSettings().Contains("\"DocumentTheme\": \"GitHub Light\"", StringComparison.Ordinal) ? session.MainWindow : null,
+         "the selected document theme to be saved");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme acceptance")), "the document after its theme changes");
+      Assert.DoesNotContain("\"Theme\": \"Light\"", session.ReadSettings(), StringComparison.Ordinal);
+   }
+
+
    /// <summary>Updates: a build that was not installed by Velopack says updates need an install.</summary>
    [Fact]
    public void CheckForUpdates_InALooseBuild_SaysUpdatesNeedAnInstall()

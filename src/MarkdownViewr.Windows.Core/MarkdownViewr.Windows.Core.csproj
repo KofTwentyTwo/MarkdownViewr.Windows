@@ -23,4 +23,8 @@
       <PackageReference Include="HtmlSanitizer" />
    </ItemGroup>
 
+   <ItemGroup>
+      <EmbeddedResource Include="Themes/BuiltIn/*.json" />
+   </ItemGroup>
+
 </Project>

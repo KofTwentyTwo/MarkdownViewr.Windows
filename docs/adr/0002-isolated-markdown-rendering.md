@@ -21,7 +21,7 @@ Versions and transitive hashes are committed in the NuGet locks.
 Host the sanitized result in WinUI WebView2. Serve an intercepted logical HTTPS
 document, with a random resource namespace for each open; no local HTTP listener.
 The document response carries a deny-by-default CSP and no-referrer/no-store headers.
-Only application-generated CSS is allowed; authored styles, IDs and classes are removed.
+Document-authored styles, IDs and classes are removed. Application theme CSS is generated from validated six-digit colors, bounded finite sizes and escaped font names. Theme custom CSS escapes every less-than sign before HTML embedding, preventing style-element breakout; CSP and resource interception continue to deny remote resources.
 
 Disable scripts, web messages, host objects, frames, downloads, popups and permission
 requests. Reject all browser resources except the exact document and allowlisted
@@ -45,7 +45,7 @@ Bound documents to 16 Mi characters and individual images to 16 MiB.
 ## Consequences
 
 The reader supports a picker, literal launch arguments, manual reload and debounced save watching.
-It does not yet reproduce Darin's themes, syntax colors or navigation. Automatic save
+The 20 original themes are embedded unchanged, with their MIT notice shipped in THIRD-PARTY-NOTICES.md. System/SF Mono defaults map to Windows font fallbacks. Document theme selection persists separately from the AppKit shell theme and retains the viewport. User-theme editing, syntax colors and navigation remain pending. Automatic save
 reload uses fixed native ExecuteScriptAsync queries on the checked current document;
 this API works while authored scripts remain disabled. Browser results must be exactly
 two finite numeric fractions, clamped to 0–1; only invariant numeric arguments enter the

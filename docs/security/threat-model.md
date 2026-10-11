@@ -22,6 +22,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Picker / literal process argument | Read-only bounded snapshot; no shell interpolation |
 | Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
+| Theme JSON / CSS | Embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
