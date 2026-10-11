@@ -122,7 +122,7 @@
                   <ComboBoxItem Content="Levels 1–6" />
                </ComboBox>
             </StackPanel>
-            <ListView x:Name="OutlineList" Grid.Row="1" Margin="0,8" SelectionChanged="OutlineSelection_Changed" AutomationProperties.Name="Document headings" />
+            <ListView x:Name="OutlineList" Grid.Row="1" Margin="0,8" SelectionChanged="OutlineSelection_Changed" IsItemClickEnabled="True" ItemClick="Outline_ItemClick" AutomationProperties.Name="Document headings" />
             <StackPanel Grid.Row="2" Spacing="8">
                <Button x:Name="ToggleSection" Content="Collapse / expand section" HorizontalAlignment="Stretch" Click="ToggleSection_Click" IsEnabled="False" />
                <Button x:Name="CollapseSections" Content="Collapse all" HorizontalAlignment="Stretch" Click="CollapseSections_Click" />

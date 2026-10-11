@@ -11,6 +11,23 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Repeated outline activation after actual bidirectional source proof — 2026-10-11
+
+Signed 22a3393 pushed. Source 38119623871/job 114411478222 advances past both actual
+middle-heading source/reader assertions. Bounded physical wheel input works and
+native source 2656.933 maps back to its reader heading. The failure is now line 461:
+clicking OutlineHeading:2 again does not jump back, since it is already selected
+and SelectionChanged does not fire. Keep the same original regression and bounds.
+Evidence: source-bounded-wheel-diagnostic-38119623871.log.
+
+The native ListView now enables ItemClick and repeats the same bounded numeric
+heading command on item activation. Existing SelectionChanged remains for keyboard
+selection navigation; repeated commands on a newly selected item are idempotent.
+No debounce/prefix/new state or renderer capability. The original source test
+already reproduces the repeat-activation bug before this fix; do not weaken it.
+22a3393 CI 38119624417 / native 114411480085 / installed 114411479783 and other
+producers remain observed until terminal before push; all full suites stay required.
+
 ## Bounded native wheel steps after measured per-event cap — 2026-10-11
 
 Signed 05c4bc9 pushed. Source 38119175090/job 114410164596 reproduced a real input

@@ -103,6 +103,17 @@ public sealed partial class MainWindow
 
 
 
+   /// <summary>Activating the same heading again returns to it after scrolling; selection changes still support keyboard navigation.</summary>
+   private async void Outline_ItemClick(object sender, ItemClickEventArgs args)
+   {
+      if(!_refreshingOutline && args.ClickedItem is ListViewItem { Tag: Core.Documents.DocumentHeading heading })
+      {
+         await _browser.JumpToHeadingAsync(heading.Index);
+      }
+   }
+
+
+
    /// <summary>The selected heading remains visible while its descendants toggle together.</summary>
    private async void ToggleSection_Click(object sender, RoutedEventArgs e)
    {
