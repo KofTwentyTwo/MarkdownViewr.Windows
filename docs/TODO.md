@@ -147,7 +147,8 @@ checks below do not substitute for current native/distributed acceptance.
 - [x] #24: Limit Components to shipped open-source credits/project/license links; preserve full audit catalog and notices, with Darin in Contributions.
 - [ ] #24: Verify current native About layout, Contributions and all credit links.
 - [x] Port pinned document CSS/container/scroll/print semantics locally. Current combined582 core tests/100% lines,25 adapter tests,zero-warning Release/format/publish pass.
-- [ ] Audit complete CSS selector/raw-HTML/source/TOC parity and run current actual paint/native/distributed acceptance. Attribution/threat-model updated; local port is not full parity proof.
+- [x] Verify immutable upstream template/CSS-help blobs and all47 shared screen CSS selector declarations; document native pane-CSS compatibility boundary in reference-fidelity-audit.md.
+- [ ] Complete remaining rendering/native/distributed fidelity acceptance and owner design review; CSS declaration comparison does not establish painted-output or arbitrary native pane-CSS parity.
 
 - [ ] Pass hosted CI on the actual current implementation; retain native/published/installed TRXs, screenshots and real PDFs.
 - [x] Implement gclo-style separate stable/dev package IDs and installed-channel title/data identity;586 core tests/100% measured lines pass.

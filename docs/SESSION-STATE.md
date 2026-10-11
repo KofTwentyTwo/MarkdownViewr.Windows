@@ -2,6 +2,26 @@
 
 Updated: 2026-10-11
 
+## Full native correction passes; pinned reference audit retained - 2026-10-11
+
+Pushedbd3d72a / CI38180868496 passes full native99/99 and focused21/21,
+zero failures/skips; native duration8m23. Retain current-native-bd3d72a.log
+and the focused TRX. Installed job114592949188 remains live; do not infer
+published/installed/registration outcomes from native success.
+
+Re-fetch immutable upstream template/CSS-help blobs, verify Git hashes and confirm
+cached source matches after newline/BOM normalization. Retain pinned-css-audit.json:
+all47 shared screen selectors retain matching upstream declarations when cascading
+per property. The31 upstream-only selector groups concern native Contents/source/
+dividers; document CSS does not style native controls. Record that boundary in
+docs/reference-fidelity-audit.md rather than claiming full pane-CSS compatibility.
+This declaration comparison is not painted-output or final-release proof.
+
+Signed local5de4125 prepares real concurrent edition/update/uninstall acceptance;
+all64 tooling tests/configured analyzer rules pass. Wait for the current full run
+before pushing it and the audit documentation. Final OS chooser/Explorer, owner
+acceptance, genuine review and shipped signing remain outstanding.
+
 ## Simultaneous stable/dev acceptance prepared - 2026-10-11
 
 Signed pushedbd3d72a / CI38180868496 passes focused21/21, zero failures/skips,
@@ -190,7 +210,7 @@ Exact04c1da8 CI38172448726 is terminal:18/20 focused,96/98 native,
 94/98 published,zero skips. Published failures retain initial Light colors in
 both palette and hover fixtures, nested outline and source-focus alignment.
 Real color trace has snapshot1/paint3/tokens6 unchanged: paint complete
-#FF75628B at20:37:33.320, after native queue #FF1F1F1F at20:37:33.389.
+`#FF75628B` at20:37:33.320, after native queue `#FF1F1F1F` at20:37:33.389.
 The hover fixture reproduces the same reset before its pointer step. This
 proves native property propagation replaces successfully painted ranges;
 classification and generation cancellation do not explain this variant.
@@ -242,7 +262,7 @@ and must be removed after diagnosis before release.
 
 Current dbda6d4 CI38171433458 focused gate is terminal17/20,3failures,
 zero skips. Initial Light source palette still becomes#1F1F1F rather than
-#75628B after an actual UIA Toggle; the queued theme repaint is not proven.
+`#75628B` after an actual UIA Toggle; the queued theme repaint is not proven.
 Nested outline expansion still exposes the collapsed child's native peer.
 Physical source-focus alignment still fails, but its failure-report geometry
 call throws E_UNEXPECTED and masks the timeout before saving the focus logs.
@@ -997,7 +1017,6 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 Update TODO and tickets with measured results; keep the PR draft until reviewed.
 Current exact commit/job IDs are in ignored artifacts/CURRENT-CHECKPOINT.json.
 Historical details: [reader/source notes](history/reader-source-session-2026-10-11.md).
-
 
 ## Exact current native failure evidence - 2026-10-11
 
