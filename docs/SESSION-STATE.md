@@ -18,8 +18,13 @@ font zoom, full/document width, borders and pixel padding. Screen/print styles a
 independent; no screen/DOM/find/collapse completion callback is guessed from void
 ShowPrintUI. Save PDF uses Windows' picker and awaited WebView2 output. ADR-0003
 is proposed for review. Core363/100% measured lines and build/format pass.
-Three hosted cases cover keyboard draft cancel, native print UI cancel and actual
-PDFs rasterized by Windows' built-in renderer; they have not run yet. UI SDK
+First hosted run38123994631 passed native Windows print cancellation. Keyboard
+cancel failed on incorrect test-only FindInput/FindCount IDs; use existing
+FindText/FindCountText. PDF fixture reported saved but expected destination absent;
+physical filename typing plus exact picker readback now tests the UIA commit
+boundary. No PDF raster/output acceptance claim yet. Full native38123995026
+reproduced the same two failures:50/52, zero skips. Retained first red TRX and
+fixture screenshot: artifacts/print-first-failure-38123994631. UI SDK
 target aligns with the app, without a new PDF dependency. Full suites now expect
 52 native/published and51 per installed channel. Temporary filtered print workflow
 is a feedback loop; all required full gates remain.
@@ -56,9 +61,9 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 
 ## Next steps
 
-1. Observe all full gates on the cleaned commit; retain actual TRX/update evidence.
+1. Resolve actual PDF destination/keyboard acceptance on the printing head; retain TRX/PDF/PNG evidence.
 2. Complete source raw-heading audit and broader zoom/theme/find/collapse proof.
-3. Implement print #12, windows/recents/activation and remaining theme/render/link parity.
+3. Complete print #12 output/state acceptance, windows/recents/activation and remaining theme/render/link parity.
 4. Finish standards inventory; exact signed stable/dev artifacts remain deferred.
 
 Update TODO and tickets with measured results; keep the PR draft until reviewed.

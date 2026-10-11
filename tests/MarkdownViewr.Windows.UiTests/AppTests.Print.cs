@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 
 
@@ -24,8 +25,8 @@ public partial class AppTests
       session.ClickElement("ZoomInButton");
       session.InvokeMenuItem("View", "SourceToggle");
       session.InvokeMenuItem("Edit", "FindMenuItem");
-      session.WaitForElement("FindInput").AsTextBox().Text = "Search needle";
-      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("FindCount").And(cf.ByName("1 of 1"))), "the actual paired print-fixture match");
+      session.WaitForElement("FindText").AsTextBox().Text = "Search needle";
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("FindCountText").And(cf.ByName("1 of 1"))), "the actual paired print-fixture match");
       double height = session.FindInApp(cf => cf.ByAutomationId("mv-heading-0"))!.BoundingRectangle.Height;
       string settings = session.ReadSettings();
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
@@ -36,8 +37,8 @@ public partial class AppTests
       session.WaitForElementGone("PrintTheme");
       Assert.Equal(settings, session.ReadSettings());
       Assert.Equal(source, session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value);
-      Assert.Equal("Search needle", session.WaitForElement("FindInput").AsTextBox().Text);
-      Assert.Equal("1 of 1", session.WaitForElement("FindCount").Name);
+      Assert.Equal("Search needle", session.WaitForElement("FindText").AsTextBox().Text);
+      Assert.Equal("1 of 1", session.WaitForElement("FindCountText").Name);
       WaitForZoomGlyph(session, height);
    }
 
@@ -151,12 +152,17 @@ public partial class AppTests
          }
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
-         filename.AsTextBox().Text = path;
+         filename.Focus();
+         SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
+         Keyboard.Type(path);
+         Wait.UntilInputIsProcessed();
+         Assert.Equal(path, filename.AsTextBox().Text);
          session.ClickButton("Save");
          session.WaitFor(() => File.Exists(path) && new FileInfo(path).Length > 100 ? session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("PDF saved."))) : null, "the completed actual PDF export", TimeSpan.FromSeconds(30));
       }
       catch(TimeoutException)
       {
+         _output.WriteLine("Owned export files: " + string.Join(", ", Directory.GetFiles(session.DataDirectory, "*.pdf").Select(Path.GetFileName)));
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;
