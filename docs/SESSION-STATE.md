@@ -31,7 +31,9 @@ PDF while browser bounds/font size stay unchanged. Restore validated vertical
 reading position in finally after awaited PDF output, guarded to the same ready
 navigation. Regression compares actual settled glyph/view rectangles rather than
 out-of-range UIA percentages; retains nonzero reading/source/collapse/pixel checks.
-Restoration acceptance pending.
+Restoration6bfcf0c/38125512661 stopped before PDF: exact filename readback observed
+only a typed prefix. Wait for the full exact native filename before Save; no
+restoration verdict can be inferred from this fixture-input failure.
 Full suites now expect
 52 native/published and51 per installed channel. Temporary filtered print workflow
 is a feedback loop; all required full gates remain.

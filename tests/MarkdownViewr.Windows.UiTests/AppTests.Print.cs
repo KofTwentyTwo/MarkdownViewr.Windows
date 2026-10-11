@@ -161,7 +161,7 @@ public partial class AppTests
          }
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
-         EnterPrintFilename(filename, path);
+         EnterPrintFilename(session, filename, path);
          TracePrintViewport(session, "Before PDF");
          session.ClickButton("Save");
          session.WaitFor(() => File.Exists(path) && new FileInfo(path).Length > 100 ? session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("PDF saved."))) : null, "the completed actual PDF export", TimeSpan.FromSeconds(30));
@@ -208,13 +208,13 @@ public partial class AppTests
 
 
    /// <summary>Physical text entry commits the Windows picker's actual destination instead of only its UIA value.</summary>
-   private static void EnterPrintFilename(AutomationElement filename, string path)
+   private static void EnterPrintFilename(AppSession session, AutomationElement filename, string path)
    {
       filename.Focus();
       SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
       Keyboard.Type(path);
       Wait.UntilInputIsProcessed();
-      Assert.Equal(path, filename.AsTextBox().Text);
+      session.WaitFor(() => string.Equals(filename.AsTextBox().Text, path, StringComparison.Ordinal) ? filename : null, "the fully committed exact PDF fixture filename");
    }
 
 
