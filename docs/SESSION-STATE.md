@@ -11,6 +11,23 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Physical repeat-activation diagnostic — 2026-10-11
+
+Signed 2bf1d14 pushed. Focused source 38120152677/job 114413026121 still
+fails at the repeated last-heading invocation (line 461), after both actual
+middle-heading viewports pass. Native job 114413027224 also fails; build,
+coverage, format, scripts, security and PR gates pass. No claim of full acceptance.
+The shared ClickElement prefers UIA Invoke, whereas the new ListView behavior
+handles ItemClick. Ranked explanations: automation does not dispatch ItemClick;
+source feedback overwrites the jump; or unexpected clicked-item payload.
+
+Change one input: use the existing owned physical mouse helper for the repeated
+heading activation. Retain the initial UIA selection and all original source,
+browser and final physical-wheel assertions. No additional app change or delay.
+If physical activation succeeds, this distinguishes the activation path from
+source feedback; if it fails, retain the trace before another implementation change.
+Evidence: artifacts/source-reactivation-38120152677.log. Full suites remain required.
+
 ## Repeated outline activation after actual bidirectional source proof — 2026-10-11
 
 Signed 22a3393 pushed. Source 38119623871/job 114411478222 advances past both actual

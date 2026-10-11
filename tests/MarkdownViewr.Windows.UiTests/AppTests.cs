@@ -457,7 +457,7 @@ public class AppTests
       ScrollSourceHeadingToTop(session, source, "## Source sync middle");
       WaitForSourceHeadingAlignment(session, source, "## Source sync middle");
       WaitForBrowserHeadingAlignment(session, "mv-heading-1");
-      session.ClickElement("OutlineHeading:2");
+      session.MouseClickElement("OutlineHeading:2");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
       AutomationElement browserScroller = FindDocumentScroller(session);
       double previous = browserScroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
