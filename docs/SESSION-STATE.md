@@ -168,3 +168,20 @@ also added. No local UI input. Observe exact new hosted handles after signed pus
 Source heading/scroll/collapse synchronization and vim keys remain issue #10 scope.
 Full PRODUCT.md, editor/print/multiwindow/activation/reference/standards/signing work
 remain active. Do not claim new find acceptance or completed port before its evidence.
+
+## Find shortcut and fragment acceptance correction
+
+4f4280921cfc87551843a03e4067e6dfe7456ceb CI 38108596329 is terminal FAILURE:
+36/38 native/UI and published tests pass. Installed channels were not reached.
+Build/test, format, CodeQL 38108596346, scripts 38108595778, security 38108596376
+and PR gates pass. Source selections, literal queries, real viewport wrap, reload
+and temporary section restoration pass. Ctrl+F from browser focus did not open find;
+fragment testing selected the visible sidebar label instead of its hidden browser
+heading. Retained logs: artifacts/paired-find-ui-38108596329.log and
+artifacts/paired-find-installed-38108596329.log.
+
+Follow-up moves Ctrl+F to the always-loaded root accelerator and keeps the physical
+browser-focus key test. Fragment lookup now requires the generated browser heading
+ID and name; physical link click/reveal assertions remain. Also correct one ADR
+heading's Markdown spacing. Neither correction is verified until hosted acceptance.
+Full PRODUCT.md scope remains active; no local desktop input or release publication.

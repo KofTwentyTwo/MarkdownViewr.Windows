@@ -442,7 +442,7 @@ public class AppTests
       session.InvokeMenuItem("View", "OutlineToggle");
       session.ClickElement("OutlineHeading:0");
       session.ClickElement("ToggleSection");
-      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Target heading")), "the heading inside its collapsed ancestor");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the heading inside its collapsed ancestor");
       AutomationElement link = session.WaitFor(() => session.MainWindow.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Hyperlink).And(cf.ByName("Jump to target"))), "the local fragment link");
       session.MainWindow.SetForeground();
       Assert.True(link.TryGetClickablePoint(out System.Drawing.Point point));
@@ -455,7 +455,7 @@ public class AppTests
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target heading")), "the fragment's revealed target heading");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the fragment's revealed target heading");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target body")), "the revealed target body");
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Fragment root")));
    }

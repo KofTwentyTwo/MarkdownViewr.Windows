@@ -41,9 +41,27 @@ public sealed partial class MainWindow
 
 
 
-   /// <summary>Ctrl+F opens one native find toolbar and keeps keyboard focus in its text field.</summary>
-   private void Find_Click(object sender, RoutedEventArgs e)
+   /// <summary>The menu invokes the same command as the always-loaded window accelerator.</summary>
+   private void Find_Click(object sender, RoutedEventArgs e) => OpenFind();
+
+
+
+   /// <summary>Owns Ctrl+F independently of the closed menu flyout.</summary>
+   private void Find_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
    {
+      args.Handled = true;
+      OpenFind();
+   }
+
+
+
+   /// <summary>Opens one native find toolbar and keeps keyboard focus in its text field.</summary>
+   private void OpenFind()
+   {
+      if(_closed)
+      {
+         return;
+      }
       FindBar.Visibility = Visibility.Visible;
       FindText.Focus(FocusState.Programmatic);
       FindText.SelectAll();

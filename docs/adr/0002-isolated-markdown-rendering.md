@@ -70,6 +70,7 @@ before applying results; repeat the current term after reload/theme navigation. 
 reveals sections temporarily and restores their saved choices on close, incorporating
 explicit native section commands during search. Source synchronization, mirrored collapse
 and vim keys remain separate work. Browser scripts, messages and host objects remain disabled.
+
 ## Verification and follow-up
 
 Core regression tests cover GFM, hostile HTML and resource paths at 100% core line

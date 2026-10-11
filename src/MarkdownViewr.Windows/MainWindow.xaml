@@ -9,7 +9,10 @@
       <MicaBackdrop />
    </Window.SystemBackdrop>
 
-   <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged">
+   <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged" KeyboardAcceleratorPlacementMode="Hidden">
+      <Grid.KeyboardAccelerators>
+         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="Find_Invoked" />
+      </Grid.KeyboardAccelerators>
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
          <RowDefinition Height="Auto" />
@@ -29,11 +32,7 @@
             <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
          </MenuBarItem>
          <MenuBarItem Title="Edit">
-            <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click">
-               <MenuFlyoutItem.KeyboardAccelerators>
-                  <KeyboardAccelerator Key="F" Modifiers="Control" />
-               </MenuFlyoutItem.KeyboardAccelerators>
-            </MenuFlyoutItem>
+            <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click" KeyboardAcceleratorTextOverride="Ctrl+F" />
          </MenuBarItem>
          <MenuBarItem Title="View">
             <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
