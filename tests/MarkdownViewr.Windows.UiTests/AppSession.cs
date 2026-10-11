@@ -327,13 +327,18 @@ public sealed class AppSession : IDisposable
 
 
 
-   /// <summary>Invokes an element through UI Automation, falling back to a mouse click.</summary>
+   /// <summary>Uses the supported native Invoke or Toggle action, falling back to a verified physical click.</summary>
    private void Invoke(AutomationElement element)
    {
       if(element.Patterns.Invoke.TryGetPattern(out IInvokePattern? invoke))
       {
          LastInvocation = $"UIA Invoke: {element.Properties.AutomationId.ValueOrDefault}.";
          invoke.Invoke();
+      }
+      else if(element.Patterns.Toggle.TryGetPattern(out ITogglePattern? toggle))
+      {
+         LastInvocation = $"UIA Toggle: {element.Properties.AutomationId.ValueOrDefault}; before={toggle.ToggleState.Value}.";
+         toggle.Toggle();
       }
       else
       {

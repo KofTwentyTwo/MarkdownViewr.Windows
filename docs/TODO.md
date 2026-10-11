@@ -67,6 +67,19 @@
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.
 - [ ] Verify actual signed stable/dev installers and exact shipped bytes before release publication.
 
+## Current acceptance checkpoint - 2026-10-11
+
+- [x] Exact8abbd4d hosted build/core/format pass; full native93/97,
+  focused10/12,zero skips. Retained native/published and real PDF artifacts
+  are documented in SESSION-STATE.md.
+- [ ] Verify the next native Toggle/menu, four-file picker and heading-inset
+  correction in all distributed builds; retain exact source-color and source
+  focus/scroll failures. The focused job includes every remaining native case.
+- [ ] Complete current published and installed stable/dev acceptance;8abbd4d
+  again exceeds600seconds during published tests before installed outcomes.
+  Investigate the reproduced disconnected-pipe timeout; local75-case stress
+  did not reproduce it. Preserve owner preview55472 and all signing gates.
+
 ## Owner follow-ups - 2026-10-11
 
 - [ ] #22: Fix the system print handoff and widen print options.

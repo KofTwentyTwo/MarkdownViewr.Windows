@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
+using FlaUI.Core.WindowsAPI;
 using MarkdownViewr.Windows.Core.Themes;
 
 
@@ -227,12 +228,20 @@ public partial class AppTests
 
 
 
-   /// <summary>Drives the existing exact owned native filename field and retains its diagnostics on failure; multiple paths are literal quoted filenames.</summary>
+   /// <summary>Navigates the owned native picker before selecting literal names, retaining all batch files within its filename capacity.</summary>
    private static void ChooseThemeImports(AppSession session, params string[] files)
    {
       OpenSettingsAction(session, "ImportDocumentThemesMenu");
       AutomationElement filename = WaitForOpenPickerFilename(session);
-      string paths = string.Join(" ", files.Select(file => "\"" + Path.Combine(session.DataDirectory, file) + "\""));
+      if(files.Length > 1)
+      {
+         string directory = session.DataDirectory + Path.DirectorySeparatorChar;
+         EnterPickerFilename(session, filename, directory);
+         SendReadingKey(VirtualKeyShort.RETURN);
+         session.WaitFor(() => !string.Equals(WaitForOpenPickerFilename(session).AsTextBox().Text, directory, StringComparison.Ordinal) ? filename : null, "the native picker completing navigation into the fixture folder");
+         filename = WaitForOpenPickerFilename(session);
+      }
+      string paths = string.Join(" ", files.Select(file => "\"" + (files.Length > 1 ? file : Path.Combine(session.DataDirectory, file)) + "\""));
       EnterPickerFilename(session, filename, paths);
       session.ClickButton("Open");
    }

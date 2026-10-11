@@ -49,7 +49,8 @@ internal sealed partial class DocumentBrowser
             for(let i=0;i<{{_headings.Count}};i++){
                const h=document.getElementById('mv-heading-'+i);
                if(h&&h.offsetParent!==null){
-                  const top=h.getBoundingClientRect().top-s.getBoundingClientRect().top+y;
+                  const inset=parseFloat(getComputedStyle(h).scrollMarginTop)||0;
+                  const top=Math.max(0,h.getBoundingClientRect().top-s.getBoundingClientRect().top+y-inset);
                   if({{direction}}){ {{update}} }
                }
             }

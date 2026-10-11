@@ -2,7 +2,41 @@
 
 Updated: 2026-10-11
 
-## Current release verification - 2026-10-11
+## Current native verification and action correction - 2026-10-11
+
+Exact signed/DCO8abbd4d / CI38168946288 is terminal: full native93/97,
+4failures,zero skips; focused10/12,2failures,zero skips. Build/core/format
+pass. Retained logs: artifacts/current-native-8abbd4d.log and
+artifacts/reader-regressions-8abbd4d.log; actual focused TRX/screenshots/PDFs:
+artifacts/reader-regressions-38168946288. The full failure set is source
+reopening, repeated heading navigation, four-file import and source focus
+alignment. Exact hover passes in both; focused palette fails on initial Light
+choice (#75628B expected versus actual#1F1F1F). Do not claim all highlighting
+accepted. Installed-updates job114557287398 again exceeded600seconds in the published
+suite before any installed outcomes. Published process15 evidence is retained
+in artifacts/current-installed-evidence-38168946288. It reproduces the same
+source reopen/inset/import/focus failures plus initial hover-color and
+intermittent disconnected-pipe timeout; no deadline was raised.
+
+Next bounded correction uses WinUI's real Toggle automation pattern for
+checkbox/radio menu items, whose native implementation invokes the same menu
+action. Physical source hover/focus assertions remain. Four-file import now
+navigates the actual fixture folder before entering all quoted relative names:
+the previous native filename field retained only260characters of the expanded
+absolute-path batch. Imported/skipped/failed counts and exact exported bytes
+remain required. Heading target comparisons include the pinned 1rem scroll
+inset, preventing repeated selection of the same heading; its exact native
+landing assertion becomes16px plus/minus2, preserving original CSS behavior.
+The focused job includes all remaining full-run failures without exclusions.
+
+The required-check setup list includes reader-regressions;55 Pester boundary
+tests pass (artifacts/reader-accessibility-script-tests.xml), and both analyzer
+partitions pass for the module. Live main ruleset must retain all review,
+signature/security rules while adding this GitHub Actions-bound check.
+Owner preview55472 remains responsive and preserved; no local physical input,
+Azure mutation, human review acknowledgement or release claim.
+
+## Previous release verification - 2026-10-11
 
 Signed/DCO05bf612 is pushed to PR#3. Exact CI38167591076 full native run
 completed84/97,13failures,zero skips; previous0ed608e was74/97. Current

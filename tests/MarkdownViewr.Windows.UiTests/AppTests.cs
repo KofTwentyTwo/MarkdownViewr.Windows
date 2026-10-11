@@ -1008,7 +1008,8 @@ public partial class AppTests
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("mv-heading-2")));
       AutomationElement finalHeading = session.WaitForElement("mv-heading-3");
       double viewportTop = session.WaitForElement("DocumentView").BoundingRectangle.Top;
-      Assert.InRange(finalHeading.BoundingRectangle.Top - viewportTop, -2, 10);
+      // The pinned document stylesheet retains its 1rem (16px) heading scroll inset.
+      Assert.InRange(finalHeading.BoundingRectangle.Top - viewportTop, 14, 18);
       Keyboard.Type(VirtualKeyShort.OEM_4, VirtualKeyShort.OEM_4);
       Wait.UntilInputIsProcessed();
       WaitForReaderScroll(session, scroller, value => Math.Abs(value - middle) < 0.1, "the previous visible middle heading");

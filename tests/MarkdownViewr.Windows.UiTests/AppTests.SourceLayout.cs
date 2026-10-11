@@ -27,7 +27,7 @@ public partial class AppTests
       }
       catch(TimeoutException exception)
       {
-         throw new TimeoutException(exception.Message + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+         throw new TimeoutException(exception.Message + "; Last native invocation=" + session.LastInvocation + "; Settings=" + session.ReadSettings() + "; Native tree: " + session.DescribeDocumentStatus(), exception);
       }
    }
 
