@@ -458,7 +458,6 @@ public class AppTests
       WaitForSourceHeadingAlignment(session, source, "## Source sync middle");
       WaitForBrowserHeadingAlignment(session, "mv-heading-1");
       session.MouseClickElement("OutlineHeading:2");
-      _output.WriteLine("[DEBUG-outline-activation] " + session.LastMouseInput);
       WaitForBrowserHeadingAlignment(session, "mv-heading-2");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
       AutomationElement browserScroller = FindDocumentScroller(session);
@@ -522,7 +521,6 @@ public class AppTests
       Assert.True(maximum > 0);
       double before = scroll.Value.Value;
       double requested = maximum * index / value.Length;
-      _output.WriteLine(FormattableString.Invariant($"[DEBUG-src-focus] scrollbar before={before:R}, minimum={scroll.Minimum.Value:R}, maximum={maximum:R}, requested={requested:R}, readonly={scroll.IsReadOnly.Value}."));
       Mouse.Scroll(1);
       Wait.UntilInputIsProcessed();
       session.WaitFor(() => scroll.Value.Value < before - 0.5 ? source : null, "physical wheel movement of the actual source viewport");
@@ -554,7 +552,6 @@ public class AppTests
       {
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
-         _output.WriteLine(FormattableString.Invariant($"[DEBUG-src-focus] scrollbar after={scroll.Value.Value:R}."));
          throw;
       }
       FlaUI.Core.ITextRange heading = visible.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
@@ -599,15 +596,6 @@ public class AppTests
       {
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
-         try
-         {
-            FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
-            _output.WriteLine("[DEBUG-src-focus] Native source glyph bounds: " + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())) + "; viewport=" + source.BoundingRectangle);
-         }
-         catch(System.ComponentModel.Win32Exception exception)
-         {
-            _output.WriteLine("[DEBUG-src-focus] Native diagnostic range unavailable: " + exception.NativeErrorCode);
-         }
          throw;
       }
    }
