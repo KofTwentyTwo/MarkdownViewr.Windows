@@ -11,6 +11,23 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Native zoom acceptance and source range probe — 2026-10-11
+
+Signed/DCO 0f13849 is pushed; CI 38118157164 native 114407185408 finished FAILURE:
+48/49, one failure/no skips. The actual zoom glyph/menu/toolbar/physical Ctrl+plus,
+minus/reset and reload case passes; both new editor tests pass. Source focus retains
+its heading, but the native scrollbar request does not reveal the middle heading.
+Isolated source 38118156844/job 114407184273 reproduces the same timeout. Retain logs
+at artifacts/zoom-scrollbar-full-ui-38118157164.log and source-scrollbar-diagnostic-
+38118156844.log. Build/core/format pass; installed 114407185287 remains observed until
+terminal before follow-up push. Current checkpoint and PR/issues reflect 0f13849.
+
+The single diagnostic change captures actual native scrollbar min/max/value/read-only,
+requested value and the resulting owned source geometry on timeout. Distinguish
+unsupported native range movement, inaccessible glyph geometry and a bad initial
+index-to-range estimate before replacing the driver. No app change or relaxed
+alignment assertion. Core 330/100%, zero-warning build, format and docs remain required.
+
 ## Zoom implementation and real native source scrolling — 2026-10-11
 
 1c4d1ad / CI 38117431818 is terminal FAILURE: native/published 47/48, zero skips;

@@ -509,7 +509,7 @@ public class AppTests
 
 
    /// <summary>Drives the real native scrollbar and aligns from its actual glyph geometry; text-range ScrollIntoView is a no-op on this SDK.</summary>
-   private static void ScrollSourceHeadingToTop(AppSession session, AutomationElement source, string text)
+   private void ScrollSourceHeadingToTop(AppSession session, AutomationElement source, string text)
    {
       string value = source.Patterns.Value.Pattern.Value.Value;
       int index = value.IndexOf(text, StringComparison.Ordinal);
@@ -518,12 +518,26 @@ public class AppTests
       IRangeValuePattern scroll = scrollbar.Patterns.RangeValue.Pattern;
       double maximum = scroll.Maximum.Value;
       Assert.True(maximum > 0);
-      scroll.SetValue(maximum * index / value.Length);
-      AutomationElement visible = session.WaitFor(() =>
+      double before = scroll.Value.Value;
+      double requested = maximum * index / value.Length;
+      _output.WriteLine(FormattableString.Invariant($"[DEBUG-src-focus] scrollbar before={before:R}, minimum={scroll.Minimum.Value:R}, maximum={maximum:R}, requested={requested:R}, readonly={scroll.IsReadOnly.Value}."));
+      scroll.SetValue(requested);
+      AutomationElement visible;
+      try
       {
-         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
-         return range.GetBoundingRectangles().Length > 0 ? source : null;
-      }, "the source heading's actual visible native glyph");
+         visible = session.WaitFor(() =>
+         {
+            FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+            return range.GetBoundingRectangles().Length > 0 ? source : null;
+         }, "the source heading's actual visible native glyph");
+      }
+      catch(TimeoutException)
+      {
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         _output.WriteLine(FormattableString.Invariant($"[DEBUG-src-focus] scrollbar after={scroll.Value.Value:R}."));
+         throw;
+      }
       FlaUI.Core.ITextRange heading = visible.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
       double adjustment = heading.GetBoundingRectangles()[0].Top - source.BoundingRectangle.Top - 12;
       scroll.SetValue(Math.Clamp(scroll.Value.Value + adjustment, scroll.Minimum.Value, maximum));
