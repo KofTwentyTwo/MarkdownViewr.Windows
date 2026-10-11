@@ -34,7 +34,7 @@ internal static class DocumentFrontmatter
    /// <summary>Metadata is display text: split only at the first colon and escape every value before creating table markup.</summary>
    public static string RenderMetadata(string metadata)
    {
-      var html = new StringBuilder("<table>");
+      var html = new StringBuilder("<table><caption>Document metadata</caption>");
       foreach(string line in metadata.Split('\n'))
       {
          string text = line.Trim();
@@ -46,7 +46,7 @@ internal static class DocumentFrontmatter
          html.Append("<tr>");
          if(colon >= 0)
          {
-            html.Append("<td>").Append(WebUtility.HtmlEncode(PlainValue(text[..colon]))).Append("</td>");
+            html.Append("<th>").Append(WebUtility.HtmlEncode(PlainValue(text[..colon]))).Append("</th>");
             html.Append("<td>").Append(WebUtility.HtmlEncode(PlainValue(text[(colon + 1)..]))).Append("</td>");
          }
          else
