@@ -77,15 +77,17 @@ function Invoke-SmokeProcess
    $stderr = $process.StandardError.ReadToEndAsync()
    try
    {
-      if(-not $process.WaitForExit($TimeoutSeconds * 1000))
+      $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+      if($timedOut)
       {
          $process.Kill($true)
-         throw "Process timed out: $File"
+         if(-not $process.WaitForExit(10000)) { throw "Timed-out process did not terminate: $File" }
       }
       $script:smokeProcessNumber++
       $log = Join-Path $outputRoot "process-$script:smokeProcessNumber.log"
       $text = $stdout.GetAwaiter().GetResult() + $stderr.GetAwaiter().GetResult()
       Set-Content -LiteralPath $log -Value $text
+      if($timedOut) { throw "Process timed out: $File. Log: $log" }
       if($process.ExitCode -ne 0) { throw "Process failed ($($process.ExitCode)): $File. Log: $log`n$text" }
    }
    finally { $process.Dispose() }
@@ -183,7 +185,7 @@ try
    if($loose.Installed -or $loose.AppKitSupported -or $null -ne $loose.Version) { throw 'Loose publish output unexpectedly supports updates.' }
    $records.Add(@{ kind = 'loose'; result = $loose })
    $env:K22_UITEST_EXE = Join-Path $buildRoot "publish/0.1.0/$mainExe"
-   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 180
+   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 300
    foreach($initial in @($versions[0], $versions[2]))
    {
       $portableDirectory = Join-Path $outputRoot "portable-$($initial.channel)"
@@ -234,7 +236,7 @@ try
          $after = Get-SmokeResult -Exe $installedProbe -ResultPath (Join-Path $outputRoot "$channel-after.json")
          if($after.Version -ne $initial.target -or $after.Channel -ne $channel -or $null -ne $after.UpdateVersion -or $after.AppKitVersion -ne $initial.target) { throw 'Post-upgrade identity or channel is incorrect.' }
          $env:K22_UITEST_EXE = $currentExe
-         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 180
+         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 300
          $records.Add(@{ kind = 'installed'; channel = $channel; before = $before; after = $after; restarted = $true; appSha256 = $installedHash })
       }
       finally

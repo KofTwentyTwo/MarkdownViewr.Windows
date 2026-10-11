@@ -54,9 +54,27 @@ public sealed partial class MainWindow
          return;
       }
       double position = scroller.VerticalOffset;
+      if(SourceText.SelectionLength == 0 && SourceText.Text.Length > 0)
+      {
+         int first = 0;
+         int last = SourceText.Text.Length - 1;
+         while(first < last)
+         {
+            int middle = first + (last - first) / 2;
+            if(SourceText.GetRectFromCharacterIndex(middle, trailingEdge: false).Y < position)
+            {
+               first = middle + 1;
+            }
+            else
+            {
+               last = middle;
+            }
+         }
+         SourceText.Select(first, 0);
+      }
       if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
       {
-         App.Log.Info(FormattableString.Invariant($"Input trace: source focus before={position:R}, last={_sourceLastY:R}."));
+         App.Log.Info(FormattableString.Invariant($"[DEBUG-src-focus] source focus before={position:R}, last={_sourceLastY:R}, caret={SourceText.SelectionStart}."));
       }
       Core.Documents.DocumentSourceText? snapshot = _sourceDocument;
       DispatcherQueue.TryEnqueue(() =>

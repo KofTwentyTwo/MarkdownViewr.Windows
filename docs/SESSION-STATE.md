@@ -11,6 +11,29 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Source caret alignment probe — 2026-10-11
+
+82898bd / CI 38117005710 isolated source job 114403773700 reproduced FAILURE
+in 18 seconds. Original timeout is now retained: source focus before=5310.933,
+last=5310.933; after physical pointer press, actual native offset resets to 0.
+The provider cannot retrieve the offscreen last-heading glyph. This rejects the
+hypothesis that GettingFocus captured an already-reset offset; deferred restoration
+ran too early to prevent later native caret work. Original full assertions stay intact.
+
+The single-variable probe positions a zero-length caret at the first visible native
+character before focus, using bounded binary search over real native character
+rectangles. Active find/nonempty selections remain independent. The previous snapshot-
+guarded viewport restoration remains. DEBUG-src-focus records the native caret index;
+remove probes/temporary CI job after actual original acceptance proves the fix.
+Full/native/installed producers on 82898bd remain observed until terminal before push.
+
+The enlarged 48-case suite's measured native failure duration is 178 seconds and
+published acceptance exceeded 180 seconds before producing TRX. Full published/
+installed UI suites receive a bounded 300 seconds (all cases/assertions unchanged).
+The process helper retains stdout/stderr after timed-out child termination before
+throwing; a 10-second termination bound still fails closed. Other command timeouts
+remain unchanged. A headless owned-child timeout probe checks retained evidence.
+
 ## Tight native source diagnostics after editor acceptance
 
 f650e36 / CI 38116258625 native job 114401630861 finished FAILURE:
