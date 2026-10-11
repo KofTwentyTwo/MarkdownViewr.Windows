@@ -58,3 +58,14 @@ A valid multiline raw heading within a Markdown paragraph exposed a separate
 source-fold defect. Actual inline parser nodes now retain the complete header;
 592 core tests pass with100% measured line coverage. The existing runtime fixture
 now exercises this variant, with fresh hosted execution still required.
+
+## Installed registration and coexistence evidence
+
+Exact53755ab / CI38182128299 passes native/published99/99 and installed
+stable/dev98/98 each, zero failures/skips. Actual registration readbacks verify
+five extensions before/after each real AppKit update and owned removal with
+existing defaults preserved. Separate concurrent stable/dev windows/profiles,
+isolated updates and stable uninstall preserving the live dev edition pass.
+Retain the actual TRXs and coexisting-channels.json under
+artifacts/current-installed-evidence-38182128299. The fixtures are unsigned and
+do not establish OS chooser/Explorer interaction or production signature trust.

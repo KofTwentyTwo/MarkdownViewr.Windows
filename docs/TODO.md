@@ -1,5 +1,8 @@
 # Development Tasks
 
+- [x] Exact53755ab: published99/99, installed stable/dev98/98 each; actual five-extension registration before/after update and owned uninstall/default preservation pass.
+- [x] Exact53755ab: simultaneous stable/dev profiles/processes, isolated actual updates and stable uninstall preserving dev pass; retain coexisting-channels.json and TRXs.
+
 - [x] Prepare native General Contents wrapping/depth-marker controls with checked sibling-safe persistence;593 core/100% measured lines and zero-warning Release pass.
 - [ ] Execute the actual long-title/sibling/persistence/restoration test and inspect Settings screenshots on its exact pushed head.
 

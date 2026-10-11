@@ -2,6 +2,31 @@
 
 Updated: 2026-10-11
 
+## Registration and simultaneous editions verified - 2026-10-11
+
+Exact53755ab / CI38182128299 is terminal success: focused21/21, native99/99,
+published99/99, installed stable98/98 and dev98/98, zero failures/skips.
+All reported PR checks pass. Actual AppKit update/apply/restart verifies target
+versions and assembly hashes. Before/after registration JSON confirms all five
+extensions for both editions; actual uninstall removes owned registrations and
+preserves existing defaults.
+
+coexisting-channels.json confirms simultaneous stable/dev windows in separate
+processes/profiles, isolated updates with sibling state preserved, stable uninstall
+preserving the live registered dev edition, and unchanged existing defaults.
+Retain current-installed-53755ab.log and the complete actual TRXs/results under
+artifacts/current-installed-evidence-38182128299. These fixtures are unsigned;
+Windows chooser/Explorer interaction and final production signatures remain open.
+The two published print-startup failures seen onbd3d72a do not reproduce on537;
+do not claim a production startup fix from this clean run alone.
+
+Signed local5803fc1 andaeeb28d include the inline-heading correction and native
+General/Contents settings. Build/format and593 core/100% measured lines pass;
+100 UI cases are compiled/discovered. Their updated/new native assertions need
+fresh hosted execution. The old full job is terminal, so the next authorized
+push may proceed without cancelling it. Full Settings/theme/Printing design and
+genuine review/signing/publication remain required; no local desktop input.
+
 ## Native General and Contents options prepared - 2026-10-11
 
 Move new-window Contents/Source defaults and Default Apps guidance into General;
