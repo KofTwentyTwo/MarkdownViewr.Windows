@@ -54,6 +54,10 @@ public sealed partial class MainWindow
          return;
       }
       double position = scroller.VerticalOffset;
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         App.Log.Info(FormattableString.Invariant($"[DEBUG-source-coordinates] focus entry; offset={position}; firstY={SourceText.GetRectFromCharacterIndex(0, false).Y}; selection={SourceText.Document.Selection.StartPosition}; state={SourceText.FocusState}."));
+      }
       if(SourceText.SelectionLength == 0 && SourceText.TextLength > 0)
       {
          int first = 0;
@@ -81,6 +85,10 @@ public sealed partial class MainWindow
             scroller.ChangeView(null, position, null, disableAnimation: true);
             _sourceLastY = position;
             _sourceScrolled = false;
+            if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+            {
+               App.Log.Info(FormattableString.Invariant($"[DEBUG-source-coordinates] focus restore; requested={position}; actual={scroller.VerticalOffset}; firstY={SourceText.GetRectFromCharacterIndex(0, false).Y}; selection={SourceText.Document.Selection.StartPosition}; state={SourceText.FocusState}."));
+            }
          }
       });
    }

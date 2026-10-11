@@ -67,7 +67,22 @@
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.
 - [ ] Verify actual signed stable/dev installers and exact shipped bytes before release publication.
 
-## Current acceptance checkpoint - 2026-10-11
+## Native and IPC follow-up - 2026-10-11
+
+- [x] Exact9fdfc2d focused native acceptance14/15,zero skips: source reopening,
+  highlighting, four-file import and repeated-heading navigation now pass.
+- [x] Reproduce the disconnected-peer failure deterministically and correct
+  owned native cleanup: actual pre-fix10-second connection timeout, then four
+  cases pass and25runs/100tests pass after fixing Broken-state disconnection.
+- [ ] Verify current full/published/installed results and the IPC correction on
+  the exact next pushed head; do not substitute local stress for distributed proof.
+- [ ] Diagnose source focus/scroll alignment using the retained numeric probe,
+  preserve exact native assertions, and remove [DEBUG-source-coordinates]
+  instrumentation before release.
+- [x] Add/read back the real reader-regressions required check on live main,
+  preserving every previous protection and GitHub Actions binding.
+
+## Previous acceptance checkpoint - 2026-10-11
 
 - [x] Exact8abbd4d hosted build/core/format pass; full native93/97,
   focused10/12,zero skips. Retained native/published and real PDF artifacts

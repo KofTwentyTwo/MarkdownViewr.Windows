@@ -87,9 +87,11 @@ internal sealed class ActivationInbox : IDisposable
    {
       while(!_closed.IsCancellationRequested)
       {
+         bool connected = false;
          try
          {
             await _pipe.WaitForConnectionAsync(_closed.Token);
+            connected = true;
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(_closed.Token);
             timeout.CancelAfter(TimeSpan.FromSeconds(10));
             byte[] length = new byte[4];
@@ -120,9 +122,17 @@ internal sealed class ActivationInbox : IDisposable
          }
          finally
          {
-            if(!_closed.IsCancellationRequested && _pipe.IsConnected)
+            if(connected && !_closed.IsCancellationRequested)
             {
-               _pipe.Disconnect();
+               // A broken read clears IsConnected, but the owned native connection still requires Disconnect.
+               try
+               {
+                  _pipe.Disconnect();
+               }
+               catch(ObjectDisposedException) when(_closed.IsCancellationRequested)
+               {
+                  // Shutdown may release the handle after the cancellation check.
+               }
             }
          }
       }

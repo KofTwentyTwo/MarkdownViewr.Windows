@@ -368,3 +368,15 @@ parent directory; it does not construct shell commands. Diagnostics omit authore
 content/paths. The disabled-editor tooltip reports native configuration state,
 and its timer and footer polling stop on window closure. Native status/hover/
 Explorer acceptance remains pending; passing pure or adapter tests is insufficient.
+
+
+## Disconnected activation peers
+
+An accepted native pipe connection remains owned until explicitly disconnected,
+even when a broken read clears the managed IsConnected property. Each request
+retains its current-user boundary, bounded frame/deadline and generated-schema
+validation. The deterministic already-closed-peer test uses real pipe handles
+and acknowledgements with a controlled continuation schedule: its pre-fix next
+connection times out; after the cleanup correction it recovers. Four cases and
+25runs/100tests pass locally. Exact hosted published/installed proof remains
+required. No protocol, caller privileges or document/native capability expands.

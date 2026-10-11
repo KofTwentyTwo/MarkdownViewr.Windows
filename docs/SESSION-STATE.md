@@ -2,7 +2,43 @@
 
 Updated: 2026-10-11
 
-## Current native verification and action correction - 2026-10-11
+## Current native result and deterministic IPC fix - 2026-10-11
+
+Signed/DCO9fdfc2d is pushed. Exact CI38170170551 focused job114560940302
+passes14/15,one failure,zero skips. Source reopen/50:50, both native highlighting
+cases, four-file import and physical repeated-heading navigation now pass.
+Build/core/format/scripts/security/PR gates pass; full native job114560940480
+and installed job114560940485 were still live at the last verified poll.
+Retained focused evidence: artifacts/reader-regressions-38170170551 and
+artifacts/reader-regressions-9fdfc2d.log. The remaining focused failure is source
+heading alignment after a physical click enters source, not the initial jump.
+
+The reproduced published disconnected-peer failure is now deterministic locally.
+A test context defers only the real server continuation until the real current-
+user pipe client closes. Unfixed next-client ConnectAsync times out10seconds:
+artifacts/pipe-closed-before/pipe-closed-before.trx. A broken synchronous read
+clears IsConnected while the native connection still needs Disconnect. The fix
+records accepted connection ownership and disconnects it even in Broken state;
+expected shutdown disposal is handled without swallowing unrelated errors.
+Unchanged regression plus three existing cases pass, then25runs/100tests pass
+with zero failures/skips: artifacts/pipe-closed-after and
+artifacts/activation-stress-after. This is local proof; hosted published and
+installed verification remains required. No deadlines or assertions were relaxed.
+
+Next source probe adds only numeric focus/viewport/caret coordinates under the
+existing MARKDOWNVIEWR_INPUT_TRACE test opt-in, with [DEBUG-source-coordinates].
+It tests double-counted native client coordinates versus caret restoration or
+later scrolling feedback. The exact native alignment assertion remains. Remove
+this tagged temporary instrumentation after diagnosis and before release.
+
+Live protect-main ruleset24859282 now requires reader-regressions bound to
+GitHub Actions15368. Exact before/payload/readback artifacts prove all prior
+rules, bindings, review settings, conditions and bypass actors were preserved.
+Owner preview55472 is responsive and preserved. Real installed chooser/Explorer,
+source alignment, channel isolation, human current-head review and production
+signing remain required; no Azure changes or release/signature claims.
+
+## Previous native verification and action correction - 2026-10-11
 
 Exact signed/DCO8abbd4d / CI38168946288 is terminal: full native93/97,
 4failures,zero skips; focused10/12,2failures,zero skips. Build/core/format

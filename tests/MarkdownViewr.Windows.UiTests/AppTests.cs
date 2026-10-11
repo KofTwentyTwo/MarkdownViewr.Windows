@@ -625,6 +625,8 @@ public partial class AppTests
       }
       catch(TimeoutException)
       {
+         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+         _output.WriteLine("Source alignment: viewport=" + source.BoundingRectangle + "; glyph rectangles=" + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())));
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;

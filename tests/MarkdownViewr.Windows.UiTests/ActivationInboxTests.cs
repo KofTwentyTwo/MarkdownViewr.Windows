@@ -90,6 +90,57 @@ public sealed class ActivationInboxTests
 
 
 
+   /// <summary>An already-closed peer must release its native connection before another real activation.</summary>
+   [Fact]
+   public async Task Listen_AlreadyClosedPeer_RecoversAfterReportedDisconnect()
+   {
+      string key = "k22-mv-tests-" + Guid.NewGuid().ToString("N");
+      var reported = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
+      var received = new ConcurrentQueue<ActivationRequest>();
+      var connectionContext = new DeferredConnectionContext();
+      SynchronizationContext? previous = SynchronizationContext.Current;
+      ActivationInbox inbox;
+      try
+      {
+         SynchronizationContext.SetSynchronizationContext(connectionContext);
+         inbox = new ActivationInbox(key, exception => reported.TrySetResult(exception));
+      }
+      finally
+      {
+         SynchronizationContext.SetSynchronizationContext(previous);
+      }
+      using ActivationInbox ownedInbox = inbox;
+      inbox.Attach(value => { received.Enqueue(value); return true; });
+      using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+      await using(var client = new NamedPipeClientStream(".", key, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly))
+      {
+         await client.ConnectAsync(deadline.Token);
+      }
+      (SendOrPostCallback callback, object? state) = await connectionContext.Continuation.Task.WaitAsync(deadline.Token);
+      // Resume the real server after the real peer closes, exercising the synchronous broken-read path.
+      var resume = Task.Run(() => callback(state), deadline.Token);
+      Assert.IsAssignableFrom<IOException>(await reported.Task.WaitAsync(deadline.Token));
+      var request = ActivationRequest.Create(["after closed peer.md"], Path.GetTempPath());
+      Assert.True(await ActivationInbox.SendAsync(key, request, deadline.Token));
+      Assert.Equal(request.Paths, Assert.Single(received).Paths);
+      await resume.WaitAsync(deadline.Token);
+   }
+
+
+
+   /// <summary>Defers only the first real server continuation, making the already-closed native peer schedule reproducible.</summary>
+   private sealed class DeferredConnectionContext : SynchronizationContext
+   {
+      internal TaskCompletionSource<(SendOrPostCallback Callback, object? State)> Continuation { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+
+
+      /// <summary>Captures the actual asynchronous continuation without changing pipe bytes, handles or acknowledgements.</summary>
+      public override void Post(SendOrPostCallback callback, object? state) => Continuation.TrySetResult((callback, state));
+   }
+
+
+
    /// <summary>Sends an intentionally invalid frame and waits for the actual server to close it before starting the next peer.</summary>
    private static async Task SendMalformed(string key, int declaredLength, byte[] payload, CancellationToken cancellationToken)
    {
