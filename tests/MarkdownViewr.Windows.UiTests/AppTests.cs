@@ -527,9 +527,18 @@ public class AppTests
       double current = WaitForSourceScrollRest(session, source, scroll);
       double pixelsPerClick = before - current;
       Assert.True(double.IsFinite(pixelsPerClick) && pixelsPerClick > 0);
-      Mouse.Scroll((current - requested) / pixelsPerClick);
-      Wait.UntilInputIsProcessed();
-      WaitForSourceScrollRest(session, source, scroll);
+      for(int attempt = 0; attempt < 12 && Math.Abs(current - requested) > 0.5; attempt++)
+      {
+         // Native wheel handling caps a single large event at about one viewport.
+         Mouse.Scroll(Math.Clamp((current - requested) / pixelsPerClick, -4, 4));
+         Wait.UntilInputIsProcessed();
+         double next = WaitForSourceScrollRest(session, source, scroll);
+         if(Math.Abs(next - current) < 0.5)
+         {
+            break;
+         }
+         current = next;
+      }
       AutomationElement visible;
       try
       {

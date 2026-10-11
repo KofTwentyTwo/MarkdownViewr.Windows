@@ -11,6 +11,20 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Bounded native wheel steps after measured per-event cap — 2026-10-11
+
+Signed 05c4bc9 pushed. Source 38119175090/job 114410164596 reproduced a real input
+failure: one upward detent moves source 5310.933→5223.933 (87px) and reader 6264→6164.
+The subsequent 31.8-detent event moves only 580px, to 4643.933, leaving the middle
+heading offscreen. Native source-to-reader movement is now observed; the driver
+requested one oversized event. Retain source-wheel-diagnostic-38119175090.log.
+
+The single change sends at most 4 detents per event, measures settled real native
+offsets after each and bounds the approach to 12 events. Actual glyph correction
+and all original source/reader/wheel assertions remain unchanged. No app-scroll
+change. Current 05c4bc9 CI 38119175562/native 114410166891/installed 114410166667 and
+other producers remain observed until terminal before the next push.
+
 ## Physical source-wheel driver after actual range diagnostics — 2026-10-11
 
 Signed 06a1213 pushed. Source 38118669938/job 114408682304 still fails: actual range
