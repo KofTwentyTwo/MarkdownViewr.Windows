@@ -1,6 +1,6 @@
 # ADR-0003: Independent print styles and native Windows output
 
-**Status:** Proposed; focused native cases pass, full clean-head acceptance pending
+**Status:** Proposed for maintainer review; all5 native/published/installed print cases pass
 **Date:** 2026-10-11
 **Deciders:** James Maes, repository maintainer
 
@@ -78,3 +78,13 @@ borders off/on and full-page width. Each PDF is retained before raster assertion
 Successful exports also verify paired query/count, actual native source selection
 and original reading paint/geometry. These new cases compile/format but have not
 run; full expanded native/published54 and installed53 per channel remain required.
+
+Full hosted acceptance `bf4fcdc` / CI38128311242 passes54 native/published and53
+installed stable/dev tests with zero failures/skips. All5 print cases pass in
+every build. Actual PDF glyph ratios,40px padding,240px custom width/full-page
+edges, optional borders and paired find/source selection pass;24 generated PDFs
+are retained. UIA screen text metrics round to integer font boxes (35px to44px at
+121%), so the PDF case verifies real increasing screen glyphs/completed zoom and
+measures precise font ratios in printed ink. Original exact screen restoration
+and PDF pixel assertions remain. Evidence: artifacts/print-font-verified-installed-38128311242.
+Unsigned fixtures do not prove production signing or a successful physical printer job.

@@ -50,17 +50,21 @@ Retained red log and published TRX:
 artifacts/print-geometry-native-38127089763.log and
 artifacts/print-geometry-installed-38127089763. Corrected head requires54
 native/published and53 per installed channel. No local GUI input or new dependency.
-Correctedbf4fcdc / CI38128311242 native54/54 passes, zero failures/skips,
-including real PDF font/padding/paired-find plus original cases. Retained native
-log: artifacts/print-font-native-38128311242.log. Installed producer114437196125
-remains live; preserve it until published54/stable-dev53 proof is retained.
-ADR-0003 remains proposed; exact final installed acceptance is pending.
+Correctedbf4fcdc / CI38128311242 fully passes: native/published54 each,
+installed stable/dev53 each, zero failures/skips. All5 Print_ cases pass in every
+build, including actual PDF font/padding/paired-find and original cancellations/
+image/background/nonzero-state cases. Retained24 PDFs/48 PNGs/TRXs:
+artifacts/print-font-verified-installed-38128311242; native log:
+artifacts/print-font-native-38128311242.log. Actual before.AppKitApplyCalled and
+restarted=true in both channels; expected stable0.4.0/dev0.3.0-beta.2; all before/
+after check/apply errors null. Fixtures unsigned; production signing not proved.
+ADR-0003 remains proposed for maintainer review.
 
 Live settings validate. Official conformance34PASS/1FAIL/1WARN/3REVIEW: required
 standards inventory lacks app, confirmed live. Exact reviewed addition prepared,
 not applied/merged; see docs/standards-readiness.md. Actual signing remains deferred.
 
-## Native windows and recents implemented locally
+## Native windows and recents milestone
 
 New window-local initial paths replace rereading process arguments. Track native
 XAML windows on one UI thread; independent watcher/browser/hooks/zoom; Ctrl+N/Ctrl+W
@@ -69,7 +73,8 @@ picker includes md/markdown/mdown/mkd/txt. Private recent history20, successful 
 only, duplicate focus, missing errors and clear. Source-generated delta merging
 protects sibling settings and cleared history from stale window snapshots.
 
-Local376 core tests/100% lines and zero-warning build pass. Three new hosted-only
+Signed/DCOe48a08c implements this milestone. Local376 core tests/100% lines and
+zero-warning build/format/docs/hooks pass. Three new hosted-only
 native lifecycle cases compile; no local GUI input. ADR-0004 and threat model
 updated. These tests have not run. Association/activation registration remains
 required. Full reference audit also retains theme ordering/enable/delete/cycle,
@@ -108,7 +113,7 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 
 ## Next steps
 
-1. Verify actual PDF font/padding/find after the diagnosed UIA font rounding; require expanded full gates and retained PDF/TRX evidence.
+1. Require native/published57 and installed stable/dev56 on the window milestone; retain actual lifecycle/picker/update evidence.
 2. Complete source raw-heading audit and broader zoom/theme/find/collapse proof.
 3. Complete print #12 output/state acceptance, windows/recents/activation and remaining theme/render/link parity.
 4. Finish standards inventory; exact signed stable/dev artifacts remain deferred.
