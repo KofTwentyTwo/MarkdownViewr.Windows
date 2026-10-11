@@ -21,13 +21,19 @@ public sealed class DocumentOutline
    /// <summary>Sanitizes first; authored identifiers cannot impersonate the generated navigation targets.</summary>
    public DocumentOutline(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide)
    {
-      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer().Render(markdown, frontmatter));
+      var sources = new DocumentSourceMap(markdown);
+      var sourceHeadings = new List<DocumentSourceHeading>();
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer().RenderWithSources(markdown, frontmatter, sources));
       IElement body = document.Body!;
       var fragments = new Dictionary<string, string>(StringComparer.Ordinal);
       foreach(IElement element in body.QuerySelectorAll("h1,h2,h3,h4,h5,h6"))
       {
          var heading = new DocumentHeading(_headings.Count, element.LocalName[1] - '0', element.TextContent.Trim());
          _headings.Add(heading);
+         if(element.GetAttribute(sources.AttributeName) is { } identity && sources.TryGetPosition(identity, out (int Start, int End) position))
+         {
+            sourceHeadings.Add(new DocumentSourceHeading(heading.Index, position.Start, position.End));
+         }
          _elements.Add(element, heading);
          element.Id = "mv-heading-" + heading.Index.ToString(CultureInfo.InvariantCulture);
          string slug = Markdig.Helpers.LinkHelper.UrilizeAsGfm(heading.Title);
@@ -37,6 +43,10 @@ public sealed class DocumentOutline
             fragment = slug + "-" + suffix.ToString(CultureInfo.InvariantCulture);
          }
          fragments.Add(fragment, element.Id);
+      }
+      foreach(IElement element in body.QuerySelectorAll("[" + sources.AttributeName + "]"))
+      {
+         element.RemoveAttribute(sources.AttributeName);
       }
       foreach(IElement link in body.QuerySelectorAll("a[href]"))
       {
@@ -56,6 +66,7 @@ public sealed class DocumentOutline
       WrapSections(body, document);
       Html = body.InnerHtml;
       Headings = _headings.AsReadOnly();
+      SourceHeadings = sourceHeadings.AsReadOnly();
    }
 
 
@@ -67,6 +78,11 @@ public sealed class DocumentOutline
 
    /// <summary>Headings in document order, including duplicate labels and headings inside authored containers.</summary>
    public IReadOnlyList<DocumentHeading> Headings { get; }
+
+
+
+   /// <summary>Parser-derived offsets of surviving headings in the original literal snapshot, independent of duplicate labels.</summary>
+   public IReadOnlyList<DocumentSourceHeading> SourceHeadings { get; }
 
 
 

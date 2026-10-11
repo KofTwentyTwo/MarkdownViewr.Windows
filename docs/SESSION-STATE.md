@@ -309,3 +309,24 @@ heading, hidden descendant, paired find and native query-typing assertions remai
 No app focus guard is widened, no outcome is substituted and no local desktop
 input occurs. The previous producer is terminal before the next push.
 Full PRODUCT.md scope and deferred production signing remain unchanged.
+
+## Source provenance foundation after native vim acceptance
+
+6bf125d / CI 38112298176 native job 114390204742 now SUCCESS: 44/44,
+zero failures/skips, actual physical reading clicks/keys and viewport/heading/find
+outcomes. Duration 2m23s. Build/format, CodeQL 38112298279, scripts 38112297896,
+security 38112298300 and PR gates 38112298282 passed. Exact native log retained
+at artifacts/vim-focus-ui-38112298176.log; installed job 114390204514 is still
+observed before any subsequent push. Previous dfc41a7 published suite timed out
+at 180 seconds before final TRX; installed channels were not reached.
+
+The next local increment maps DocumentOutline.SourceHeadings to original UTF-16
+source ranges from Markdig AST headings and AngleSharp raw HTML tokens. It handles
+Setext, fences, raw tags in quotes/lists/inline text, duplicate labels, native
+newlines, Unicode and frontmatter. A fresh internal marker is allowed only during
+mapped sanitation and stripped before output; authored markers/IDs stay denied.
+Raw line lookup is indexed rather than rescanning all lines for each heading.
+254 core tests/100% measured lines and zero-warning build pass. The original
+snapshot and public renderer policy remain unchanged. Full scroll/heading/collapse
+source UI remains unimplemented, not replaced by this foundation. No GUI input,
+Azure attempt, merge/tag/release or claim of production signing.

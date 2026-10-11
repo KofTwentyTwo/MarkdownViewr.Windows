@@ -81,6 +81,21 @@ heading operations use fixed host scripts and generated numeric identities only.
 No content script, native bridge or dependency is added. Physical-key browser and
 text-entry acceptance remains distinct from pure key-model tests.
 
+## Parser-derived source provenance
+
+The source synchronization foundation maps AST headings and raw HTML tokens to
+original UTF-16 offsets. ATX/Setext, quote/list prefixes, fences, duplicate labels
+and frontmatter retain parser identity rather than text/regex matching. Raw HTML
+line lookup uses indexed offsets; source text remains immutable. Only headings
+surviving the ordinary passive sanitizer receive a source identity.
+
+A fresh per-render private attribute carries this provenance through sanitation;
+its generated name is allowed only for the internal outline render, then removed
+from every element before presentation. The public renderer never admits it, and
+authored IDs/data attributes remain stripped. No source marker grants a browser
+capability. Full source scroll/heading/collapse UI synchronization remains pending;
+these parser tests do not prove browser behavior. ADR status remains proposed.
+
 ## Verification and follow-up
 
 Core regression tests cover GFM, hostile HTML and resource paths at 100% core line

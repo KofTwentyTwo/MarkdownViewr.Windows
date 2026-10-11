@@ -23,6 +23,7 @@ public sealed class MarkdownRenderer
       .UseTaskLists()
       .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
       .UseAutoLinks()
+      .UsePreciseSourceLocation()
       .Build();
 
    private readonly HtmlSanitizer _sanitizer;
@@ -47,7 +48,28 @@ public sealed class MarkdownRenderer
 
 
    /// <summary>Preserves useful markup while sanitizing every parser result, including authored raw HTML.</summary>
-   public string Render(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide)
+   public string Render(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide) => Render(markdown, frontmatter, null);
+
+
+
+   /// <summary>Admits only the current private provenance attribute, then restores the ordinary authored-markup policy.</summary>
+   internal string RenderWithSources(string markdown, FrontmatterMode frontmatter, DocumentSourceMap sources)
+   {
+      _sanitizer.AllowedAttributes.Add(sources.AttributeName);
+      try
+      {
+         return Render(markdown, frontmatter, sources);
+      }
+      finally
+      {
+         _sanitizer.AllowedAttributes.Remove(sources.AttributeName);
+      }
+   }
+
+
+
+   /// <summary>Uses the same bounded parser and passive sanitation for public HTML and internal source-aware outlines.</summary>
+   private string Render(string markdown, FrontmatterMode frontmatter, DocumentSourceMap? sources)
    {
       ArgumentNullException.ThrowIfNull(markdown);
       if(markdown.Length > MaximumCharacters)
@@ -62,10 +84,11 @@ public sealed class MarkdownRenderer
       string prefix = !string.IsNullOrEmpty(metadata) ? frontmatter switch
       {
          FrontmatterMode.Metadata => DocumentFrontmatter.RenderMetadata(metadata),
-         FrontmatterMode.Markdown => Markdown.ToHtml("---\n" + metadata + "\n---", s_pipeline),
+         FrontmatterMode.Markdown => sources is null ? Markdown.ToHtml("---\n" + metadata + "\n---", s_pipeline) : sources.Render("---\n" + metadata + "\n---", s_pipeline, markdown.IndexOf('\n') + 1 - 4),
          _ => "",
       } : "";
-      return _sanitizer.Sanitize(prefix + Markdown.ToHtml(body, s_pipeline));
+      string html = sources is null ? Markdown.ToHtml(body, s_pipeline) : sources.Render(body, s_pipeline, markdown.Length - body.Length);
+      return _sanitizer.Sanitize(prefix + html);
    }
 
 

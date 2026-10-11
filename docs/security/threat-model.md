@@ -93,5 +93,18 @@ existing document and passes its full path as exactly one `ArgumentList` value w
 The chosen application runs with the user's permissions and receives the document.
 Missing files and native launch errors leave the viewer open; logs omit paths and
 contents. Core tests cover metacharacters/Unicode, relative/script paths, corruption
-and bounds. Actual fixture-process/UI acceptance is pending; reference editor-list
+and bounds. Actual fixture-process/UI acceptance passed on 5a9af63 in native, published and
+installed channels; reference editor-list
 and folder-opening parity still require review.
+
+## Source provenance boundary
+
+Source anchors originate from Markdig heading spans and AngleSharp raw HTML token
+positions, with original newline/frontmatter/UTF-16 offsets. Repeated titles or
+fenced heading-like text cannot select another heading's identity. A fresh private
+attribute name is admitted only during the internal render and removed before any
+HTML is presented; public renderer policy and authored ID/data-attribute denial
+remain unchanged. Positions pair only with sanitized surviving headings and do
+not grant scripts, messages, native access or resources. The original snapshot is
+immutable. Core regressions cover nested raw markup, Setext, fences, Unicode,
+frontmatter and forged attributes; source scroll/folding UI acceptance is pending.
