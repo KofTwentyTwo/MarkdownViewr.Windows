@@ -2,6 +2,22 @@
 
 Updated: 2026-10-11
 
+## Terminal published regressions retained; next candidate ready - 2026-10-11
+
+Exactb5e519e CI38184378762 is terminal failure: focused19/22, native98/100,
+published98/100, zero skips. Published actual TRX confirms the same raw-inline
+fold and source physical-click/alignment failures; installed lifecycle phase is
+not reached. Retain current-installed-b5e519e.log and actual artifact bundle at
+artifacts/current-installed-evidence-38184378762. The General/Contents case passes.
+
+Signed localec78b50 fixes reproduced parser/token boundaries and prepares the
+native tooltip/picker corrections; signed7fa9f77 adds shared Printing Settings.
+All598 core tests/100% lines, zero-warning Release, format/hooks pass;102 native
+cases compiled/discovered. Full prior run is terminal; next authorized push can
+proceed without cancellation. Fresh exact-head focused/full/distributed proof,
+Settings design acceptance, remaining defaults/themes, genuine review and signing
+are still required. No installed success inferred and no production publication.
+
 ## Shared native Printing settings prepared - 2026-10-11
 
 Add a dedicated Printing category using the same PrintOptionsEditor as the output

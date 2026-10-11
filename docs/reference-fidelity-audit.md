@@ -86,3 +86,9 @@ Printing now has a locally prepared native Settings page sharing the existing
 output editor and checked saved defaults. Apply/Restore/closing and concurrent
 sibling draft preservation have compiled actual native cases, not execution
 proof. Full owner design acceptance and production signing remain outstanding.
+
+Exactb5e519e distributed job is now terminal: published98/100, zero skips, with
+the same raw-inline fold and physical source-click/alignment failures; installed
+lifecycle phase not reached. Retain its actual published TRX under
+artifacts/current-installed-evidence-38184378762. Signed localec78b50/7fa9f77
+require fresh exact-head native/distributed acceptance after the next push.

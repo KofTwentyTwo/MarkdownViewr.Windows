@@ -1,5 +1,7 @@
 # Development Tasks
 
+- [x] Retain terminal b5e519e published98/100 TRX: same raw-fold/source-click failures, zero skips; installed lifecycle phase not reached.
+
 - [x] Prepare shared native Printing Settings options with Apply/Restore, validated checked saves and sibling draft preservation; zero-warning Release/format pass.
 - [ ] Execute both new Printing defaults/draft acceptance cases plus every existing Print/PDF/pixel case on the exact next hosted head; inspect actual Settings screenshots.
 
