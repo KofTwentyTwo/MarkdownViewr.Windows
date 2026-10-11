@@ -68,3 +68,13 @@ artifacts/print-exact-filename-38125751638.
 Sources: [Microsoft printing overview](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/print?tabs=dotnetcsharp),
 [App SDK save picker](https://learn.microsoft.com/en-us/windows/apps/develop/files/pickers-save-file),
 [pinned print coordinator](https://github.com/darinkelkhoff/markdownViewr/blob/6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021/ContentView.swift).
+
+## Expanded output proof in progress
+
+The native fixture now compares actual first-heading ink bands for Standard and
+Match Screen font scaling and40pixel padding. Another fixture creates a saved
+user theme with240pixel content width and compares actual block-edge pixels with
+borders off/on and full-page width. Each PDF is retained before raster assertions.
+Successful exports also verify paired query/count, actual native source selection
+and original reading paint/geometry. These new cases compile/format but have not
+run; full expanded native/published54 and installed53 per channel remain required.

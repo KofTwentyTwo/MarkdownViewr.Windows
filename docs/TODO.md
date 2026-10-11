@@ -40,6 +40,7 @@
 - [ ] Verify actual zoom glyph/key/reload/theme/find/collapse behavior in native, published and both installed channels.
 - [x] Implement print-only themes/options, native Windows print UI and explicit PDF save (issue #12); core363/100% lines; no new renderer dependency.
 - [x] Verify original3 focused native print cases on ec5f98f/38125751638: both cancels, real default/themed PDF pixels and unchanged actual glyph/view/source/collapse state.
+- [x] Implement actual PDF font/padding/width/border comparisons and successful-export paired-find preservation; local build/format pass, hosted outcomes pending.
 - [ ] Verify actual native print cancellation, saved PDF image/background/font/layout output and unchanged reading/source/find/collapse state in all channels.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.

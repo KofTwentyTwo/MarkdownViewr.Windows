@@ -11,7 +11,7 @@ draft PR #3. Owner authorizes signed/DCO commits, pushes, configuration and tick
 No merges, tags/releases, new Azure sign-ins or fabricated human review.
 Hosted Windows UI tests are authorized; no current local desktop reservation.
 
-## Printing accepted in focused native run; full clean gates pending
+## Printing native baseline verified; installed baseline live
 
 Native File/Print/Ctrl+P, copied themes/layout preferences and explicit native PDF
 saving are implemented. Core363/100% measured lines;55 scripts; build/format pass.
@@ -26,9 +26,18 @@ Hosted probes proved41pixel PDF reading movement. SavePdf restores validated
 vertical position in finally only for the same ready navigation; no completion is
 guessed for void native print UI. Filename typing waits for exact full native
 readback. Stale UIA200% values are replaced by actual glyph/view assertions.
-Temporary workflow/tagged probes are removed; preserve all original cases and
-require cleaned full52 native/published and51 per installed channel. Broader
-font/layout/width/padding/find-success comparisons remain open; ADR-0003 proposed.
+Cleaned300e145 / CI38126078284 native52/52 passes, zero failures/skips; format,
+core, scripts/security/PR gates pass. Installed job114430656496 remains live.
+Native log: artifacts/print-clean-native-38126078284.log. Preserve this installed
+producer before pushing further changes; require published52/stable-dev51.
+
+Two additional native-output cases now compile/format locally: first printed
+heading glyph ratios for standard/matching zoom, real40px padding shift and paired
+find/source selection/screen paint after each PDF; saved user-theme240px block
+width versus full page and actual optional border rows. New helper edits actual
+native options, including padding NumberBox; all generated PDF/PNG bytes retained.
+These cases have not run. Full expanded suites expect54 native/published and53 per
+installed channel. No new dependency or local GUI input. ADR-0003 remains proposed.
 
 Live settings validate. Official conformance34PASS/1FAIL/1WARN/3REVIEW: required
 standards inventory lacks app, confirmed live. Exact reviewed addition prepared,

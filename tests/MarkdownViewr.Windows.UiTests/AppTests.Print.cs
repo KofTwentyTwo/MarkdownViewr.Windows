@@ -9,6 +9,7 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
+using MarkdownViewr.Windows.Core.Printing;
 
 
 namespace MarkdownViewr.Windows.UiTests;
@@ -85,7 +86,7 @@ public partial class AppTests
       Assert.True(session.WaitForElement("mv-heading-0").BoundingRectangle.Top < reading.View.Top);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
       string first = Path.Combine(session.DataDirectory, "default-print.pdf");
-      SavePrintPdf(session, first, configure: false);
+      SavePrintPdf(session, first);
       string firstEvidence = RetainPrintedFixture(session, first);
       using Bitmap clean = await RenderFirstPdfPageAsync(first);
       clean.Save(firstEvidence + ".png", ImageFormat.Png);
@@ -94,7 +95,7 @@ public partial class AppTests
       Assert.True(CountPixels(clean, pixel => pixel.R < 100 && pixel.G < 100 && pixel.B < 100) > 100, "The actual PDF is missing printed heading/body glyphs.");
       AssertPrintScreenState(session, reading, source);
       string second = Path.Combine(session.DataDirectory, "themed-print.pdf");
-      SavePrintPdf(session, second, configure: true);
+      SavePrintPdf(session, second, new PrintOptions("Active Theme", true, false, true, false, true));
       string secondEvidence = RetainPrintedFixture(session, second);
       using Bitmap themed = await RenderFirstPdfPageAsync(second);
       themed.Save(secondEvidence + ".png", ImageFormat.Png);
@@ -142,20 +143,15 @@ public partial class AppTests
 
 
    /// <summary>Uses the actual app options and Windows Save picker; output is always an owned fixture path.</summary>
-   private void SavePrintPdf(AppSession session, string path, bool configure)
+   private void SavePrintPdf(AppSession session, string path, PrintOptions? options = null)
    {
       try
       {
          session.InvokeMenuItem("File", "PrintMenuItem");
          session.WaitForElement("PrintTheme");
-         if(configure)
+         if(options is not null)
          {
-            session.WaitForElement("PrintTheme").AsComboBox().Select("Active Theme");
-            session.WaitForElement("PrintBackgrounds").AsCheckBox().IsChecked = true;
-            session.WaitForElement("PrintImages").AsCheckBox().IsChecked = false;
-            session.WaitForElement("PrintZoom").AsComboBox().Select("Match screen");
-            session.WaitForElement("PrintWidth").AsComboBox().Select("Document width");
-            session.WaitForElement("PrintBorders").AsCheckBox().IsChecked = true;
+            ConfigurePrintOptions(session, options);
          }
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
