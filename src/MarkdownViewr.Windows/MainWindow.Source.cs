@@ -63,6 +63,7 @@ public sealed partial class MainWindow
       _settings.ShowSource = SourceToggle.IsChecked;
       Save();
       RefreshSource();
+      QueueFind();
    }
 
 

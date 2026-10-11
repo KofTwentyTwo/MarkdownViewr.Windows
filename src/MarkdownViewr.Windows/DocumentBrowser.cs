@@ -14,7 +14,7 @@ using Microsoft.Web.WebView2.Core;
 namespace MarkdownViewr.Windows;
 
 /// <summary>Hosts passive Markdown without network access, authored scripts or native capabilities.</summary>
-internal sealed class DocumentBrowser
+internal sealed partial class DocumentBrowser
 {
    private const string SecurityHeaders = "Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nCache-Control: no-store";
    private readonly WebView2 _view;
@@ -66,6 +66,7 @@ internal sealed class DocumentBrowser
       core.Settings.AreDefaultScriptDialogsEnabled = false;
       core.Settings.AreDevToolsEnabled = false;
       core.Settings.AreDefaultContextMenusEnabled = false;
+      core.Settings.AreBrowserAcceleratorKeysEnabled = false;
       core.PermissionRequested += (_, args) => args.State = CoreWebView2PermissionState.Deny;
       core.DownloadStarting += (_, args) => args.Cancel = true;
       core.NewWindowRequested += (_, args) => args.Handled = true;
@@ -82,6 +83,7 @@ internal sealed class DocumentBrowser
    /// <summary>Replaces the document capability and navigates to an intercepted HTTPS response, with no HTTP server.</summary>
    public void Show(DocumentFiles? files, string sanitizedHtml, string title, Core.Documents.DocumentViewport viewport = default, IReadOnlyList<Core.Documents.DocumentHeading>? headings = null)
    {
+      ResetFindForNavigation();
       headings ??= [];
       if(!_headings.SequenceEqual(headings))
       {
@@ -126,33 +128,44 @@ internal sealed class DocumentBrowser
 
 
    /// <summary>Only a host-generated section body can be collapsed, leaving its own heading visible.</summary>
-   public Task ToggleSectionAsync(int index)
+   public async Task ToggleSectionAsync(int index)
    {
       if(index < 0 || index >= _headings.Count)
       {
-         return Task.CompletedTask;
+         return;
       }
-      return ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const e=document.querySelector('[data-mv-body=\"{index}\"]'); if(e) e.hidden=!e.hidden;}})()"));
+      Uri document = _policy.DocumentUri;
+      string? result = await ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const e=document.querySelector('[data-mv-body=\"{index}\"]'); if(e) return e.hidden=!e.hidden;}})()"));
+      if(document == _policy.DocumentUri && _findCollapsed is { } collapsed && result is "true" or "false")
+      {
+         _findCollapsed = string.Equals(result, "true", StringComparison.Ordinal) ? collapsed.Append(index).Distinct().ToArray() : collapsed.Where(value => value != index).ToArray();
+      }
    }
 
 
 
    /// <summary>Applies an explicit native command to every generated section, including nested descendants.</summary>
-   public Task SetSectionsAsync(bool collapsed)
-      => ExecuteDocumentScriptAsync("for(const e of document.querySelectorAll('[data-mv-body]')) e.hidden=" + (collapsed ? "true" : "false") + ";");
-
+   public async Task SetSectionsAsync(bool collapsed)
+   {
+      Uri document = _policy.DocumentUri;
+      string? result = await ExecuteDocumentScriptAsync("for(const e of document.querySelectorAll('[data-mv-body]')) e.hidden=" + (collapsed ? "true" : "false") + ";");
+      if(result is not null && document == _policy.DocumentUri && _findCollapsed is not null)
+      {
+         _findCollapsed = collapsed ? Enumerable.Range(0, _headings.Count).ToArray() : [];
+      }
+   }
 
 
    /// <summary>Fixed host operations run only on the ready intercepted document; content script execution remains disabled.</summary>
-   private async Task ExecuteDocumentScriptAsync(string script)
+   private async Task<string?> ExecuteDocumentScriptAsync(string script)
    {
       if(_closed || !_pageReady || !IsCurrentDocument())
       {
-         return;
+         return null;
       }
       try
       {
-         await _view.CoreWebView2.ExecuteScriptAsync(script);
+         return await _view.CoreWebView2.ExecuteScriptAsync(script);
       }
       catch(COMException)
       {
@@ -160,6 +173,7 @@ internal sealed class DocumentBrowser
          {
             _status("The document navigation could not be completed.");
          }
+         return null;
       }
    }
 
@@ -222,6 +236,7 @@ internal sealed class DocumentBrowser
          if(!_closed && args.NavigationId == _navigationId && IsCurrentDocument())
          {
             _pageReady = true;
+            DocumentReady?.Invoke(this, EventArgs.Empty);
          }
       }
       catch(COMException)

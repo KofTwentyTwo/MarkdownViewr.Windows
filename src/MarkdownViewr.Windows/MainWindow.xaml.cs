@@ -41,6 +41,7 @@ public sealed partial class MainWindow : Window, IDisposable
       CreateDocumentThemeMenu();
       InitializeOutline();
       InitializeSource();
+      InitializeFind();
       InitializeInputDiagnostics();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
       Title = AppIdentity.Info.DisplayName;
@@ -282,6 +283,8 @@ public sealed partial class MainWindow : Window, IDisposable
    private void ShowDocument(DocumentFiles files, Core.Documents.DocumentOutline outline, string path, Core.Documents.DocumentViewport viewport, bool reload)
    {
       _browser.Show(files, outline.Html, Path.GetFileName(path), viewport, outline.Headings);
+      _find = null;
+      _findGeneration++;
       _sourceMarkdown = files.Markdown;
       RefreshSource();
       _outline = outline;
@@ -304,6 +307,8 @@ public sealed partial class MainWindow : Window, IDisposable
       if(!_closed)
       {
          _closed = true;
+         _findGeneration++;
+         _findDelay?.Stop();
          _watcher?.Dispose();
          _watcher = null;
          _browser.Close();

@@ -142,3 +142,29 @@ real 70-pixel source-divider drag; normalize only native line-ending presentatio
 Source/outline resize and frontmatter remain unverified until exact hosted results.
 All 9ff820f producers are now terminal; the follow-up may be pushed without cancelling them.
 Native paired-find research retained in artifacts/native-find-notes.md; full scope active.
+
+## Verified native input/source and paired find increment
+
+4bf0b81b85e99a9f583c5e60b7276e49b423b114 CI 38106991467 completed SUCCESS.
+Exact TRX: 34/34 loose native/UI, 34/34 published, stable/dev 33/33 each; no skips.
+Real frontmatter switching, outline resize and literal-source/read-only/reload/physical
+resize all pass. CodeQL 38106991641/scripts 38106991033/security 38106991494 passed.
+Four payload gates verified 536 files; stable 0.1→0.4 and dev beta.1→beta.2 probes
+called AppKit apply/restarted within their channels. Retained artifacts:
+artifacts/native-move-installed-38106991467, plus native/installed verified job logs.
+These synthetic unsigned fixtures remain distinct from production signing proof.
+
+Next increment implements paired find: pure bounded literal source positions/counts,
+native WebView2.Find with suppressed default dialog, Ctrl+F toolbar, wrapping controls,
+Enter/Shift+Enter/Escape, actual source selection and query/page lifecycle guards.
+Search temporarily reveals sections; closing restores prior/explicit choices. Browser
+feature accelerators are disabled so the host owns its commands; scripts/messages/host
+objects stay disabled. No new dependencies. 179 core tests pass with 100% lines; build
+zero warnings and format pass. New hosted tests exercise physical Ctrl+F typing from
+browser focus, source provider ranges, native viewport wrap, collapse restoration,
+literal hostile-looking terms and reload/empty counts. Physical local-fragment reveal
+also added. No local UI input. Observe exact new hosted handles after signed push.
+
+Source heading/scroll/collapse synchronization and vim keys remain issue #10 scope.
+Full PRODUCT.md, editor/print/multiwindow/activation/reference/standards/signing work
+remain active. Do not claim new find acceptance or completed port before its evidence.

@@ -18,13 +18,15 @@
 - [x] Complete hosted theme editor/validation/restoration acceptance (issue #7): CI 38102867556 passed; size 17 edit also passes in 29/30 later UI tests.
 - [x] Implement persistent resizable TOC/depth, safe heading/local-fragment jumps and independent nested section collapse (issue #9).
 - [x] Verify hosted heading jumps, independent nested collapse and theme/reload state on 5c3988e (31/33 UI pass).
-- [ ] Verify physical sidebar resize and frontmatter input follow-up; keep exact assertions.
+- [x] Verify physical sidebar/source resize and frontmatter modes: CI 38106991467, 34 native/published and 33 per installed channel, no skips.
 - [x] Implement literal read-only source pane, saved visibility/width and shared committed reload snapshots (issue #10).
-- [ ] Verify hosted source visibility/read-only/literal/reload acceptance and physical source resize.
-- [ ] Add synchronized headings/scroll/collapse, paired find and vim keys (issue #10).
+- [x] Verify source visibility/read-only/literal/reload and physical resize in native, published and both installed builds on 4bf0b81.
+- [x] Implement paired native browser/source find with bounded literal terms, shared counts, wraparound and reload guards (issue #10).
+- [ ] Verify actual Ctrl+F typing, source ranges, native match viewport, collapse restoration and literal/reload queries.
+- [ ] Add synchronized headings/scroll/collapse and vim keys (issue #10); audit find/source collapse parity against the pinned reference.
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [x] Verify actual code-font size 17 editing in hosted UI runs.
-- [ ] Verify actual hosted frontmatter mode switching.
+- [x] Verify actual hosted frontmatter mode switching on 4bf0b81 (including both installed channels).
 - [ ] Add safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.

@@ -26,6 +26,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
 | Source pane | Same bounded committed snapshot in a native read-only TextBox; literal HTML/CSS/script text never enters a renderer or command interpreter; hidden pane removed from accessibility surface |
+| Find | Bounded literal query; pure source positions and native WebView2 finder, with duplicate browser UI suppressed; no query enters executable code or activity logs. Serialized queries and page/navigation checks reject stale completions; existing numeric section operations reveal/restore content |
 | Fixture input diagnostics | Explicit opt-in environment switch; observes handled native pointer/drag events without changing routing; logs owned control names, coordinates and button state only, never document text or keystrokes |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
@@ -51,11 +52,11 @@ physical directory. It does not authorize native commands or remote resource acc
 
 ## Remaining risks and work
 
-This is a first reader, not a completed port. Native outline/collapse acceptance, external editor commands,
+This is a first reader, not a completed port. Native frontmatter/outline/literal-source acceptance passed CI 38106991467 in loose, published and both installed builds. New find acceptance, synchronized source/collapse, external editor commands,
 print and any future browser bridge need their own controls and tests. Save watching is
 implemented; hosted real browser replacement/deletion/scroll and remote-image denial pass on 77dd04d.
 Local links to other documents and mailto links are currently blocked. WebView2 uses
-the installed evergreen runtime; published and both installed channels passed reader acceptance on 77dd04d and editable themes on 30ca094. New frontmatter/outline acceptance remains required.
+the installed evergreen runtime; published and both installed channels passed reader acceptance on 77dd04d and editable themes on 30ca094. New paired-find keyboard/source/viewport/hostile-query acceptance remains required.
 
 Historical EX-0002 does not authorize unsigned production publication. Azure setup
 and real final-artifact signature validation are deferred; an active profile alone

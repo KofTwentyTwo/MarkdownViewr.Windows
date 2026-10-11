@@ -262,6 +262,126 @@ public class AppTests
    }
 
 
+   /// <summary>Ctrl+F accepts physical typing and pairs the actual source selection with wrapping browser occurrences.</summary>
+   [Fact]
+   public void Find_PairedMatches_UpdatesCounterAndSourceSelection()
+   {
+      using var session = new AppSession(document: "# Find acceptance\n\n**Alpha** first alpha\n\nLast ALPHA");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Find acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      session.MainWindow.SetForeground();
+      session.WaitForElement("DocumentView").Focus();
+      FlaUI.Core.Input.Keyboard.TypeSimultaneously(FlaUI.Core.WindowsAPI.VirtualKeyShort.CONTROL, FlaUI.Core.WindowsAPI.VirtualKeyShort.KEY_F);
+      session.WaitForElement("FindText");
+      FlaUI.Core.Input.Keyboard.Type("alpha");
+      WaitForFindCount(session, "1 of 3");
+      Assert.Equal("Alpha", ReadSourceSelection(source));
+      session.ClickElement("FindNextButton");
+      WaitForFindCount(session, "2 of 3");
+      Assert.Equal("alpha", ReadSourceSelection(source));
+      session.ClickElement("FindPreviousButton");
+      WaitForFindCount(session, "1 of 3");
+      session.ClickElement("FindPreviousButton");
+      WaitForFindCount(session, "3 of 3");
+      Assert.Equal("ALPHA", ReadSourceSelection(source));
+      session.ClickElement("FindNextButton");
+      WaitForFindCount(session, "1 of 3");
+      _output.WriteLine(session.DescribeDocumentStatus());
+      session.ClickElement("FindCloseButton");
+      session.WaitForElementGone("FindText");
+      Assert.Equal("", ReadSourceSelection(source));
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>Find reveals collapsed text, moves the real browser viewport and restores prior section choices on close.</summary>
+   [Fact]
+   public void Find_CollapsedLongDocument_MovesViewportAndRestoresSections()
+   {
+      string paragraphs = string.Join("\n\n", Enumerable.Range(0, 100).Select(index => "Find filler paragraph " + index));
+      using var session = new AppSession(document: "# Find root\n\nFirst needle occurrence\n\n" + paragraphs + "\n\n## Find tail\n\nLast needle occurrence");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Find root")), "the root heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Last needle occurrence")), "the collapsed tail content");
+      session.ClickElement("OutlineHeading:0");
+      session.InvokeMenuItem("Edit", "FindMenuItem");
+      session.EnterText("FindText", "needle");
+      WaitForFindCount(session, "1 of 2");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last needle occurrence")), "the revealed tail match");
+      session.ClickElement("FindNextButton");
+      WaitForFindCount(session, "2 of 2");
+      AutomationElement scroller = FindDocumentScroller(session);
+      session.WaitFor(() => scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value > 70 ? scroller : null, "the browser viewport at the last find match");
+      session.ClickElement("FindNextButton");
+      WaitForFindCount(session, "1 of 2");
+      session.WaitFor(() => scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value < 10 ? scroller : null, "the browser viewport after wrapping to the first match");
+      session.ClickElement("FindCloseButton");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Last needle occurrence")), "the restored collapsed tail content");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Find root")));
+      session.InvokeMenuItem("Edit", "FindMenuItem");
+      WaitForFindCount(session, "1 of 2");
+      session.ClickElement("ExpandSections");
+      session.ClickElement("FindCloseButton");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last needle occurrence")), "the explicit expansion retained after closing find");
+   }
+
+
+
+   /// <summary>Hostile-looking terms stay literal and the current query is recomputed for the newly committed reload snapshot.</summary>
+   [Fact]
+   public void Find_LiteralQueryAndReload_KeepsDocumentSafeAndRefreshesCount()
+   {
+      const string Query = "');document.body.textContent='unsafe';//";
+      using var session = new AppSession(document: "# Literal find\n\n`a.*[x]`\n\n```text\n" + Query + "\n```");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Literal find")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      session.InvokeMenuItem("Edit", "FindMenuItem");
+      session.EnterText("FindText", "a.*[x]");
+      WaitForFindCount(session, "1 of 1");
+      Assert.Equal("a.*[x]", ReadSourceSelection(source));
+      session.EnterText("FindText", Query);
+      WaitForFindCount(session, "1 of 1");
+      session.WaitFor(() => string.Equals(ReadSourceSelection(source), Query, StringComparison.Ordinal) ? source : null, "the literal hostile-looking query selection");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Literal find")));
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Reloaded find\n\n```text\n" + Query + "\n" + Query + "\n```");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reloaded find")), "the reloaded document heading");
+      WaitForFindCount(session, "1 of 2");
+      Assert.Equal(Query, ReadSourceSelection(source));
+      session.EnterText("FindText", "absent literal query");
+      WaitForFindCount(session, "0 of 0");
+      Assert.False(session.WaitForElement("FindNextButton").IsEnabled);
+      Assert.False(session.WaitForElement("FindPreviousButton").IsEnabled);
+      Assert.Equal("", ReadSourceSelection(source));
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Reloaded find")));
+   }
+
+
+
+   /// <summary>Waits for real native results, retaining fixture-only surface/log evidence on timeout.</summary>
+   private static void WaitForFindCount(AppSession session, string count)
+   {
+      try
+      {
+         session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("FindCountText").And(cf.ByName(count))), "the paired find count " + count);
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException($"{exception.Message} Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
+      }
+   }
+
+
+
+   /// <summary>Reads the native text provider's actual selected range, rather than a mirrored application property.</summary>
+   private static string ReadSourceSelection(AutomationElement source)
+      => string.Concat(source.Patterns.Text.Pattern.GetSelection().Select(range => range.GetText(-1)));
+
+
    /// <summary>The native depth choice filters exact headings and a real divider drag saves its new width.</summary>
    [Fact]
    public void Outline_DepthAndResize_PersistsNativeChoices()
@@ -311,6 +431,34 @@ public class AppTests
       _output.WriteLine(session.DescribeDocumentStatus());
    }
 
+
+
+   /// <summary>A physical local-fragment click reveals a hidden generated heading without loading another page.</summary>
+   [Fact]
+   public void Outline_LocalFragmentClick_RevealsCollapsedTarget()
+   {
+      using var session = new AppSession(document: "[Jump to target](#target-heading)\n\n# Fragment root\n\nRoot body\n\n## Target heading\n\nTarget body");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Fragment root")), "the root heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:0");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Target heading")), "the heading inside its collapsed ancestor");
+      AutomationElement link = session.WaitFor(() => session.MainWindow.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Hyperlink).And(cf.ByName("Jump to target"))), "the local fragment link");
+      session.MainWindow.SetForeground();
+      Assert.True(link.TryGetClickablePoint(out System.Drawing.Point point));
+      Assert.True(session.MainWindow.BoundingRectangle.Contains(point));
+      NativeMouse.MoveTo(point);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      AutomationElement hit = session.Automation.FromPoint(point);
+      Assert.True(hit.Equals(link) || hit.Parent.Equals(link), "The pointer must hit the exact owned document link or its text child.");
+      FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target heading")), "the fragment's revealed target heading");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target body")), "the revealed target body");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Fragment root")));
+   }
 
 
    /// <summary>A heading selection moves the actual browser viewport and all-section operations change displayed content.</summary>

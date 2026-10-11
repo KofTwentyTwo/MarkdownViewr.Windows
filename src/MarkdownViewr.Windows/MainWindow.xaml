@@ -12,6 +12,7 @@
    <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged">
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
          <RowDefinition Height="*" />
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
@@ -26,6 +27,13 @@
             <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
             <MenuFlyoutSeparator />
             <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
+         </MenuBarItem>
+         <MenuBarItem Title="Edit">
+            <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click">
+               <MenuFlyoutItem.KeyboardAccelerators>
+                  <KeyboardAccelerator Key="F" Modifiers="Control" />
+               </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
          </MenuBarItem>
          <MenuBarItem Title="View">
             <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
@@ -56,8 +64,22 @@
          </MenuBarItem>
       </MenuBar>
 
-      <TextBlock x:Name="StatusText" Grid.Row="2" Margin="16,8" Text="Starting the document surface..." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.AutomationId="StatusText" AutomationProperties.Name="{Binding Text, ElementName=StatusText}" AutomationProperties.AccessibilityView="Content" AutomationProperties.LiveSetting="Polite" />
-      <Grid Grid.Row="1">
+      <Grid x:Name="FindBar" Grid.Row="1" Visibility="Collapsed" Margin="16,8" ColumnSpacing="8">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+         <TextBox x:Name="FindText" PlaceholderText="Find in document and source" MaxLength="256" TextChanged="FindText_Changed" KeyDown="FindText_KeyDown" AutomationProperties.Name="Find in document and source" />
+         <TextBlock x:Name="FindCountText" Grid.Column="1" Text="0 of 0" VerticalAlignment="Center" AutomationProperties.Name="{Binding Text, ElementName=FindCountText}" AutomationProperties.LiveSetting="Polite" />
+         <Button x:Name="FindPreviousButton" Grid.Column="2" Content="Previous" Click="FindPrevious_Click" IsEnabled="False" />
+         <Button x:Name="FindNextButton" Grid.Column="3" Content="Next" Click="FindNext_Click" IsEnabled="False" />
+         <Button x:Name="FindCloseButton" Grid.Column="4" Content="Close find" Click="FindClose_Click" />
+      </Grid>
+      <TextBlock x:Name="StatusText" Grid.Row="3" Margin="16,8" Text="Starting the document surface..." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.AutomationId="StatusText" AutomationProperties.Name="{Binding Text, ElementName=StatusText}" AutomationProperties.AccessibilityView="Content" AutomationProperties.LiveSetting="Polite" />
+      <Grid Grid.Row="2">
          <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="OutlineColumn" Width="0" />
             <ColumnDefinition x:Name="OutlineDividerColumn" Width="0" />
