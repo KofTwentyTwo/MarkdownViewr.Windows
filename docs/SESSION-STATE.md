@@ -18,14 +18,15 @@ font zoom, full/document width, borders and pixel padding. Screen/print styles a
 independent; no screen/DOM/find/collapse completion callback is guessed from void
 ShowPrintUI. Save PDF uses Windows' picker and awaited WebView2 output. ADR-0003
 is proposed for review. Core363/100% measured lines and build/format pass.
-First hosted run38123994631 passed native Windows print cancellation. Keyboard
-cancel failed on incorrect test-only FindInput/FindCount IDs; use existing
-FindText/FindCountText. PDF fixture reported saved but expected destination absent;
-physical filename typing plus exact picker readback now tests the UIA commit
-boundary. No PDF raster/output acceptance claim yet. Full native38123995026
-reproduced the same two failures:50/52, zero skips. Retained first red TRX and
-fixture screenshot: artifacts/print-first-failure-38123994631. UI SDK
-target aligns with the app, without a new PDF dependency. Full suites now expect
+First hosted38123994631 passed native Windows cancel; wrong fixture find IDs
+and UIA-only filename entry failed. Correction41a687d / filtered38124425486
+passes both cancel cases and generates a real PDF: owned red image, predominantly
+white page and actual text pixels pass. Retained PDF/PNG/TRX under
+artifacts/print-path-verified-state-failed-38124425486. The subsequent unchanged
+reader viewport assertion fails (observed87.0253%). New focused fixture probes
+record before/options/PDF positions and wait for stable pre-print layout; no
+product restoration change or relaxed after-print assertion yet.
+Full suites now expect
 52 native/published and51 per installed channel. Temporary filtered print workflow
 is a feedback loop; all required full gates remain.
 

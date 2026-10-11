@@ -83,7 +83,8 @@ public partial class AppTests
       session.ClickElement("OutlineHeading:1");
       AutomationElement browserScroller = FindDocumentScroller(session);
       WaitForReaderScroll(session, browserScroller, value => value > 1, "a nonzero actual reading viewport before printing");
-      double position = browserScroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
+      double position = WaitForStablePrintViewport(session, browserScroller);
+      _output.WriteLine($"[DEBUG-print-viewport] Before options: {position:R}.");
       double height = session.FindInApp(cf => cf.ByAutomationId("mv-heading-1"))!.BoundingRectangle.Height;
       Assert.True(height > 0);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
@@ -141,6 +142,7 @@ public partial class AppTests
       {
          session.InvokeMenuItem("File", "PrintMenuItem");
          session.WaitForElement("PrintTheme");
+         _output.WriteLine($"[DEBUG-print-viewport] Options open: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
          if(configure)
          {
             session.WaitForElement("PrintTheme").AsComboBox().Select("Active Theme");
@@ -152,13 +154,11 @@ public partial class AppTests
          }
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
-         filename.Focus();
-         SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
-         Keyboard.Type(path);
-         Wait.UntilInputIsProcessed();
-         Assert.Equal(path, filename.AsTextBox().Text);
+         EnterPrintFilename(filename, path);
+         _output.WriteLine($"[DEBUG-print-viewport] Before PDF: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
          session.ClickButton("Save");
          session.WaitFor(() => File.Exists(path) && new FileInfo(path).Length > 100 ? session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("PDF saved."))) : null, "the completed actual PDF export", TimeSpan.FromSeconds(30));
+         _output.WriteLine($"[DEBUG-print-viewport] PDF saved: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
       }
       catch(TimeoutException)
       {
@@ -167,6 +167,35 @@ public partial class AppTests
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;
       }
+   }
+
+
+
+   /// <summary>Waits for actual post-layout scroll samples before recording the unchanged-print baseline.</summary>
+   private static double WaitForStablePrintViewport(AppSession session, AutomationElement scroller)
+   {
+      double previous = double.NaN;
+      int stable = 0;
+      session.WaitFor(() =>
+      {
+         double current = scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
+         stable = double.IsFinite(previous) && Math.Abs(current - previous) < 0.01 ? stable + 1 : 0;
+         previous = current;
+         return current > 1 && stable >= 4 ? scroller : null;
+      }, "the settled nonzero reading viewport before printing");
+      return previous;
+   }
+
+
+
+   /// <summary>Physical text entry commits the Windows picker's actual destination instead of only its UIA value.</summary>
+   private static void EnterPrintFilename(AutomationElement filename, string path)
+   {
+      filename.Focus();
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
+      Keyboard.Type(path);
+      Wait.UntilInputIsProcessed();
+      Assert.Equal(path, filename.AsTextBox().Text);
    }
 
 
