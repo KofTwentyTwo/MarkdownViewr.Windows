@@ -389,3 +389,17 @@ actual viewport/physical-wheel assertions remain. Exact native log retained at
 artifacts/source-sync-ui-38114492408.log. Build/core/format, CodeQL, scripts,
 security and PR gates passed; installed producer is still observed before a push.
 No local desktop input or weakening of coverage/selection/viewport checks.
+
+## Native CR acceptance and remaining provider scroll
+
+90b5406 / CI 38114958970 native job 114397920477 finished FAILURE: 45/46,
+zero skips. Exact source find selections, nested fold/find/reload restoration and
+reader-to-source heading alignment now pass. Only the source-to-reader assertion
+after an unfocused native ITextRange.ScrollIntoView fails; the log reports no new
+source geometry/event after that request. Evidence retained at
+artifacts/source-sync-cr-ui-38114958970.log. The fixture now physically focuses
+the owned SourceText and verifies its actual middle-heading glyph alignment
+before requiring browser alignment. Original viewport bounds and physical wheel
+assertions remain; numeric diagnostics also include source offset changes and
+previous offsets. This is not yet verified. Observe installed producer
+114397920229 before any next push. No local GUI input or Azure attempt.

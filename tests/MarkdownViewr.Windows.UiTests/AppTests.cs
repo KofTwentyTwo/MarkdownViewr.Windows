@@ -355,10 +355,12 @@ public class AppTests
       session.InvokeMenuItem("View", "OutlineToggle");
       session.ClickElement("OutlineHeading:2");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
+      session.MouseClickElement("SourceText");
       FlaUI.Core.ITextRange middle = source.Patterns.Text.Pattern.DocumentRange.FindText("## Source sync middle", backward: false, ignoreCase: false);
       Assert.NotNull(middle);
       middle.ScrollIntoView(alignToTop: true);
       Wait.UntilInputIsProcessed();
+      WaitForSourceHeadingAlignment(session, source, "## Source sync middle");
       WaitForBrowserHeadingAlignment(session, "mv-heading-1");
       session.ClickElement("OutlineHeading:2");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");

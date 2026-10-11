@@ -183,9 +183,9 @@ public sealed partial class MainWindow
       }
       double sourceY = scroller.VerticalOffset;
       if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal) &&
-         (_sourceScrolled || !double.IsFinite(_sourceReaderLastY) || Math.Abs(frame.Position - _sourceReaderLastY) > 0.5))
+         (_sourceScrolled || double.IsFinite(_sourceLastY) && Math.Abs(sourceY - _sourceLastY) > 0.5 || !double.IsFinite(_sourceReaderLastY) || Math.Abs(frame.Position - _sourceReaderLastY) > 0.5))
       {
-         App.Log.Info(FormattableString.Invariant($"Input trace: source geometry source={sourceY:R}/{scroller.ScrollableHeight:R}, reader={frame.Position:R}/{frame.Maximum:R}, paired={anchors.Count}."));
+         App.Log.Info(FormattableString.Invariant($"Input trace: source geometry source={sourceY:R}/{scroller.ScrollableHeight:R}, reader={frame.Position:R}/{frame.Maximum:R}, paired={anchors.Count}, last={_sourceLastY:R}/{_sourceReaderLastY:R}."));
       }
       bool sourceMoved = _sourceScrolled || double.IsFinite(_sourceLastY) && Math.Abs(sourceY - _sourceLastY) > 0.5;
       _sourceScrolled = false;
