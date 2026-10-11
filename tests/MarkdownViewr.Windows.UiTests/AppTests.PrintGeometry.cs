@@ -23,11 +23,18 @@ public partial class AppTests
       double height = session.WaitForElement("mv-heading-0").BoundingRectangle.Height;
       for(int step = 0; step < 4; step++)
       {
+         double previous = session.WaitForElement("mv-heading-0").BoundingRectangle.Height;
          session.ClickElement("ZoomInButton");
-         double expected = height * Math.Pow(1.1, step + 1);
-         _output.WriteLine(FormattableString.Invariant($"Print zoom step={step + 1}; original height={height}; expected={expected}; actual={session.WaitForElement("mv-heading-0").BoundingRectangle}; reset={session.WaitForElement("ZoomResetButton").Name}."));
-         WaitForZoomGlyph(session, expected);
+         string percentage = Math.Round(Math.Pow(1.1, step + 1) * 100).ToString(System.Globalization.CultureInfo.InvariantCulture);
+         session.WaitFor(() =>
+         {
+            AutomationElement heading = session.WaitForElement("mv-heading-0");
+            AutomationElement reset = session.WaitForElement("ZoomResetButton");
+            return heading.BoundingRectangle.Height > previous && reset.IsEnabled && string.Equals(reset.Name, "Actual size (" + percentage + "%)", StringComparison.Ordinal) ? heading : null;
+         }, "the real larger heading at the completed requested zoom step");
       }
+      // UIA text boxes use rounded font metrics (35px becomes 44px at 121%); exact font scale is measured in the PDF below.
+      Assert.InRange(session.WaitForElement("mv-heading-0").BoundingRectangle.Height / height, 1.35, 1.6);
       session.InvokeMenuItem("View", "SourceToggle");
       session.InvokeMenuItem("Edit", "FindMenuItem");
       session.EnterText("FindText", "paired needle");

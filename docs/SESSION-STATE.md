@@ -39,11 +39,16 @@ width versus full page and actual optional border rows. New helper edits actual
 native options, including padding NumberBox; all generated PDF/PNG bytes retained.
 Signedd0a225d / CI38127089763 finishes native/published53/54, zero skips.
 Actual saved custom-width/border/full-page case passes. Font/padding case fails
-before PDF output at the fourth requested zoom wait; installed channels are not
+before PDF output at a requested zoom wait; installed channels are not
 reached. Exact expected/actual glyph rectangles and native state are now retained
-on failure; all original assertions remain. Retained red log and published TRX:
+on failure. Diagnostic6e17674 proves the second step: initial35px,121% actual44px,
+expected42.35px from multiplying an already-rounded UIA text box. The new PDF
+case now requires actual increasing screen glyphs and completed native percentage,
+plus bounded final screen growth; precise standard/matched font ratios remain
+asserted against real PDF glyph bands. No PDF/state assertion is removed.
+Retained red log and published TRX:
 artifacts/print-geometry-native-38127089763.log and
-artifacts/print-geometry-installed-38127089763. New diagnostic head requires54
+artifacts/print-geometry-installed-38127089763. Corrected head requires54
 native/published and53 per installed channel. No local GUI input or new dependency.
 ADR-0003 remains proposed; full font/padding/paired-find acceptance is pending.
 
@@ -83,7 +88,7 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 
 ## Next steps
 
-1. Diagnose exact fourth-zoom geometry; require expanded full gates and retained PDF/TRX evidence.
+1. Verify actual PDF font/padding/find after the diagnosed UIA font rounding; require expanded full gates and retained PDF/TRX evidence.
 2. Complete source raw-heading audit and broader zoom/theme/find/collapse proof.
 3. Complete print #12 output/state acceptance, windows/recents/activation and remaining theme/render/link parity.
 4. Finish standards inventory; exact signed stable/dev artifacts remain deferred.

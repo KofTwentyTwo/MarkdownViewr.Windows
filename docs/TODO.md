@@ -40,7 +40,7 @@
 - [ ] Verify actual zoom glyph/key/reload/theme/find/collapse behavior in native, published and both installed channels.
 - [x] Implement print-only themes/options, native Windows print UI and explicit PDF save (issue #12); core363/100% lines; no new renderer dependency.
 - [x] Verify original3 focused native print cases on ec5f98f/38125751638: both cancels, real default/themed PDF pixels and unchanged actual glyph/view/source/collapse state.
-- [x] Implement actual PDF font/padding/width/border comparisons and successful-export paired-find preservation; d0a225d native/published width/borders pass, fourth zoom wait fails before font/padding output.
+- [x] Implement actual PDF font/padding/width/border comparisons and successful-export paired-find preservation; d0a225d native/published width/borders pass, zoom wait fails before font/padding output. Diagnostic6e17674 confirms rounded UIA metrics; corrected case measures precise font ratios in actual PDFs.
 - [x] Verify clean original3 print cases in full300e145: native/published52 each, installed stable/dev51 each, zero failures/skips; real PDFs and update apply/restart retained.
 - [ ] Verify actual native print cancellation, saved PDF image/background/font/layout output and unchanged reading/source/find/collapse state in all channels.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
