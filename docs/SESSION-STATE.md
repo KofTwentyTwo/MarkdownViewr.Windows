@@ -2,6 +2,31 @@
 
 Updated: 2026-10-11
 
+## Sustained source palette candidate - 2026-10-11
+
+Exact91877f7 CI38173447118 is terminal:18/20 focused,97/98 native,
+95/98 published,zero skips. Nested outline now passes all variants; source
+focus still fails and published initial Light colors remain authoritative.
+Retain artifacts/current-native-91877f7.log and actual published TRX under
+artifacts/current-installed-evidence-38173447118. No installed outcome yet.
+
+Signed5fa6754 orders semantic formatting after the native property queue;
+signedb15fcbc includes actual source scroll offsets in native content-client
+hit-testing. Both have local zero-warning Release/format/hooks passing.
+Also repaint from the explicit shell theme command: System and explicit Light
+may have the same ActualTheme and otherwise provide no ActualThemeChanged
+repaint. Add System→Light after already highlighted text, and require actual
+native colors in three consecutive existing250ms polls, within the unchanged
+10second limit. This catches a temporary correct flash followed by the proven
+native reset; it does not mirror tokens, delay blindly or relax expectations.
+
+All current corrections preserve physical hover/focus/selection, exact native
+colors and source -2..36px alignment bounds. Tagged diagnostic probes remain
+opt-in and must be removed after diagnosis before release. Preserve owner55472
+output/profile and no local desktop input. Installed/default/Explorer/lifecycle,
+side-by-side editions, original fidelity/standards, Azure/signatures and genuine
+current-head human review remain open; no publication claim.
+
 ## Native client caret coordinates - 2026-10-11
 
 Exact91877f7 CI38173447118 focused18/20,2failures,zero skips: outline

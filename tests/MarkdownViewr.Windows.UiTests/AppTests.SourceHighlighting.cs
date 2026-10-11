@@ -69,6 +69,9 @@ public partial class AppTests
       Assert.Equal(Markdown.ReplaceLineEndings("\r"), source.Patterns.Value.Pattern.Value.Value);
       session.InvokeMenuItem("View", "ThemeLight");
       AssertNativeSourcePalette(session, source, ThemeCatalog.Find("Catppuccin Mocha"), dark: false);
+      session.InvokeMenuItem("View", "ThemeSystem");
+      session.InvokeMenuItem("View", "ThemeLight");
+      AssertNativeSourcePalette(session, source, ThemeCatalog.Find("Catppuccin Mocha"), dark: false);
       SourceRange(source, "Plain 😀 text").Select();
       string selected = ReadSourceSelection(source);
       session.InvokeMenuItem("View", "ThemeDark");
@@ -112,7 +115,12 @@ public partial class AppTests
       int color = red | green << 8 | blue << 16;
       try
       {
-         session.WaitFor(() => NativeSourceAttribute(SourceRange(source, literal), session.Automation.TextAttributeLibrary.ForegroundColor) == color ? source : null, "the actual native source color of " + literal);
+         int stable = 0;
+         session.WaitFor(() =>
+         {
+            stable = NativeSourceAttribute(SourceRange(source, literal), session.Automation.TextAttributeLibrary.ForegroundColor) == color ? stable + 1 : 0;
+            return stable >= 3 ? source : null;
+         }, "the actual native source color of " + literal);
       }
       catch(TimeoutException exception)
       {

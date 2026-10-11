@@ -489,6 +489,7 @@ public sealed partial class MainWindow : Window, IDisposable
       {
          WinUIShell.ApplyTheme((FrameworkElement)_settingsWindow.Content, _settings.ThemeKind);
       }
+      SourceText.SetTheme(ActiveDocumentTheme());
       Save();
    }
 
