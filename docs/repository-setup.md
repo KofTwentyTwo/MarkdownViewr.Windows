@@ -9,7 +9,7 @@ hooks, and run [CONTRIBUTING.md](../CONTRIBUTING.md)'s checks. Node 24 and Power
 The default command works offline and writes thirteen non-secret API requests:
 
 ```powershell
-./build/Initialize-GitHubRepository.ps1 -Repository KofTwentyTwo/MarkdownViewr.Windows
+./build/Initialize-GitHubRepository.ps1 -Repository KofTwentyTwo/windows-app-template
 Get-Content artifacts/repository-setup.json
 ```
 
@@ -65,6 +65,12 @@ reused; conflicting rules or release policies stop before writes. Unrelated rule
 and environment protections are retained. API failures stop immediately; earlier
 successful requests may remain, so validate and resolve the reported failure before
 rerunning. The tool never creates repositories, pushes, merges, tags or releases.
+
+The selected Actions policy permits the shared standards workflows, GitHub-owned
+and verified actions, and the exact digest-pinned Gitleaks/Trivy container actions
+used by the published security builder. GitHub also checks container actions
+against this policy; missing entries prevent the security workflow from starting.
+Review these exact references whenever the shared builder pin changes.
 
 ## Finish and verify
 
