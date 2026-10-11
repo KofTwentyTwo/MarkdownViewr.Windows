@@ -68,7 +68,7 @@ public partial class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the print width heading", TimeSpan.FromSeconds(30));
       OpenSettingsAction(session, "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorName", "Print geometry");
-      session.EnterText("ThemeEditorCss", "body { max-width: 240px; } pre { border: none; border-radius: 0; }");
+      session.EnterText("ThemeEditorCss", "body { max-width: 240px; margin: 0 auto; } pre { border: none; border-radius: 0; }");
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
       CloseSettings(session);

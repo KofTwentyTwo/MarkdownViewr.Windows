@@ -110,7 +110,15 @@ public partial class AppTests
       int green = int.Parse(expected.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
       int blue = int.Parse(expected.AsSpan(5, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
       int color = red | green << 8 | blue << 16;
-      session.WaitFor(() => NativeSourceAttribute(SourceRange(source, literal), session.Automation.TextAttributeLibrary.ForegroundColor) == color ? source : null, "the actual native source color of " + literal);
+      try
+      {
+         session.WaitFor(() => NativeSourceAttribute(SourceRange(source, literal), session.Automation.TextAttributeLibrary.ForegroundColor) == color ? source : null, "the actual native source color of " + literal);
+      }
+      catch(TimeoutException exception)
+      {
+         string actual = NativeSourceColorHex(SourceRange(source, literal), session);
+         throw new TimeoutException(exception.Message + "; Expected=" + expected + "; Actual=" + actual + "; Last native invocation=" + session.LastInvocation + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+      }
    }
 
 

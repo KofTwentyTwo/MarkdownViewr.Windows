@@ -4,31 +4,41 @@ Updated: 2026-10-11
 
 ## Current release verification - 2026-10-11
 
-Signed/DCO0ed608e is pushed to PR#3. Exact CI38166230860 is terminal:
-source-hover regression passes (actual native pointer/focus/selection colors,
-TRX in artifacts/source-hover-38166230860); full native74/97,23failures,
-zero skips. Build/core/format pass. Published acceptance again exceeded its
-600second process deadline before installed channel outcomes; no signed release
-or current installed acceptance is established. Retained exact job logs:
-artifacts/current-native-0ed608e.log and artifacts/current-installed-0ed608e.log.
+Signed/DCO05bf612 is pushed to PR#3. Exact CI38167591076 full native run
+completed84/97,13failures,zero skips; previous0ed608e was74/97. Current
+focused12-case TRX is retained in artifacts/reader-regressions-38167591076:
+Settings panel defaults, toolbar alignment, picker cancellation, custom theme
+paint, source theme/mode and exact copying pass. Source-hover passes the full
+run but has a focused initial-color timeout before pointer input; retain the
+variant instead of calling all highlighting accepted. Build/core/format pass.
+Published/installed job114553267448 is terminal: published dotnet tests again
+exceeded600seconds before any installed outcomes; retain
+artifacts/current-installed-05bf612.log. No deadline was increased.
+Exact full-native log: artifacts/current-native-05bf612.log.
 
-Next reviewed patch corrects the observed Open picker filename selector1148
-(control1001 is its address toolbar), checks the actual outline-depth peer,
-and aligns Contents/Print48px hit targets with the other toolbar commands.
-Full-page printing now resets custom outer body width as well as inner width.
-Document paint checks sample the owned browser instead of a split divider;
-custom CSS fixture targets the visible body layer of the original stylesheet.
-Unchanged native pane-width/scroll/glyph assertions now retain precise failed
-geometry/provider evidence; no cases are skipped or relaxed. The focused hosted
-job covers the actual failing paths, with full acceptance still required.
+Next patch gives the original #content div a named, focusable main landmark so
+Chromium exposes the actual inner scroll surface. The prior root reports Scroll
+support but no vertical extent, while the unnamed inner container is omitted.
+Native menu lookup now selects visible owned peers and dismisses leaf View
+menus; UIA Invoke no longer forces reader foreground over Settings/menu owners.
+Recent activation defers until the invoking menu finishes restoring focus.
 
-Local Release build is zero-warning;586 core tests and100% measured line
-coverage pass in artifacts/reader-fixes-core-verified. Formatting remains a
-required final gate. Owner preview PID55472 remains responsive and untouched.
-Azure access is unavailable; exact repository-specific immutable OIDC trust,
-resource verification and profile role commands are committed in
-[azure-signing-admin.md](azure-signing-admin.md). No Azure mutations, human
-review acknowledgement, merges or release publication have been fabricated.
+Existing exact font/pixel/print assertions remain: typography fixture requests
+28px body because24px produces20→28px glyph heights, exactly40%, rejected by its
+strict greater-than40% comparison. The narrow print fixture explicitly centers
+its custom body before testing the Full-page margin/width reset. Palette checks
+sample the owned empty8px reading gutter rather than a glyph/find mark; no
+color expectation is changed. Source color/picker failures retain actual values.
+No test is skipped or weakened; actual hosted behavior must prove these changes.
+
+Local zero-warning Release build,586 core tests/100% measured lines pass in
+artifacts/reader-accessibility-core. Real pipe stress25runs/75tests passes,
+zero skips; the older intermittent disconnect failure did not reproduce, and
+no speculative pipe change was made. Formatting passes.
+Owner preview55472 stays responsive and preserved. Azure access unavailable;
+[azure-signing-admin.md](azure-signing-admin.md) provides exact immutable OIDC,
+resource/profile verification and profile-role commands. No signing/release,
+review acknowledgement, Azure mutation or merge is claimed.
 
 ## Current owner review launch - 2026-10-11
 

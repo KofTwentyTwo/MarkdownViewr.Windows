@@ -198,7 +198,14 @@ public partial class AppTests
       SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
       Keyboard.Type(path);
       Wait.UntilInputIsProcessed();
-      session.WaitFor(() => string.Equals(filename.AsTextBox().Text, path, StringComparison.Ordinal) ? filename : null, "the fully committed exact owned picker filename");
+      try
+      {
+         session.WaitFor(() => string.Equals(filename.AsTextBox().Text, path, StringComparison.Ordinal) ? filename : null, "the fully committed exact owned picker filename");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException(exception.Message + "; Expected=" + path + "; Actual=" + filename.AsTextBox().Text + "; Last invocation=" + session.LastInvocation, exception);
+      }
    }
 
 

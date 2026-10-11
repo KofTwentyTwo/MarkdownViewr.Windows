@@ -20,6 +20,6 @@ public static class DocumentPage
       ArgumentNullException.ThrowIfNull(title);
       ArgumentNullException.ThrowIfNull(theme);
       ArgumentNullException.ThrowIfNull(appearance);
-      return $"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{WebUtility.HtmlEncode(title)}</title><style media="screen">{theme.GetReadingStyles(appearance, zoomScale)}</style></head><body><div id="content"><div id="content-inner">{sanitizedHtml}</div></div></body></html>""";
+      return $"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{WebUtility.HtmlEncode(title)}</title><style media="screen">{theme.GetReadingStyles(appearance, zoomScale)}</style></head><body><div id="content" role="main" aria-label="Document reading area" tabindex="0"><div id="content-inner">{sanitizedHtml}</div></div></body></html>""";
    }
 }

@@ -120,7 +120,7 @@ public partial class AppTests
 
 
 
-   /// <summary>Samples only the explicitly foreground owned WebView surface, excluding native source panes and other readers.</summary>
+   /// <summary>Samples the foreground owned reading gutter, excluding native panes, glyphs and active find highlights.</summary>
    private static void WaitForAppearanceWindowColor(AppSession session, Window window, Color expected)
    {
       window.SetForeground();
@@ -137,7 +137,7 @@ public partial class AppTests
             return null;
          }
          using Bitmap image = view.Capture();
-         return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? view : null;
+         return image.GetPixel(Math.Min(8, image.Width - 1), Math.Min(8, image.Height - 1)).ToArgb() == expected.ToArgb() ? view : null;
       }, "actual owned reader background " + expected);
    }
 }

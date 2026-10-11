@@ -29,9 +29,10 @@ public partial class AppTests
       {
          session.EnterText(id, "Consolas");
       }
+      // Give native rounded glyph metrics a clear growth margin while retaining the40% assertion.
       var sizes = new Dictionary<string, (string Id, double Value)>(StringComparer.Ordinal)
       {
-         ["baseFontSize"] = ("ThemeEditorBodySize", 24),
+         ["baseFontSize"] = ("ThemeEditorBodySize", 28),
          ["h1Size"] = ("ThemeEditorHeading1Size", 56),
          ["h2Size"] = ("ThemeEditorHeading2Size", 48),
          ["h3Size"] = ("ThemeEditorHeading3Size", 44),

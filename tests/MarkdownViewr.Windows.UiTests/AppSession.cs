@@ -213,9 +213,16 @@ public sealed class AppSession : IDisposable
             Invoke(menu);
          }
          Wait.UntilInputIsProcessed();
-         item = Retry.WhileNull(() => FindInApp(cf => cf.ByAutomationId(itemAutomationId)), timeout: TimeSpan.FromSeconds(3), interval: s_pollInterval, ignoreException: true).Result;
+         item = Retry.WhileNull(
+            () => TopLevelWindows().Prepend(MainWindow).SelectMany(root => root.FindAllDescendants(cf => cf.ByAutomationId(itemAutomationId))).FirstOrDefault(candidate => !candidate.IsOffscreen),
+            timeout: TimeSpan.FromSeconds(3), interval: s_pollInterval, ignoreException: true).Result;
       }
       Invoke(item ?? throw new TimeoutException($"Menu item '{itemAutomationId}' never appeared under '{menuName}'. (app exited: {App.HasExited})"));
+      if(string.Equals(menuName, "View", StringComparison.Ordinal) && !item.Patterns.ExpandCollapse.IsSupported)
+      {
+         menu.Patterns.ExpandCollapse.Pattern.Collapse();
+         Wait.UntilInputIsProcessed();
+      }
    }
 
 
@@ -323,7 +330,6 @@ public sealed class AppSession : IDisposable
    /// <summary>Invokes an element through UI Automation, falling back to a mouse click.</summary>
    private void Invoke(AutomationElement element)
    {
-      MainWindow.SetForeground();
       if(element.Patterns.Invoke.TryGetPattern(out IInvokePattern? invoke))
       {
          LastInvocation = $"UIA Invoke: {element.Properties.AutomationId.ValueOrDefault}.";

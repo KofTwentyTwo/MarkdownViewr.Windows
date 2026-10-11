@@ -66,7 +66,11 @@ public partial class App
       MainWindow? existing = _windows.FirstOrDefault(window => string.Equals(window.DocumentPath, canonical, StringComparison.OrdinalIgnoreCase));
       if(existing is not null)
       {
-         existing.Activate();
+         // The invoking menu must finish restoring focus before the existing reader activates.
+         if(!existing.DispatcherQueue.TryEnqueue(() => existing.Activate()))
+         {
+            existing.Activate();
+         }
       }
       else if(requester.DocumentPath is null)
       {

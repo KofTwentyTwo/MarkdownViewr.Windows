@@ -1344,7 +1344,7 @@ public partial class AppTests
 
 
 
-   /// <summary>Waits for the actual painted document palette rather than just a saved preference or old heading.</summary>
+   /// <summary>Samples the actual owned browser reading gutter, excluding glyphs, find marks and native dividers.</summary>
    private static void WaitForDocumentColor(AppSession session, System.Drawing.Color expected)
    {
       session.WaitFor(
@@ -1352,7 +1352,7 @@ public partial class AppTests
          {
             AutomationElement view = session.WaitForElement("DocumentView");
             using System.Drawing.Bitmap image = view.Capture();
-            return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? view : null;
+            return image.GetPixel(Math.Min(8, image.Width - 1), Math.Min(8, image.Height - 1)).ToArgb() == expected.ToArgb() ? view : null;
          },
          "the rendered document background " + expected);
    }
