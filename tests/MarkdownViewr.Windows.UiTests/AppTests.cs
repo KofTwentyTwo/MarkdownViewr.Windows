@@ -215,9 +215,17 @@ public class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source acceptance")), "the document heading", TimeSpan.FromSeconds(30));
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("SourceText")));
       session.InvokeMenuItem("View", "SourceToggle");
-      AutomationElement source = session.WaitForElement("SourceText");
+      AutomationElement source;
+      try
+      {
+         source = session.WaitForElement("SourceText");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException($"{exception.Message} Settings: {session.ReadSettings()} Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
+      }
       Assert.True(source.Patterns.Value.Pattern.IsReadOnly.Value);
-      string value = source.Patterns.Value.Pattern.Value.Value.Replace("\r\n", "\n", StringComparison.Ordinal);
+      string value = source.Patterns.Value.Pattern.Value.Value.ReplaceLineEndings("\n");
       Assert.Equal(Markdown, value);
       using(var settings = JsonDocument.Parse(session.ReadSettings()))
       {
@@ -227,6 +235,25 @@ public class AppTests
       File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Source replacement\n\n**New literal text**");
       session.WaitFor(() => source.Patterns.Value.Pattern.Value.Value.Contains("**New literal text**", StringComparison.Ordinal) ? source : null, "the source snapshot after reload");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source replacement")), "the rendered replacement heading");
+      AutomationElement divider = session.WaitForElement("SourceDivider");
+      session.MainWindow.SetForeground();
+      Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
+      Assert.Equal("SourceDivider", session.Automation.FromPoint(start).Properties.AutomationId.ValueOrDefault);
+      NativeMouse.MoveTo(start);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      NativeMouse.MoveTo(new System.Drawing.Point(start.X - 70, start.Y));
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      session.WaitFor(
+         () =>
+         {
+            using var settings = JsonDocument.Parse(session.ReadSettings());
+            return settings.RootElement.GetProperty("SourceWidth").GetDouble() > 360 ? session.MainWindow : null;
+         },
+         "the physically resized source width to be saved");
       session.InvokeMenuItem("View", "SourceToggle");
       session.WaitForElementGone("SourceText");
       using var hidden = JsonDocument.Parse(session.ReadSettings());
@@ -254,11 +281,11 @@ public class AppTests
       Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
       Assert.Equal(session.App.ProcessId, session.Automation.FromPoint(start).Properties.ProcessId.ValueOrDefault);
       Assert.Equal("OutlineDivider", session.Automation.FromPoint(start).Properties.AutomationId.ValueOrDefault);
-      FlaUI.Core.Input.Mouse.Position = start;
+      NativeMouse.MoveTo(start);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(start.X + 70, start.Y));
+      NativeMouse.MoveTo(new System.Drawing.Point(start.X + 70, start.Y));
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();

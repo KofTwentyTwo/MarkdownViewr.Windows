@@ -255,7 +255,7 @@ public sealed class AppSession : IDisposable
       {
          throw new InvalidOperationException("The native mouse target no longer has a clickable point.");
       }
-      Mouse.Position = point;
+      NativeMouse.MoveTo(point);
       Wait.UntilInputIsProcessed();
       AutomationElement? hit = Automation.FromPoint(Mouse.Position);
       for(int depth = 0; hit is not null && depth < 8; depth++, hit = hit.Parent)

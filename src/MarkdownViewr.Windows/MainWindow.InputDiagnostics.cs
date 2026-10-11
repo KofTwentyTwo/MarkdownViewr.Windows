@@ -21,10 +21,13 @@ public sealed partial class MainWindow
       }
       foreach(UIElement element in new UIElement[] { RootGrid, OutlineDivider, SourceDivider, FrontmatterHide, FrontmatterMetadata, FrontmatterMarkdown })
       {
+         element.AddHandler(UIElement.PointerEnteredEvent, new PointerEventHandler((sender, args) => TracePointer("entered", sender, args)), handledEventsToo: true);
+         element.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler((sender, args) => TracePointer("exited", sender, args)), handledEventsToo: true);
          element.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler((sender, args) => TracePointer("pressed", sender, args)), handledEventsToo: true);
          element.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler((sender, args) => TracePointer("released", sender, args)), handledEventsToo: true);
          element.AddHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler((sender, args) => TracePointer("capture-lost", sender, args)), handledEventsToo: true);
       }
+      OutlineDivider.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler((sender, args) => TracePointer("moved", sender, args)), handledEventsToo: true);
       OutlineDivider.DragStarted += (_, args) => App.Log.Info(FormattableString.Invariant($"Input trace: outline drag started; x={args.HorizontalOffset}; y={args.VerticalOffset}."));
       OutlineDivider.DragDelta += (_, args) => App.Log.Info(FormattableString.Invariant($"Input trace: outline drag delta; x={args.HorizontalChange}; y={args.VerticalChange}."));
       OutlineDivider.DragCompleted += (_, args) => App.Log.Info(FormattableString.Invariant($"Input trace: outline drag completed; canceled={args.Canceled}."));

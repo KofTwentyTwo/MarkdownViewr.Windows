@@ -120,3 +120,25 @@ Fixture-only MARKDOWNVIEWR_INPUT_TRACE=1 records native pressed/released/capture
 outline drag events and frontmatter clicks without changing routing or logging content.
 This tests whether WinUI receives the exact physical events; no third timing workaround
 or weakened outcome assertion. The next exact hosted handles must be observed.
+
+## Native events captured and movement correction
+
+9ff820f4773c54573c1d24028ba489328bf2e9c6 CI 38106466328 loose native/UI
+finished 31/34: two prior input failures plus SourceText accessibility lookup.
+Build/format/scripts/security/CodeQL passed; installed producer now terminal FAILURE.
+Retained exact log: artifacts/native-event-source-ui-38106466328.log.
+
+Trace shows Markdown press handled and release unhandled with no click. Outline
+DragStarted and DragCompleted occur, but no DragDelta. The pinned FlaUI 5.0.0
+Mouse.Position/MoveTo implementation uses SetCursorPos, while Down/Up use SendInput.
+Follow-up injects a real absolute MOUSEEVENTF_MOVE through the existing FlaUI Win32
+API, with virtual-desktop bounds/normalization and failure checks. Button states,
+exact target checks, 70-pixel resize and all saved-mode/width assertions remain.
+Entered/exited/outline-moved traces will distinguish the next delivery path.
+
+Declare native source controls before WebView2 while retaining Grid.Column positions,
+as the earlier verified StatusText accessibility fix did. Source test now includes a
+real 70-pixel source-divider drag; normalize only native line-ending presentation.
+Source/outline resize and frontmatter remain unverified until exact hosted results.
+All 9ff820f producers are now terminal; the follow-up may be pushed without cancelling them.
+Native paired-find research retained in artifacts/native-find-notes.md; full scope active.
