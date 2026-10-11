@@ -625,10 +625,17 @@ public partial class AppTests
       }
       catch(TimeoutException)
       {
-         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
-         _output.WriteLine("Source alignment: viewport=" + source.BoundingRectangle + "; glyph rectangles=" + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())));
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
+         try
+         {
+            FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+            _output.WriteLine("Source alignment: viewport=" + source.BoundingRectangle + "; glyph rectangles=" + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())));
+         }
+         catch(System.ComponentModel.Win32Exception exception)
+         {
+            _output.WriteLine("Native source geometry was unavailable: " + exception.Message);
+         }
          throw;
       }
    }
@@ -1162,6 +1169,7 @@ public partial class AppTests
       AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Visible peer body")), "the collapsed parent");
       session.ClickElement("ToggleSection");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible peer body")), "the expanded parent");
+      _output.WriteLine(session.ReadLogs());
       Assert.Null(session.FindInApp(cf => cf.ByName("Hidden child body")));
       session.InvokeMenuItem("View", "DocumentThemesMenu");
       session.ClickElement("DocumentTheme:GitHub Light");

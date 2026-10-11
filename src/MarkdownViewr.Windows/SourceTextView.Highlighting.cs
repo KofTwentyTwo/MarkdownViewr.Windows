@@ -92,6 +92,7 @@ public sealed partial class SourceTextView
       {
          return;
       }
+      TraceSourceAppearance("paint start");
       int generation = ++_paintGeneration;
       int snapshot = _generation;
       var palette = new SourcePalette(_theme, ActualTheme == ElementTheme.Dark);
@@ -120,6 +121,27 @@ public sealed partial class SourceTextView
          PaintBatch(tokens, first, palette, foreground, highContrast);
          await Task.Yield();
       }
+      TraceSourceAppearance("paint complete");
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => TraceSourceAppearance("after native queue"));
+      }
+   }
+
+
+
+   /// <summary>Temporary fixture-only evidence distinguishes parser completion from native foreground replacement without text.</summary>
+   private void TraceSourceAppearance(string operation)
+   {
+      if(_disposed || !string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         return;
+      }
+      SourceToken? heading = _tokens.FirstOrDefault(token => token.Kind == SourceTokenKind.Heading);
+      global::Windows.UI.Color? color = heading is null ? null : Document.GetRange(heading.Start, heading.Start + heading.Length).CharacterFormat.ForegroundColor;
+      global::Windows.UI.Color? foreground = (Foreground as SolidColorBrush)?.Color;
+      global::Windows.UI.Color? content = (GetTemplateChild("ContentElement") as Microsoft.UI.Xaml.Controls.ScrollViewer)?.Foreground is SolidColorBrush brush ? brush.Color : null;
+      App.Log.Info(FormattableString.Invariant($"[DEBUG-source-colors] {operation}; snapshot={_generation}; paint={_paintGeneration}; tokens={_tokens.Count}; theme={ActualTheme}; focus={FocusState}; heading={color}; foreground={foreground}; content={content}; highContrast={_accessibility.HighContrast}."));
    }
 
 

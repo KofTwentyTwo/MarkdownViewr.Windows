@@ -2,6 +2,25 @@
 
 Updated: 2026-10-11
 
+## Native diagnostic correction - 2026-10-11
+
+Current dbda6d4 CI38171433458 focused gate is terminal17/20,3failures,
+zero skips. Initial Light source palette still becomes#1F1F1F rather than
+#75628B after an actual UIA Toggle; the queued theme repaint is not proven.
+Nested outline expansion still exposes the collapsed child's native peer.
+Physical source-focus alignment still fails, but its failure-report geometry
+call throws E_UNEXPECTED and masks the timeout before saving the focus logs.
+
+Preserve the original assertions and bounds. Read native logs/tree before
+optional glyph geometry and catch only the observed diagnostic Win32Exception.
+Add temporary opt-in [DEBUG-source-colors] before/after actual painting and the
+native queue, plus [DEBUG-outline-collapse] generated hidden-section indices
+following actual jump/toggle commands. These probes log no document text or
+paths and must be removed after diagnosis before release. Native/published
+jobs114564687334/114564687101 remain live; do not cancel or restart them just
+because job logs are not yet available. Full installed/default/Explorer and
+stable/dev lifecycle acceptance remains pending. Owner preview55472 is untouched.
+
 ## Installed association acceptance boundary - 2026-10-11
 
 The installed harness now supplies a saved/restored test-only installation

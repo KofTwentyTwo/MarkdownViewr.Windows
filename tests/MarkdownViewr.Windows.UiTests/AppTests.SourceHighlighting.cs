@@ -117,7 +117,7 @@ public partial class AppTests
       catch(TimeoutException exception)
       {
          string actual = NativeSourceColorHex(SourceRange(source, literal), session);
-         throw new TimeoutException(exception.Message + "; Expected=" + expected + "; Actual=" + actual + "; Last native invocation=" + session.LastInvocation + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+         throw new TimeoutException(exception.Message + "; Expected=" + expected + "; Actual=" + actual + "; Last native invocation=" + session.LastInvocation + "; App logs: " + session.ReadLogs() + "; Native tree: " + session.DescribeDocumentStatus(), exception);
       }
    }
 

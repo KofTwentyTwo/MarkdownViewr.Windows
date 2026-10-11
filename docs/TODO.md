@@ -145,6 +145,7 @@ checks below do not substitute for current native/distributed acceptance.
 - [ ] Pass hosted CI on the actual current implementation; retain native/published/installed TRXs, screenshots and real PDFs.
 - [x] Implement gclo-style separate stable/dev package IDs and installed-channel title/data identity;586 core tests/100% measured lines pass.
 - [ ] Verify current side-by-side stable/dev install/activation/registration/update behavior and exact package IDs.
+- [ ] Diagnose dbda6d4 focused17/20 failures with retained native color/focus/hidden-section evidence; preserve exact assertions and remove temporary debug probes before release.
 - [ ] Adopt the reviewed/published owned-file signing builder; verify actual Azure resource/profile/publisher and repository-bound OIDC/profile-signer permission.
 - [ ] Obtain genuine current-head maintainer review acknowledgement, complete required checks and merge.
 - [ ] Publish signed stable1.0/dev releases with verification of exact distributed artifacts, timestamp/publisher/checksums and installed update acceptance.
