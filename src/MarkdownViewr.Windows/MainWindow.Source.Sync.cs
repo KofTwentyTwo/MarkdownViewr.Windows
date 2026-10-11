@@ -60,21 +60,9 @@ public sealed partial class MainWindow
       }
       if(SourceText.SelectionLength == 0 && SourceText.TextLength > 0)
       {
-         int first = 0;
-         int last = SourceText.TextLength - 1;
-         while(first < last)
-         {
-            int middle = first + (last - first) / 2;
-            if(SourceText.GetRectFromCharacterIndex(middle, trailingEdge: false).Y < position)
-            {
-               first = middle + 1;
-            }
-            else
-            {
-               last = middle;
-            }
-         }
-         SourceText.Select(first, 0);
+         Microsoft.UI.Text.ITextRange visible = SourceText.Document.GetRangeFromPoint(
+            new global::Windows.Foundation.Point(SourceText.Padding.Left, SourceText.Padding.Top), Microsoft.UI.Text.PointOptions.ClientCoordinates);
+         SourceText.Select(visible.StartPosition, 0);
       }
       Core.Documents.DocumentSourceText? snapshot = _sourceDocument;
       DispatcherQueue.TryEnqueue(() =>

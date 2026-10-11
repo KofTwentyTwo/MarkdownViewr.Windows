@@ -2,6 +2,33 @@
 
 Updated: 2026-10-11
 
+## Visible source caret and outline accessibility - 2026-10-11
+
+Signed04c1da8 CI38172448726 focused20 cases:18pass,2fail,zero skips.
+Source colors/physical hover pass this variant; full/published colors remain
+required because metadata probes may change native propagation timing.
+
+Exact native source-focus probe: offset5297.759, firstY5297.759, selection0
+before and after focus. The offscreen first-character rectangle is zero before
+adding the offset, so binary searching offscreen rectangles picks character0
+and focus reveals the old caret. Replace that search with native
+ITextDocument.GetRangeFromPoint at the visible client inset and select its
+actual position. Keep original physical click/wheel and -2..36px glyph bounds.
+
+Outline probe retains collapsed DOMindices[1] after child collapse, [0,1]
+while parent is collapsed, and [1] after parent expands. The stale child UIA
+peer is observed immediately after its sibling appears. Wait for the same
+actual hidden child's peer to disappear within the existing10second helper;
+retain identical absence checks through theme change and reload. No arbitrary
+sleep, hidden-flag simulation, wider geometry bound or test exclusion.
+
+Local zero-warning Release passes for the caret/outline correction. Current
+04c1da8 full native/published jobs114567713082/114567712967 are still live;
+retain their terminal variants before pushing the next head. Signing, installed
+associations/Explorer/lifecycle and side-by-side release verification remain open.
+Owner preview55472 is responsive and untouched. Tagged probes remain temporary
+and must be removed after diagnosis before release.
+
 ## Native diagnostic correction - 2026-10-11
 
 Current dbda6d4 CI38171433458 focused gate is terminal17/20,3failures,

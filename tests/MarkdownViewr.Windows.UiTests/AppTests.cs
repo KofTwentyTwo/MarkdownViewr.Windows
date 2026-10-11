@@ -1170,14 +1170,14 @@ public partial class AppTests
       session.ClickElement("ToggleSection");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible peer body")), "the expanded parent");
       _output.WriteLine(session.ReadLogs());
-      Assert.Null(session.FindInApp(cf => cf.ByName("Hidden child body")));
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Hidden child body")), "the retained collapsed child accessibility peer");
       session.InvokeMenuItem("View", "DocumentThemesMenu");
       session.ClickElement("DocumentTheme:GitHub Light");
       WaitForDocumentColor(session, System.Drawing.Color.White);
-      Assert.Null(session.FindInApp(cf => cf.ByName("Hidden child body")));
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Hidden child body")), "the retained collapsed child accessibility peer");
       File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Parent outline\n\nParent body\n\n## Child outline\n\nUpdated child body\n\n## Peer outline\n\nUpdated peer body");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Updated peer body")), "the new snapshot");
-      Assert.Null(session.FindInApp(cf => cf.ByName("Updated child body")));
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Updated child body")), "the retained collapsed reloaded child accessibility peer");
       session.ClickElement("OutlineHeading:1");
       session.ClickElement("ToggleSection");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Updated child body")), "the expanded reloaded child");
