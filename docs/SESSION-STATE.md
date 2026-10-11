@@ -44,6 +44,14 @@ the initial Opened status to be accessible. Build and formatting pass locally;
 hosted recovery proof is pending. Accessibility head 23928bc still failed the initial status lookup (24/25 UI tests passed); properties alone did not resolve it. The next diagnostic retains the native tree and fixture-window PNG in hosted installed evidence. No deletion assertion is weakened. Scripts 38100976565 reproduced the analyzer
 engine crash; no scripts/settings/workflow changed and issue #5 remains open.
 
+Hosted diagnostic CI 38101512710 is terminal failure. Its retained app screenshot
+shows the initial window extending off the hosted desktop, clipping the entire status
+line. The next change fits initial size/position and minimum dimensions to the current
+monitor work area using physical DPI-scaled pixels. Exact initial and deletion status
+assertions remain unchanged. Theme commit 0507ca5 is local until this follow-up push;
+117 core tests/100% coverage and zero-warning build/format passed. Real browser proof
+of display fitting and theme selection remains pending.
+
 ## Repository and authorization
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).

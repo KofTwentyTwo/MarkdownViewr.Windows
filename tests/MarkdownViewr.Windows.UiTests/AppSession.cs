@@ -102,7 +102,8 @@ public sealed class AppSession : IDisposable
       Directory.CreateDirectory(directory);
       string name = Guid.NewGuid().ToString("N");
       MainWindow.CaptureToFile(Path.Combine(directory, name + ".png"));
-      string tree = FlaUI.Core.Debug.Details(MainWindow);
+      string tree = string.Join(Environment.NewLine, MainWindow.FindAllDescendants().Take(200).Select(element =>
+         $"Id={element.Properties.AutomationId.ValueOrDefault}; Name={element.Properties.Name.ValueOrDefault}; Type={element.Properties.ControlType.ValueOrDefault}; Bounds={element.BoundingRectangle}; Offscreen={element.IsOffscreen}"));
       File.WriteAllText(Path.Combine(directory, name + ".log"), tree);
       return tree;
    }

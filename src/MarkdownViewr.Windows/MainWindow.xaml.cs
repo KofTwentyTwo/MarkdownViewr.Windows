@@ -38,8 +38,7 @@ public sealed partial class MainWindow : Window, IDisposable
       _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, Core.Themes.ThemeCatalog.Find(_settings.DocumentTheme));
       CreateDocumentThemeMenu();
       Title = AppIdentity.Info.DisplayName;
-      this.ResizeForDpi(1100, 760);
-      this.SetMinimumSize(640, 420);
+      FitInitialWindow();
       this.SetAppIcon(AppIdentity.Info);
 
       _updates = new UpdateCoordinator(
@@ -62,6 +61,28 @@ public sealed partial class MainWindow : Window, IDisposable
       }
    }
 
+
+
+   /// <summary>Keeps the full initial window and status line inside the current monitor's working area.</summary>
+   private void FitInitialWindow()
+   {
+      global::Windows.Graphics.RectInt32 area = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary).WorkArea;
+      double scale = this.DpiScale();
+      int width = Math.Min((int)(1100 * scale), area.Width);
+      int height = Math.Min((int)(760 * scale), area.Height);
+      if(AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+      {
+         presenter.PreferredMinimumWidth = Math.Min((int)(640 * scale), area.Width);
+         presenter.PreferredMinimumHeight = Math.Min((int)(420 * scale), area.Height);
+      }
+      AppWindow.MoveAndResize(new global::Windows.Graphics.RectInt32
+      {
+         X = area.X + (area.Width - width) / 2,
+         Y = area.Y + (area.Height - height) / 2,
+         Width = width,
+         Height = height,
+      });
+   }
 
 
    /// <summary>
