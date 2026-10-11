@@ -151,7 +151,7 @@ public sealed class DocumentStylesTests
       Assert.Contains("html,body,#content{height:auto!important;overflow:visible!important;display:block!important;}", full, StringComparison.Ordinal);
       Assert.Contains("#content-inner{padding:0!important;}", full, StringComparison.Ordinal);
       Assert.Contains("body{padding:16px!important;}", full, StringComparison.Ordinal);
-      Assert.Contains("#content-inner{max-width:none!important;margin:0!important;}", full, StringComparison.Ordinal);
+      Assert.Contains("#content-inner{width:auto!important;max-width:none!important;margin:0!important;}", full, StringComparison.Ordinal);
       Assert.DoesNotContain("#content-inner{max-width:none!important", limited, StringComparison.Ordinal);
       Assert.Contains("#content-inner{max-width:900px;margin:0 auto;}", limited, StringComparison.Ordinal);
    }

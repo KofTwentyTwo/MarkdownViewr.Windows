@@ -61,7 +61,7 @@ public static class PrintStyles
       css.Append("body{padding:").Append(options.PaddingPixels.ToString("R", CultureInfo.InvariantCulture)).Append("px!important;}");
       if(options.FullPage)
       {
-         css.Append("#content-inner{max-width:none!important;margin:0!important;}");
+         css.Append("body{width:auto!important;max-width:none!important;margin:0!important;}#content-inner{width:auto!important;max-width:none!important;margin:0!important;}");
       }
       if(!options.Backgrounds)
       {

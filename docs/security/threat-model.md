@@ -21,7 +21,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | --- | --- |
 | Picker / literal process argument | Read-only bounded snapshot; no shell interpolation |
 | Frontmatter | Bounded by document limit; complete leading delimiters only; metadata values HTML-escaped; Markdown mode uses the same sanitizer; no YAML execution or native commands |
-| Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
+| Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS or IDs; only bounded code-language and fixed document classes survive |
 | Native print/PDF | Deliberate File/Print/Ctrl+P; ready passive document only; copied bounded settings; Windows destination picker; JSON-serialized CSS text in host-owned print stylesheet; same navigation checked after preparation; no authored command/output path; no document/path logs |
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
 | Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded strict version-one parsing and validated compatible saved/import schemas with explicit newer-import consent; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |

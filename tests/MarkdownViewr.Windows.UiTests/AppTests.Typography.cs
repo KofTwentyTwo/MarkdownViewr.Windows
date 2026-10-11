@@ -48,14 +48,22 @@ public partial class AppTests
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
       CloseSettings(session);
-      session.WaitFor(() =>
-      {
-         AutomationElement current = session.WaitForElement("mv-heading-0");
-         return current.BoundingRectangle.Height > headingHeight * 1.4 &&
-            WaitForTypographyText(session, "Body font probe").BoundingRectangle.Height > bodyHeight * 1.4 &&
-            WaitForTypographyText(session, "Code font probe").BoundingRectangle.Height > codeHeight * 1.15 ? current : null;
-      }, "actual heading, body and code glyph growth after all typography edits");
       AssertSavedTypography(session, sizes);
+      try
+      {
+         session.WaitFor(() =>
+         {
+            AutomationElement current = session.WaitForElement("mv-heading-0");
+            return current.BoundingRectangle.Height > headingHeight * 1.4 &&
+               WaitForTypographyText(session, "Body font probe").BoundingRectangle.Height > bodyHeight * 1.4 &&
+               WaitForTypographyText(session, "Code font probe").BoundingRectangle.Height > codeHeight * 1.15 ? current : null;
+         }, "actual heading, body and code glyph growth after all typography edits");
+      }
+      catch(TimeoutException exception)
+      {
+         string heights = FormattableString.Invariant($"Heading={headingHeight:R}/{session.WaitForElement("mv-heading-0").BoundingRectangle.Height:R}; Body={bodyHeight:R}/{WaitForTypographyText(session, "Body font probe").BoundingRectangle.Height:R}; Code={codeHeight:R}/{WaitForTypographyText(session, "Code font probe").BoundingRectangle.Height:R}");
+         throw new TimeoutException(exception.Message + "; Initial/current actual glyph heights: " + heights + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+      }
       string accepted = session.ReadSettings();
       double acceptedHeight = session.WaitForElement("mv-heading-0").BoundingRectangle.Height;
       OpenSettingsAction(session, "EditDocumentThemeMenu");

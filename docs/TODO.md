@@ -95,7 +95,8 @@
 Full stable1.0 and isolated development releases are authorized. Local implementation
 checks below do not substitute for current native/distributed acceptance.
 
-- [ ] #27: Reproduce and fix source token colors disappearing on pointer hover; verify focus/selection/scroll/reload/theme transitions in the actual native control.
+- [x] #27: Reproduce source-hover color loss and fix native foreground state assignments; exact hosted pointer/focus/selection regression passes on0ed608e/CI38166230860.
+- [ ] #27: Verify all source color/theme/reload/copy/scroll behavior in current published and installed editions; full acceptance remains open.
 - [x] #18: Remove the duplicate toolbar depth selector and label Contents/Print; retain TOC depth.
 - [ ] #18: Verify current toolbar alignment, overflow and narrow-window behavior.
 - [x] #21: Add independent new-window Contents/Source defaults, both off; core merge/copy regressions pass.

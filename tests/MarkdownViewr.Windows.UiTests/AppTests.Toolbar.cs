@@ -26,7 +26,7 @@ public partial class AppTests
       Assert.True(session.WaitForElement("ToolbarPrintButton").IsEnabled);
       AssertCompactToolbarLayout(session);
       ClickToolbarCommand(session, "ToolbarOutlineButton");
-      Assert.NotNull(session.WaitForElement("OutlinePanel"));
+      Assert.NotNull(session.WaitForElement("OutlineDepth"));
       session.WaitForElement("OutlineDepth").AsComboBox().Select(1);
       Assert.NotNull(session.WaitForElement("OutlineHeading:1"));
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineHeading:2")));
@@ -50,7 +50,7 @@ public partial class AppTests
       ClickToolbarCommand(session, "ZoomResetButton");
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("ZoomResetButton").And(cf.ByName("Actual size (100%)"))), "the actual toolbar zoom percentage reset");
       session.InvokeMenuItem("View", "OutlineToggle");
-      session.WaitForElementGone("OutlinePanel");
+      session.WaitForElementGone("OutlineDepth");
       Assert.Equal(ToggleState.Off, session.WaitForElement("ToolbarOutlineButton").Patterns.Toggle.Pattern.ToggleState.Value);
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("ToolbarDepthButton")));
       RetainDocumentWindow(session, session.MainWindow, "reference-toolbar-reading-actions");
@@ -174,7 +174,7 @@ public partial class AppTests
    private static void AssertCompactToolbarLayout(AppSession session)
    {
       AutomationElement fixedPrint = session.WaitForElement("ToolbarPrintButton");
-      double scale = fixedPrint.BoundingRectangle.Height / 40;
+      double scale = fixedPrint.BoundingRectangle.Height / 48;
       foreach(string identity in new[] { "ToolbarOutlineButton", "ToolbarSourceButton", "ZoomResetButton", "ToolbarThemeButton" })
       {
          AutomationElement command = session.WaitForElement(identity);

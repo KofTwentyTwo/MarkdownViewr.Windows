@@ -324,7 +324,7 @@ public partial class AppTests
       session.EnterText("ThemeEditorCodeFont", "Consolas");
       session.WaitForElement("ThemeEditorCodeSize").Patterns.RangeValue.Pattern.SetValue(17);
       session.EnterText("ThemeEditorColor:background", "#112233");
-      session.EnterText("ThemeEditorCss", "html { background: #223344; }");
+      session.EnterText("ThemeEditorCss", "body { background: #223344; }");
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
       CloseSettings(session);
@@ -335,7 +335,7 @@ public partial class AppTests
       Assert.Equal("Consolas", theme.RootElement.GetProperty("fonts").GetProperty("code").GetString());
       Assert.Equal(17, theme.RootElement.GetProperty("sizes").GetProperty("codeFontSize").GetDouble());
       Assert.Equal("#112233", theme.RootElement.GetProperty("colors").GetProperty("background").GetString());
-      Assert.Equal("html { background: #223344; }", theme.RootElement.GetProperty("customCSS").GetString());
+      Assert.Equal("body { background: #223344; }", theme.RootElement.GetProperty("customCSS").GetString());
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Custom theme acceptance")));
       _output.WriteLine(session.DescribeDocumentStatus());
    }
@@ -1350,8 +1350,9 @@ public partial class AppTests
       session.WaitFor(
          () =>
          {
-            using System.Drawing.Bitmap image = session.MainWindow.Capture();
-            return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? session.MainWindow : null;
+            AutomationElement view = session.WaitForElement("DocumentView");
+            using System.Drawing.Bitmap image = view.Capture();
+            return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? view : null;
          },
          "the rendered document background " + expected);
    }
@@ -1361,10 +1362,20 @@ public partial class AppTests
    private static AutomationElement FindDocumentScroller(AppSession session)
    {
       AutomationElement browser = session.WaitForElement("DocumentView");
-      return session.WaitFor(
-         () => browser.FindAllDescendants().Prepend(browser).FirstOrDefault(element =>
-            element.Patterns.Scroll.TryGetPattern(out IScrollPattern? scroll) && scroll.VerticallyScrollable.Value),
-         "the owned browser scroll provider");
+      try
+      {
+         return session.WaitFor(
+            () => browser.FindAllDescendants().Prepend(browser).FirstOrDefault(element =>
+               element.Patterns.Scroll.TryGetPattern(out IScrollPattern? scroll) && scroll.VerticallyScrollable.Value),
+            "the owned browser scroll provider");
+      }
+      catch(TimeoutException exception)
+      {
+         string providers = string.Join(Environment.NewLine, browser.FindAllDescendants().Prepend(browser).Take(40).Select(element =>
+            "Id=" + element.Properties.AutomationId.ValueOrDefault + "; Type=" + element.Properties.ControlType.ValueOrDefault +
+            "; Scroll=" + element.Patterns.Scroll.IsSupported + "; Bounds=" + element.BoundingRectangle));
+         throw new TimeoutException(exception.Message + "; Browser providers: " + providers + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+      }
    }
 
 

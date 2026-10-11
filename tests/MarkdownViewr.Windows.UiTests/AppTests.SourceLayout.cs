@@ -15,12 +15,21 @@ public partial class AppTests
 {
    /// <summary>UIA widths include display scaling; equal DIP columns must remain within two physical pixels.</summary>
    private static void AssertEqualSourcePanes(AppSession session)
-      => session.WaitFor(() =>
+   {
+      try
       {
-         AutomationElement source = session.WaitForElement("SourceText");
-         AutomationElement document = session.WaitForElement("DocumentView");
-         return source.BoundingRectangle.Width > 0 && Math.Abs(source.BoundingRectangle.Width - document.BoundingRectangle.Width) <= 2 ? source : null;
-      }, "equal actual document/source widths, excluding the outline and dividers");
+         session.WaitFor(() =>
+         {
+            AutomationElement source = session.WaitForElement("SourceText");
+            AutomationElement document = session.WaitForElement("DocumentView");
+            return source.BoundingRectangle.Width > 0 && Math.Abs(source.BoundingRectangle.Width - document.BoundingRectangle.Width) <= 2 ? source : null;
+         }, "equal actual document/source widths, excluding the outline and dividers");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException(exception.Message + "; Native tree: " + session.DescribeDocumentStatus(), exception);
+      }
+   }
 
 
 

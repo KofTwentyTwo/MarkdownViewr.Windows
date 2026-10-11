@@ -22,7 +22,7 @@ public partial class AppTests
    {
       using var session = new AppSession(document: "# Default visibility fixture");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Default visibility fixture")), "the default visibility fixture", TimeSpan.FromSeconds(30));
-      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlinePanel")));
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineDepth")));
       Assert.Null(session.FindInApp(cf => cf.ByAutomationId("SourceText")));
       session.InvokeMenuItem("File", "SettingsMenuItem");
       session.WaitForElement("SettingsAdvancedTab").Patterns.SelectionItem.Pattern.Select();
@@ -47,9 +47,11 @@ public partial class AppTests
       session.WaitFor(() => DocumentWindows(session).Length == 2 ? session.MainWindow : null, "a reader opened with the selected panel defaults");
       Window second = DocumentWindows(session).Single(window => !window.Equals(original));
       Assert.NotNull(WaitForWindowElement(session, second, "SourceText"));
-      Assert.NotNull(WaitForWindowElement(session, second, "OutlinePanel"));
+      AutomationElement depth = WaitForWindowElement(session, second, "OutlineDepth");
+      Assert.False(depth.IsOffscreen);
+      Assert.True(depth.BoundingRectangle.Width > 0);
       Assert.Null(original.FindFirstDescendant(cf => cf.ByAutomationId("SourceText")));
-      Assert.Null(original.FindFirstDescendant(cf => cf.ByAutomationId("OutlinePanel")));
+      Assert.Null(original.FindFirstDescendant(cf => cf.ByAutomationId("OutlineDepth")));
    }
 
 

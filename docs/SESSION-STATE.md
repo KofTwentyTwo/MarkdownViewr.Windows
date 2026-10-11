@@ -2,6 +2,34 @@
 
 Updated: 2026-10-11
 
+## Current release verification - 2026-10-11
+
+Signed/DCO0ed608e is pushed to PR#3. Exact CI38166230860 is terminal:
+source-hover regression passes (actual native pointer/focus/selection colors,
+TRX in artifacts/source-hover-38166230860); full native74/97,23failures,
+zero skips. Build/core/format pass. Published acceptance again exceeded its
+600second process deadline before installed channel outcomes; no signed release
+or current installed acceptance is established. Retained exact job logs:
+artifacts/current-native-0ed608e.log and artifacts/current-installed-0ed608e.log.
+
+Next reviewed patch corrects the observed Open picker filename selector1148
+(control1001 is its address toolbar), checks the actual outline-depth peer,
+and aligns Contents/Print48px hit targets with the other toolbar commands.
+Full-page printing now resets custom outer body width as well as inner width.
+Document paint checks sample the owned browser instead of a split divider;
+custom CSS fixture targets the visible body layer of the original stylesheet.
+Unchanged native pane-width/scroll/glyph assertions now retain precise failed
+geometry/provider evidence; no cases are skipped or relaxed. The focused hosted
+job covers the actual failing paths, with full acceptance still required.
+
+Local Release build is zero-warning;586 core tests and100% measured line
+coverage pass in artifacts/reader-fixes-core-verified. Formatting remains a
+required final gate. Owner preview PID55472 remains responsive and untouched.
+Azure access is unavailable; exact repository-specific immutable OIDC trust,
+resource verification and profile role commands are committed in
+[azure-signing-admin.md](azure-signing-admin.md). No Azure mutations, human
+review acknowledgement, merges or release publication have been fabricated.
+
 ## Current owner review launch - 2026-10-11
 
 Owner-requested latest self-contained build is open from

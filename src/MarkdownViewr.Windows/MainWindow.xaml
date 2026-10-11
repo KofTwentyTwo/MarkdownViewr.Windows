@@ -102,13 +102,13 @@
       <CommandBar x:Name="ReaderToolbar" Grid.Row="1" Height="48" Margin="12,4,12,4" HorizontalAlignment="Left" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True" AutomationProperties.Name="Document toolbar">
          <CommandBar.Content>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="0,0,8,0">
-               <ToggleButton x:Name="ToolbarOutlineButton" Height="40" Padding="12,0" VerticalAlignment="Center" Click="ToolbarOutline_Click" AutomationProperties.Name="Table of contents" ToolTipService.ToolTip="Show table of contents">
+               <ToggleButton x:Name="ToolbarOutlineButton" Height="48" Padding="12,0" VerticalAlignment="Center" Click="ToolbarOutline_Click" AutomationProperties.Name="Table of contents" ToolTipService.ToolTip="Show table of contents">
                   <StackPanel Orientation="Horizontal" Spacing="8">
                      <SymbolIcon Symbol="Bullets" />
                      <TextBlock Text="Contents" VerticalAlignment="Center" />
                   </StackPanel>
                </ToggleButton>
-               <Button x:Name="ToolbarPrintButton" Height="40" Padding="12,0" VerticalAlignment="Center" Click="Print_Click" IsEnabled="False" AutomationProperties.Name="Print" ToolTipService.ToolTip="Print document">
+               <Button x:Name="ToolbarPrintButton" Height="48" Padding="12,0" VerticalAlignment="Center" Click="Print_Click" IsEnabled="False" AutomationProperties.Name="Print" ToolTipService.ToolTip="Print document">
                   <StackPanel Orientation="Horizontal" Spacing="8">
                      <SymbolIcon Symbol="Print" />
                      <TextBlock Text="Print" VerticalAlignment="Center" />
