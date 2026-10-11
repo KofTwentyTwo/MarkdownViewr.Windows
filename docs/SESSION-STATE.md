@@ -185,3 +185,23 @@ browser-focus key test. Fragment lookup now requires the generated browser headi
 ID and name; physical link click/reveal assertions remain. Also correct one ADR
 heading's Markdown spacing. Neither correction is verified until hosted acceptance.
 Full PRODUCT.md scope remains active; no local desktop input or release publication.
+
+## Owned browser keyboard integration
+
+7d7c712c6365fd6a036c572de3b51b49c6daa1ea CI 38109196556 is terminal FAILURE:
+36/38 native/UI and published tests; installed channels not reached. Ctrl+F still
+never opens find, despite a loaded root accelerator. Fragment collapse is now
+correctly observed, but pointer hit is not the exact link/text child. Keep those
+outcome assertions and retain owned-window screenshot, UIA, hit/focus diagnostics.
+
+The follow-up installs WH_GETMESSAGE only on the current app UI thread, requires
+the active owned window/child and Ctrl without Shift/Alt/Windows, and consumes
+only that find command before browser dispatch. It queues the existing OpenFind,
+forwards every other message, and removes the callback on window closure. There
+is no global hook, browser bridge or search/document text logging. Host keyboard
+acceptance remains pending. Exact logs: artifacts/window-find-ui-38109196556.log
+and artifacts/window-find-installed-38109196556.log.
+
+Separate local editor work is tracked by issue #11: literal ProcessStartInfo
+ArgumentList, persisted executable selection and native controls. Its 195 core
+tests/100% lines pass; that work is not included in this keyboard correction.

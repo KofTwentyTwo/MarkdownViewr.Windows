@@ -68,3 +68,14 @@ does not establish working release signing.
 | --- | --- | --- |
 | 2026-10-10 | Codex (GPT-6) | Added directory watching and guarded numeric viewport preservation; hosted reload acceptance pending |
 | 2026-10-10 | Codex (GPT-6) | Replaced template-only interfaces with actual document and browser boundaries; recorded separate unit/native/browser evidence |
+
+## Owned-window keyboard boundary
+
+Browser-focus shortcuts cannot rely on XAML menu/root acceleration alone. The
+Windows adapter uses a current-UI-thread `WH_GETMESSAGE` hook, requires this
+foreground window or its children, recognizes only Ctrl+F without additional
+modifiers, and queues the existing native find command. Other messages pass
+through; closing the window removes the callback. No global keyboard registration,
+other-process input capture, arbitrary command dispatch, browser bridge or text
+logging is introduced. Actual hosted browser-focus acceptance is still required.
+See Microsoft's [thread-hook contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexw).

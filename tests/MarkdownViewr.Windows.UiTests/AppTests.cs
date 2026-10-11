@@ -273,7 +273,18 @@ public class AppTests
       session.MainWindow.SetForeground();
       session.WaitForElement("DocumentView").Focus();
       FlaUI.Core.Input.Keyboard.TypeSimultaneously(FlaUI.Core.WindowsAPI.VirtualKeyShort.CONTROL, FlaUI.Core.WindowsAPI.VirtualKeyShort.KEY_F);
-      session.WaitForElement("FindText");
+      try
+      {
+         session.WaitForElement("FindText");
+      }
+      catch(TimeoutException)
+      {
+         AutomationElement focused = session.Automation.FocusedElement();
+         _output.WriteLine($"Find shortcut focus: Id={focused.Properties.AutomationId.ValueOrDefault}; Type={focused.Properties.ControlType.ValueOrDefault}; PID={focused.Properties.ProcessId.ValueOrDefault}.");
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
       FlaUI.Core.Input.Keyboard.Type("alpha");
       WaitForFindCount(session, "1 of 3");
       Assert.Equal("Alpha", ReadSourceSelection(source));
@@ -450,7 +461,13 @@ public class AppTests
       NativeMouse.MoveTo(point);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       AutomationElement hit = session.Automation.FromPoint(point);
-      Assert.True(hit.Equals(link) || hit.Parent.Equals(link), "The pointer must hit the exact owned document link or its text child.");
+      bool exactLink = hit.Equals(link) || hit.Parent.Equals(link);
+      if(!exactLink)
+      {
+         _output.WriteLine($"Fragment point={point}; mouse={FlaUI.Core.Input.Mouse.Position}; link={link.Properties.BoundingRectangle.ValueOrDefault}; hit Id={hit.Properties.AutomationId.ValueOrDefault}; Type={hit.Properties.ControlType.ValueOrDefault}; PID={hit.Properties.ProcessId.ValueOrDefault}; bounds={hit.Properties.BoundingRectangle.ValueOrDefault}; parent Type={hit.Parent.Properties.ControlType.ValueOrDefault}; bounds={hit.Parent.Properties.BoundingRectangle.ValueOrDefault}.");
+         _output.WriteLine(session.DescribeDocumentStatus());
+      }
+      Assert.True(exactLink, "The pointer must hit the exact owned document link or its text child.");
       FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);

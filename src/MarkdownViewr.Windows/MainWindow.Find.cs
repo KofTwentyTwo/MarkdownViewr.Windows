@@ -18,12 +18,33 @@ public sealed partial class MainWindow
    private int _findGeneration;
    private bool _finding;
    private bool _findQueued;
+   private DocumentKeyboard? _documentKeyboard;
 
 
 
    /// <summary>Debounces typing and refreshes the query only after the current page has finished restoration.</summary>
    private void InitializeFind()
    {
+      try
+      {
+         _documentKeyboard = new DocumentKeyboard(WinRT.Interop.WindowNative.GetWindowHandle(this), () =>
+         {
+            if(_closed)
+            {
+               return false;
+            }
+            if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+            {
+               App.Log.Info("Input trace: owned document find command queued.");
+            }
+            return DispatcherQueue.TryEnqueue(OpenFind);
+         });
+      }
+      catch(System.ComponentModel.Win32Exception)
+      {
+         App.Log.Warning("The document keyboard shortcut could not be initialized; Edit → Find remains available.");
+      }
+      Closed += (_, _) => _documentKeyboard?.Dispose();
       _findDelay = DispatcherQueue.CreateTimer();
       _findDelay.Interval = TimeSpan.FromMilliseconds(200);
       _findDelay.IsRepeating = false;
@@ -63,7 +84,11 @@ public sealed partial class MainWindow
          return;
       }
       FindBar.Visibility = Visibility.Visible;
-      FindText.Focus(FocusState.Programmatic);
+      bool focused = FindText.Focus(FocusState.Programmatic);
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         App.Log.Info(FormattableString.Invariant($"Input trace: find toolbar opened; focus accepted={focused}."));
+      }
       FindText.SelectAll();
       QueueFind();
    }
