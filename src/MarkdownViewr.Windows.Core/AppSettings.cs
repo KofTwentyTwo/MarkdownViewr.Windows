@@ -66,6 +66,11 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>Private bounded successful-open history; clearable without deleting documents.</summary>
+   public string[] RecentFiles { get; set; } = [];
+
+
+
    /// <summary>Saved print choices are independent of the reading theme and window-local zoom.</summary>
    public Printing.PrintOptions Print { get; set; } = new();
 
@@ -75,6 +80,7 @@ public sealed class AppSettings : ShellSettings
    public override void Sanitize()
    {
       base.Sanitize();
+      RecentFiles = Documents.RecentDocuments.Sanitize(RecentFiles);
       Print = (Print ?? new Printing.PrintOptions()).Sanitize();
       ExternalEditor = Editors.EditorLaunch.IsExecutablePath(ExternalEditor) ? ExternalEditor : "";
       ConfiguredEditors = Editors.EditorConfiguration.Sanitize(ConfiguredEditors);

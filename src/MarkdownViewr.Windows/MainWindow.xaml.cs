@@ -8,7 +8,7 @@ using KofTwentyTwo.AppKit.Updates;
 using KofTwentyTwo.AppKit.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Storage.Pickers;
+using Microsoft.Windows.Storage.Pickers;
 
 
 namespace MarkdownViewr.Windows;
@@ -33,9 +33,12 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Sizes and brands the window, creates the document host, shows the splash, and schedules the quiet startup update check.</summary>
-   public MainWindow()
+   public MainWindow(string? documentPath = null, bool initialWindow = true)
    {
+      _initialDocumentPath = documentPath;
+      _lastSavedSettings = Core.SettingsChanges.Copy(_settings);
       InitializeComponent();
+      RefreshRecentDocuments();
       _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
       _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme());
       CreateDocumentThemeMenu();
@@ -62,10 +65,13 @@ public sealed partial class MainWindow : Window, IDisposable
       UpdateCheckToggle.IsChecked = _settings.CheckForUpdatesOnStartup;
       (_settings.ThemeKind switch { AppTheme.Light => ThemeLight, AppTheme.Dark => ThemeDark, _ => ThemeSystem }).IsChecked = true;
 
-      SplashOverlay.ShowOver(RootGrid, AppIdentity.Info, _settings);
+      if(initialWindow)
+      {
+         SplashOverlay.ShowOver(RootGrid, AppIdentity.Info, _settings);
+      }
       Closed += (_, _) => Dispose();
 
-      if(_settings.CheckForUpdatesOnStartup)
+      if(initialWindow && _settings.CheckForUpdatesOnStartup)
       {
          // The constructor runs on the UI thread, so the check resumes there to show dialogs.
          _ = CheckForUpdatesAfterStartupAsync();
@@ -125,10 +131,10 @@ public sealed partial class MainWindow : Window, IDisposable
             return;
          }
          StatusText.Text = "Choose File → Open to read a Markdown document.";
-         string[] arguments = Environment.GetCommandLineArgs();
-         if(arguments.Length == 2)
+         if(_initialDocumentPath is { } path)
          {
-            await OpenDocumentAsync(arguments[1]);
+            await OpenDocumentAsync(path);
+            _initialDocumentPath = null;
          }
       }
       catch(Exception exception) when(exception is IOException or System.Runtime.InteropServices.COMException)
@@ -143,15 +149,30 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Shows the Windows picker in this window; cancellation leaves the current document intact.</summary>
    private async void Open_Click(object sender, RoutedEventArgs e)
    {
-      var picker = new FileOpenPicker();
-      WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
-      picker.FileTypeFilter.Add(".md");
-      picker.FileTypeFilter.Add(".markdown");
-      picker.FileTypeFilter.Add(".txt");
-      global::Windows.Storage.StorageFile? file = await picker.PickSingleFileAsync();
-      if(file is not null)
+      try
       {
-         await OpenDocumentAsync(file.Path);
+         var picker = new FileOpenPicker(AppWindow.Id);
+         foreach(string extension in new[] { ".md", ".markdown", ".mdown", ".mkd", ".txt" })
+         {
+            picker.FileTypeFilter.Add(extension);
+         }
+         IReadOnlyList<PickFileResult> files = await picker.PickMultipleFilesAsync();
+         foreach(PickFileResult file in files)
+         {
+            if(_closed)
+            {
+               return;
+            }
+            await ((App)Application.Current).OpenDocumentAsync(this, file.Path);
+         }
+      }
+      catch(Exception exception) when(exception is System.Runtime.InteropServices.COMException or InvalidOperationException)
+      {
+         if(!_closed)
+         {
+            StatusText.Text = "The file picker could not complete. Please try again.";
+            App.Log.Warning("The native document picker could not complete.");
+         }
       }
    }
 
@@ -169,7 +190,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Reads and parses outside the UI thread; a failed open preserves the previous document.</summary>
-   private async Task OpenDocumentAsync(string path, bool reload = false)
+   internal async Task OpenDocumentAsync(string path, bool reload = false)
    {
       if(_closed)
       {
@@ -194,7 +215,7 @@ public sealed partial class MainWindow : Window, IDisposable
          }
          ShowDocument(files, outline, path, viewport, reload);
       }
-      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.COMException)
+      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Runtime.InteropServices.COMException)
       {
          App.Log.Warning(FormattableString.Invariant($"Could not open a Markdown document. Reload={reload}; exception={exception.GetType().Name}; HRESULT=0x{exception.HResult:X8}; UIThread={DispatcherQueue.HasThreadAccess}."));
          if(!_closed)
@@ -303,6 +324,10 @@ public sealed partial class MainWindow : Window, IDisposable
       if(!reload)
       {
          StartWatching();
+         if(!((App)Application.Current).RecordRecentDocument(_documentPath))
+         {
+            StatusText.Text = "Opened the document, but could not save recent files.";
+         }
       }
    }
 
@@ -319,7 +344,6 @@ public sealed partial class MainWindow : Window, IDisposable
          _watcher?.Dispose();
          _watcher = null;
          _browser.Close();
-         LogWindow.CloseCurrent();
       }
       GC.SuppressFinalize(this);
    }
@@ -327,7 +351,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>File, Exit.</summary>
-   private void Exit_Click(object sender, RoutedEventArgs e) => Close();
+   private void Exit_Click(object sender, RoutedEventArgs e) => ((App)Application.Current).CloseDocumentWindows();
 
 
 
@@ -489,7 +513,12 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Saves the settings and reports a failed save in the status line.</summary>
    private void Save()
    {
-      if(!AppIdentity.SettingsStore.Save(_settings))
+      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), _lastSavedSettings, _settings);
+      if(AppIdentity.SettingsStore.Save(merged))
+      {
+         _lastSavedSettings = Core.SettingsChanges.Copy(_settings);
+      }
+      else
       {
          StatusText.Text = "Could not save settings.";
       }

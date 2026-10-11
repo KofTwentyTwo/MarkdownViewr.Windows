@@ -42,8 +42,13 @@
 - [x] Verify original3 focused native print cases on ec5f98f/38125751638: both cancels, real default/themed PDF pixels and unchanged actual glyph/view/source/collapse state.
 - [x] Implement actual PDF font/padding/width/border comparisons and successful-export paired-find preservation; d0a225d native/published width/borders pass, zoom wait fails before font/padding output. Diagnostic6e17674 confirms rounded UIA metrics; corrected case measures precise font ratios in actual PDFs.
 - [x] Verify clean original3 print cases in full300e145: native/published52 each, installed stable/dev51 each, zero failures/skips; real PDFs and update apply/restart retained.
-- [ ] Verify actual native print cancellation, saved PDF image/background/font/layout output and unchanged reading/source/find/collapse state in all channels.
-- [ ] Add multiple document windows, recent files and Windows activation/file associations.
+- [x] Verify corrected native54/54 on bf4fcdc / CI38128311242: actual PDF font/padding/paired-find plus original cases, zero failures/skips.
+- [ ] Verify actual native print cancellation, saved PDF image/background/font/layout output and unchanged reading/source/find/collapse state in all installed channels.
+- [x] Implement native independent document windows, multiple-file picker/all reference extensions and bounded private recent files/clear; source-generated sibling-safe preference merging. Local376 core/100% lines and zero-warning build pass.
+- [ ] Verify actual hosted Ctrl+N/Ctrl+W, two-window zoom/watching, actual multiple-file picker/cancel, recent duplicate/missing/clear/stale-save and File/Exit acceptance.
+- [ ] Implement and verify Windows file associations/cross-process activation with stable/dev identity boundaries.
+- [ ] Complete reference theme order/enable/delete/restore/cycling, JSON import/export conflicts, body/heading typography, global CSS and content width.
+- [ ] Implement and verify configurable highlight/superscript/subscript/underline and remaining image/link/render fidelity.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
 - [ ] Verify hosted checks on each actual implementation head.
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.

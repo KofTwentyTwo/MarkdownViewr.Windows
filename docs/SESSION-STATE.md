@@ -50,11 +50,31 @@ Retained red log and published TRX:
 artifacts/print-geometry-native-38127089763.log and
 artifacts/print-geometry-installed-38127089763. Corrected head requires54
 native/published and53 per installed channel. No local GUI input or new dependency.
-ADR-0003 remains proposed; full font/padding/paired-find acceptance is pending.
+Correctedbf4fcdc / CI38128311242 native54/54 passes, zero failures/skips,
+including real PDF font/padding/paired-find plus original cases. Retained native
+log: artifacts/print-font-native-38128311242.log. Installed producer114437196125
+remains live; preserve it until published54/stable-dev53 proof is retained.
+ADR-0003 remains proposed; exact final installed acceptance is pending.
 
 Live settings validate. Official conformance34PASS/1FAIL/1WARN/3REVIEW: required
 standards inventory lacks app, confirmed live. Exact reviewed addition prepared,
 not applied/merged; see docs/standards-readiness.md. Actual signing remains deferred.
+
+## Native windows and recents implemented locally
+
+New window-local initial paths replace rereading process arguments. Track native
+XAML windows on one UI thread; independent watcher/browser/hooks/zoom; Ctrl+N/Ctrl+W
+and Exit; shared log closes only after the last reader. Modern App SDK multiple-file
+picker includes md/markdown/mdown/mkd/txt. Private recent history20, successful opens
+only, duplicate focus, missing errors and clear. Source-generated delta merging
+protects sibling settings and cleared history from stale window snapshots.
+
+Local376 core tests/100% lines and zero-warning build pass. Three new hosted-only
+native lifecycle cases compile; no local GUI input. ADR-0004 and threat model
+updated. These tests have not run. Association/activation registration remains
+required. Full reference audit also retains theme ordering/enable/delete/cycle,
+JSON import/export conflicts, all typography/global CSS/content width and four
+configurable rendering extensions in PRODUCT/TODO; none is claimed complete.
 
 ## Current outcome
 

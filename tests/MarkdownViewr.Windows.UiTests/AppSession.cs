@@ -32,7 +32,7 @@ public sealed class AppSession : IDisposable
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null)
+   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null, IReadOnlyDictionary<string, string>? additionalDocuments = null)
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
@@ -57,6 +57,13 @@ public sealed class AppSession : IDisposable
       {
          string path = Path.Combine(DataDirectory, documentFileName);
          File.WriteAllText(path, document);
+         startInfo.ArgumentList.Add(path);
+      }
+
+      foreach((string name, string markdown) in additionalDocuments ?? new Dictionary<string, string>(StringComparer.Ordinal))
+      {
+         string path = Path.Combine(DataDirectory, name);
+         File.WriteAllText(path, markdown);
          startInfo.ArgumentList.Add(path);
       }
 

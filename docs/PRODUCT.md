@@ -2,7 +2,9 @@
 
 Build a Windows counterpart to [Darin Kelkhoff's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), using the KofTwentyTwo AppKit foundations and standards. The agreed display name is MarkdownViewr, repository MarkdownViewr.Windows, and permanent application ID markdownviewr-windows.
 
-The first reader implementation opens Markdown with a Windows picker or literal launch argument, renders sanitized GFM and supports bounded local images, manual reload and automatic saves with relative scroll preservation. The original 20 document themes and persistent palette selection are implemented. Hosted reader/live-reload/theme selection and both installed update channels passed on 77dd04d. Editable custom themes, color/code-font/CSS controls and restoration are implemented; their dialog/browser acceptance passed in CI 38102867556. Frontmatter, resizable outline/depth/jump/section controls and literal source visibility/reload/physical resize passed CI 38106991467: 34 native/UI and published tests, 33 per installed channel, no skips. Paired browser/source find, repeated local-fragment reveal and configured editor launch passed CI 38110726381: 41 native/published tests and 40 per installed channel, no skips. Vim navigation passed CI 38112298176: 44 native/published tests and 43 per installed channel, zero skips. Parser-derived source positions, literal source folding and bidirectional heading-based scroll synchronization are implemented with 363 core tests/100% measured lines, including new per-window reading zoom. Named editor lists, stable migration, add/remove/reorder and file/folder choices are implemented. Current source synchronization, named editor lists and glyph/key/reload zoom pass `2639e2d` / CI38121762124 (49 native/published,48 per installed channel, no skips). Print-only theme/layout options, Windows print UI and PDF save are implemented with native/output acceptance pending; the previous source-provenance head b0f3b86 passed CI 38113042618, including published 44/44 and installed stable/dev 43/43 tests without skips. The full feature list below remains the target; the first reader is not a completed port.
+The reader implements passive GFM, bounded local images, save/replacement/deletion recovery, the original20 themes and editable overrides, frontmatter, outline/collapse, literal synchronized source, paired find, vim commands, named editors and per-window zoom. Clean baseline `300e145` / CI38126078284 passes52 native/published and51 installed stable/dev tests with no failures/skips, including original3 native printing/PDF cases. Both actual AppKit update/apply/restart probes pass; fixtures are unsigned.
+
+Broader actual PDF font/padding/find comparisons are pending on corrected `bf4fcdc` after hosted evidence showed rounded UIA text metrics cannot provide an exact multi-step font ratio. Real width/border/full-page PDF comparisons already pass. Multiple native document windows, modern multiple-file picking, bounded private recent files and sibling-safe settings merging are implemented locally with376 core tests/100% measured lines; hosted lifecycle acceptance remains pending. Windows associations/activation and the remaining reference features below are still required. This is not a completed port.
 
 ## Reference and feature scope
 
@@ -10,10 +12,10 @@ Reference source inspected at commit `6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021`.
 
 | Area | Required Windows behavior |
 | --- | --- |
-| Documents | Open Markdown through a picker and Windows file activation; multiple document windows; recent files; clear missing/unreadable-file errors |
-| Rendering | GitHub Flavored Markdown, tables, tasks, strikethrough, fenced code, local images and links |
+| Documents | Open `.md`, `.markdown`, `.mdown`, `.mkd` and plain text through a multiple-file picker and Windows activation; independent document windows; recent files/clear history; clear missing/unreadable-file errors |
+| Rendering | GitHub Flavored Markdown, tables, tasks, strikethrough, fenced code, local images/links; independently configurable highlight, superscript, subscript and underline extensions |
 | Reload | Watch saves, including atomic replacements; debounce changes, preserve scroll, report deletion/recovery |
-| Themes | Built-in themes, editable user themes, custom CSS, code font/size and persistent settings |
+| Themes | 20 built-ins; editable body/heading/code fonts, sizes and palette; theme/global CSS; content width; theme order, enable/disable/delete/restore and cycling; JSON import/export with overwrite/keep-both/skip conflicts; persistent settings |
 | Navigation | Resizable table of contents, depth control, heading jumps, collapsible sections and per-window font zoom (30–500%, Ctrl+plus/minus/0) |
 | Source | Optional source pane, synchronized headings/scroll and collapse state |
 | Find | Match counts, next/previous matches, search in both panes and vim-style shortcuts |

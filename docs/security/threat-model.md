@@ -160,3 +160,23 @@ Windows picker destination. PDF export disables headers/footers; fixture accepta
 cancels print UI and renders owned generated PDFs, never submits a physical job.
 The existing CSP, denied remote requests and opened-handle image containment apply.
 See ADR-0003; full hosted/output/layout verification remains pending.
+
+## Document windows and recent files
+
+Only literal process arguments and deliberate native picker/recent commands open
+documents. The App SDK multiple-file picker is bound to its owning AppWindow.Id.
+A new reader receives its own initial path, browser, watcher and keyboard/window
+lifetime; document content cannot open windows or invoke native menus. Reuse/focus
+is restricted to matching canonical paths within the current process. Browser CSP,
+local-image handle containment and passive-content policy apply independently to
+every reader; closing one stops only its owned callbacks and hooks.
+
+Recent paths remain private in the local AppKit settings file, capped at20 and
+32767 characters per entry; relative paths, URLs/control characters and duplicates
+are discarded. Record only successful parsed opens, never missing/unreadable files.
+No document content or paths enter activity logs. Native Clear removes history,
+not files. Source-generated property-delta merging preserves sibling preferences
+and prevents an older window snapshot from restoring cleared paths. Core tests
+cover corruption, bounds, ordering, independent arrays and stale-window merging.
+Actual hosted lifecycle/clear/reload tests are pending; association/activation
+registration has not been implemented or represented as verified. See ADR-0004.
