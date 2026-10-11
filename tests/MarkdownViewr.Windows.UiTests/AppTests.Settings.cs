@@ -179,6 +179,17 @@ public partial class AppTests
       var dev = new FileTypeRegistration(Microsoft.Win32.Registry.CurrentUser, session.ExePath, "dev");
       bool registered = stable.GetDefaultAppsUri(supportsAppPage: true) is not null || dev.GetDefaultAppsUri(supportsAppPage: true) is not null;
       Assert.Equal(registered, choose.IsEnabled);
+      string? installedFixture = Environment.GetEnvironmentVariable("K22_UITEST_INSTALLED");
+      if(string.Equals(installedFixture, "1", StringComparison.Ordinal))
+      {
+         FileTypeRegistration installedRegistration = string.Equals(Environment.GetEnvironmentVariable("K22_UITEST_CHANNEL"), "dev", StringComparison.Ordinal) ? dev : stable;
+         Assert.NotNull(installedRegistration.GetDefaultAppsUri(supportsAppPage: true));
+         Assert.True(choose.IsEnabled);
+      }
+      else if(string.Equals(installedFixture, "0", StringComparison.Ordinal))
+      {
+         Assert.False(registered);
+      }
       if(!registered)
       {
          Assert.NotNull(session.FindInApp(cf => cf.ByName("Install or repair MarkdownViewr to make it available in Open with and Default Apps. This preview does not change Windows file associations.")));

@@ -2,7 +2,28 @@
 
 Updated: 2026-10-11
 
-## Current full-run variants and queued source repaint - 2026-10-11
+## Installed association acceptance boundary - 2026-10-11
+
+The installed harness now supplies a saved/restored test-only installation
+marker after its actual manifest/version/channel/update proof, and explicitly
+marks the published copy as portable. The native Default file types case must
+find this exact installed executable's expected channel registration and an
+enabled Windows chooser action. Previously a missing registration and disabled
+button could agree and pass the installed test. Portable evidence must instead
+show no registration. This marker does not change application behavior, create
+registry keys or simulate successful hooks; actual installed execution is still
+required. Windows selection/Explorer/update/uninstall acceptance remains#14.
+
+Prior CI38170170551 is terminal: native93/97 and published93/97,4failures,
+zero skips. Published8m56s now completes inside the existing600second bound;
+its red tests prevent installed outcomes. No deadline was raised. Current native
+and published failures include the reproducible pipe bug, initial source colors,
+nested outline expansion and physical source focus alignment. Exact evidence:
+artifacts/current-installed-9fdfc2d.log and retained installed-update-results.
+Locally signed2fe5853/efe14af prepare the tested IPC correction and queued theme
+repaint; next exact pushed head must verify these and the association boundary.
+
+## Previous full-run variants and queued source repaint - 2026-10-11
 
 Exact9fdfc2d full native job114560940480 is terminal93/97,4failures,zero
 skips (8m59s), despite focused14/15. Retain artifacts/current-native-9fdfc2d.log:
