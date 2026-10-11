@@ -3,7 +3,9 @@
 - [x] Exact6374611: native97/98 and published97/98, focused19/20, zero skips; actual sustained colors/hover/focus and outline pass.
 - [x] Exact9994eda: offscreen native geometry correction passes focused20/20 and full native98/98; original focus/both-direction glyph/wheel assertions unchanged.
 - [x] Exact9994eda: published98/98 and installed stable/dev97/97 each, real update/apply/restart and target hashes pass; zero skips.
-- [ ] Verify the clean1.0 milestone candidate, actual install/update/uninstall registration readbacks and new raw-HTML runtime case on the next exact head.
+- [x] Exact764c7ac: retain focused20/21, native98/99 and published98/99; only the new raw multiline-heading fold fails, zero skips. Installed lifecycle phase is not reached.
+- [x] Reproduce multiline raw-header loss in core tests and correct parser token end spans;589 core/100% measured lines, zero-warning Release/format pass.
+- [ ] Verify the correction with unchanged raw-HTML runtime assertions and actual install/update/uninstall registration readbacks on the next exact head.
 
 - [x] Generate and publish the GUI-only AppKit application with the approved identity.
 - [x] Configure/read back repository protections and establish the initial hosted CI baseline.

@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Raw multiline heading fold reproduced and corrected - 2026-10-11
+
+Exact764c7ac / CI38179931820 is terminal: focused20/21, native98/99,
+published98/99, zero skips. All failures are the newly added raw-HTML case at
+its complete-header fold assertion. Published failure prevents the new installed
+registration lifecycle readbacks from running; do not claim those passed.
+Retain current-focused-764c7ac.log/current-native-764c7ac.log and downloaded TRXs
+under artifacts/reader-regressions-38179931820 and
+artifacts/current-installed-evidence-38179931820.
+
+The parser mapped a raw heading's end to its opening line, hiding remaining
+multiline attributes/title/closing syntax when folded. Three actual failing core
+regressions reproduced this; existing AngleSharp token spans now retain the
+complete header, respecting quoted attributes, comments and nested title markup.
+All34 source mapping/folding cases and all589 core tests pass with100% measured
+line coverage. Release build has zero warnings/errors and format verification
+passes. The unchanged raw-HTML runtime case and full distributed suites must
+verify the correction on the next pushed head.
+
+No production publication, signing verification, OS default selection or local
+desktop input. Preserve owner preview55472. Actual chooser/Explorer, concurrent
+stable/dev isolation, full fidelity audit, genuine maintainer review and final
+signed release artifacts remain required.
+
 ## All distributed source cases pass; next release acceptance checks - 2026-10-11
 
 Exact9994eda CI38176727468 is terminal success: focused20/20, native98/98,
@@ -10,7 +34,7 @@ Actual AppKit apply/restart advances stable0.1.0→0.4.0 and devbeta.1→beta.2;
 post-upgrade channel/versions and target DLL hashes are verified by the harness.
 Retain actual TRXs and before/after JSON under artifacts/current-installed-evidence-38176727468.
 These fixtures are unsigned and sequential; they do not prove production signing
-or simultaneous stable/dev coexistence. Signed cleanupc89ce5c remains local.
+or simultaneous stable/dev coexistence. Signed cleanupc89ce5c was pushed as parent of764c7ac.
 
 New read-only harness checks require all five Open With/Default Apps extensions
 at real initial install and after upgrade, the same owned ProgID, complete owned

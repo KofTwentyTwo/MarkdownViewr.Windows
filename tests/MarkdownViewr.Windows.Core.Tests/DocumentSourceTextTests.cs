@@ -93,6 +93,29 @@ public sealed class DocumentSourceTextTests
 
 
 
+   /// <summary>A folded multiline HTML heading retains all authored attributes, nested title markup and closing syntax.</summary>
+   [Theory]
+   [InlineData("\n")]
+   [InlineData("\r\n")]
+   [InlineData("\r")]
+   public void SetCollapsed_RawMultilineHeading_PreservesCompleteHeader(string newline)
+   {
+      string header = string.Join(newline, "<H2", " title='quoted > value'>", "Raw <em>child</em>", "<!-- </h2> is a comment -->", "</H2>");
+      string original = "# Root" + newline
+         + header + newline + "Hidden body" + newline + "<h3>First peer</h3><h3>Second peer</h3>" + newline + "Peer body" + newline + newline + "# Last" + newline + "Tail";
+      var source = new DocumentSourceText(original, new DocumentOutline(original));
+      Assert.True(source.SetCollapsed([1]));
+      Assert.Contains(header.ReplaceLineEndings("\r"), source.Text, StringComparison.Ordinal);
+      Assert.DoesNotContain("Hidden body", source.Text, StringComparison.Ordinal);
+      Assert.DoesNotContain("First peer", source.Text, StringComparison.Ordinal);
+      Assert.Contains("# Last\rTail", source.Text, StringComparison.Ordinal);
+      Assert.Equal(new[] { 0, 1, 4 }, source.Headings.Select(heading => heading.Index));
+      Assert.True(source.SetCollapsed([]));
+      Assert.Equal(original, source.GetCopyText(0, source.Text.Length));
+   }
+
+
+
    /// <summary>Folding accepts only bounded canonical snapshots with matching source anchors.</summary>
    [Fact]
    public void Create_InvalidSnapshot_RejectsInput()

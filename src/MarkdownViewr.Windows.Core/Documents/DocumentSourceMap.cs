@@ -73,7 +73,7 @@ internal sealed class DocumentSourceMap
          else if(node is HtmlInline inline && IsHeadingTag(inline.Tag))
          {
             int start = offset + inline.Span.Start;
-            inline.Tag = inline.Tag.Insert(3, Attribute(AddPosition(start, EndOfLine(start))));
+            inline.Tag = inline.Tag.Insert(3, Attribute(AddPosition(start, EndOfLine(offset + inline.Span.End))));
          }
       }
       return Markdown.ToHtml(document, pipeline);
@@ -110,12 +110,41 @@ internal sealed class DocumentSourceMap
 
 
 
+   /// <summary>Tokenizer spans preserve complete raw headings across lines without mistaking quoted attributes or comments for closing syntax.</summary>
+   private static HtmlParser CreateSourceParser(Dictionary<int, int> headingEnds)
+   {
+      int pendingHeading = -1;
+      return new HtmlParser(new HtmlParserOptions
+      {
+         IsKeepingSourceReferences = true,
+         OnToken = (token, range) =>
+         {
+            if(token.Name.Length == 2 && token.Name[0] == 'h' && token.Name[1] is >= '1' and <= '6')
+            {
+               if(token.Type == HtmlTokenType.StartTag)
+               {
+                  pendingHeading = range.Start.Index;
+                  headingEnds.Add(pendingHeading, range.End.Index - 1);
+               }
+               else if(token.Type == HtmlTokenType.EndTag && pendingHeading >= 0)
+               {
+                  headingEnds[pendingHeading] = range.End.Index - 1;
+                  pendingHeading = -1;
+               }
+            }
+         },
+      });
+   }
+
+
+
    /// <summary>Source slices retain quote/list indentation offsets while emitted raw HTML omits those Markdown prefixes.</summary>
    private void AnnotateHtmlBlock(HtmlBlock block, int offset)
    {
       StringLine[] lines = block.Lines.Lines;
       string html = string.Join('\n', lines.Take(block.Lines.Count).Select(line => line.Slice.ToString()));
-      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser(new HtmlParserOptions { IsKeepingSourceReferences = true }).ParseDocument(html);
+      var headingEnds = new Dictionary<int, int>();
+      using AngleSharp.Html.Dom.IHtmlDocument document = CreateSourceParser(headingEnds).ParseDocument(html);
       int[] lineStarts = new int[block.Lines.Count];
       int length = 0;
       for(int index = 0; index < lineStarts.Length; index++)
@@ -139,7 +168,11 @@ internal sealed class DocumentSourceMap
             changes = [];
             inserts.Add(index, changes);
          }
-         changes.Add((column + 3, Attribute(AddPosition(start, EndOfLine(start)))));
+         int endPosition = headingEnds[position];
+         int endIndex = Array.BinarySearch(lineStarts, endPosition);
+         endIndex = endIndex >= 0 ? endIndex : ~endIndex - 1;
+         int end = offset + lines[endIndex].Slice.Start + endPosition - lineStarts[endIndex];
+         changes.Add((column + 3, Attribute(AddPosition(start, EndOfLine(end)))));
       }
       foreach((int index, List<(int Position, string Attribute)> changes) in inserts)
       {
