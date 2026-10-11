@@ -108,9 +108,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## markdownViewr built-in themes
+## markdownViewr resources and frontmatter behavior
 
-The 20 original JSON themes are copied unchanged from Darin Kelkhoff's markdownViewr at commit 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021.
+Frontmatter delimiter/metadata display behavior is adapted from MarkdownDocument.swift at the same pinned commit. The 20 original JSON themes are copied unchanged from Darin Kelkhoff's markdownViewr at commit 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021.
 
 Source: <https://github.com/darinkelkhoff/markdownViewr/tree/6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021/markdownViewr/Resources/themes>
 

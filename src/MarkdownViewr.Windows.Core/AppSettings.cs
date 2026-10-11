@@ -4,6 +4,7 @@
  */
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KofTwentyTwo.AppKit.Settings;
 
 
@@ -21,10 +22,21 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>The frontmatter display mode, saved independently of document contents.</summary>
+   public string Frontmatter { get; set; } = "Hide";
+
+
+
+   /// <summary>Repairs unknown saved mode values to the reference's default.</summary>
+   [JsonIgnore]
+   public Documents.FrontmatterMode FrontmatterKind => Enum.TryParse(Frontmatter, out Documents.FrontmatterMode mode) && Enum.IsDefined(mode) ? mode : Documents.FrontmatterMode.Hide;
+
+
    /// <inheritdoc/>
    public override void Sanitize()
    {
       base.Sanitize();
+      Frontmatter = FrontmatterKind.ToString();
       if(string.IsNullOrWhiteSpace(DocumentTheme) || DocumentTheme.Length > 80 || DocumentTheme.Any(char.IsControl))
       {
          DocumentTheme = "Catppuccin Mocha";

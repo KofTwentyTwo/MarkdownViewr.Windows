@@ -17,7 +17,9 @@
 - [x] Implement persisted editable theme overrides/custom names, color/code-font/CSS controls and built-in restoration.
 - [ ] Complete hosted theme editor/validation/restoration acceptance (issue #7).
 - [ ] Add TOC, section collapse, source pane, synchronized navigation, find and vim keys.
-- [ ] Add YAML frontmatter modes, safe configured editor launch and printing options.
+- [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
+- [ ] Verify actual hosted frontmatter mode switching and code-font size editing.
+- [ ] Add safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [ ] Verify hosted checks on each actual implementation head; PSScriptAnalyzer engine crash remains tracked in #5.
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.

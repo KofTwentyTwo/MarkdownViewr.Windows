@@ -31,6 +31,12 @@
             <MenuFlyoutItem x:Name="EditDocumentThemeMenu" Text="Edit document theme..." Click="EditDocumentTheme_Click" />
             <MenuFlyoutItem x:Name="RestoreDocumentThemesMenu" Text="Restore built-in themes" Click="RestoreDocumentThemes_Click" />
             <MenuFlyoutSeparator />
+            <MenuFlyoutSubItem x:Name="FrontmatterMenu" Text="Frontmatter">
+               <RadioMenuFlyoutItem x:Name="FrontmatterHide" Text="Hide" GroupName="Frontmatter" Tag="Hide" Click="Frontmatter_Click" />
+               <RadioMenuFlyoutItem x:Name="FrontmatterMetadata" Text="Show as metadata" GroupName="Frontmatter" Tag="Metadata" Click="Frontmatter_Click" />
+               <RadioMenuFlyoutItem x:Name="FrontmatterMarkdown" Text="Show as Markdown" GroupName="Frontmatter" Tag="Markdown" Click="Frontmatter_Click" />
+            </MenuFlyoutSubItem>
+            <MenuFlyoutSeparator />
             <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
             <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
             <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />

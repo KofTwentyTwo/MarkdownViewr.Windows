@@ -32,8 +32,22 @@ Built-in selection persists independently of the AppKit shell; actual dark/light
 and screenshots passed. Current local change adds saved user overrides/custom names,
 native color/code-font/size/CSS controls, invalid-input validation and built-in restoration
 that retains custom names. AppKit saves preferences atomically; corrupt saved themes are
-discarded before catalog loading. Core 119 tests/100% coverage and zero-warning build
+discarded before catalog loading. Core 149 tests/100% coverage and zero-warning build
 pass. New dialog/browser tests added but not run locally; next hosted acceptance pending.
+
+Editable theme commit 30ca0943c09a8662794c2d400f1b5c49de426942 is now pushed.
+Its CI 38102867556 fully passed, including new theme editor/color/CSS/invalid-input/
+restore tests and both installed channels. CodeQL 38102867583 and scripts 38102867251
+also passed. New follow-up tests the NumberBox range-value edit to font size 17 and
+adds analyzer filename/full-exception reporting without changing rules or retry policy.
+
+Frontmatter #8 now implements the reference's hidden default, escaped line-based
+metadata and sanitized Markdown display. Complete leading delimiters required;
+Windows CRLF and body preserved. Native mode changes persist and retain relative
+viewport; menu disabled while snapshot loading prevents stale mode changes. 149 core
+tests pass with 100% line coverage; native switching/table disappearance test added,
+not run locally. Darin's MIT notice and source attribution retained. Next push waits
+for these final local gates; observe its exact CI handles.
 
 ## Authority and continuity
 

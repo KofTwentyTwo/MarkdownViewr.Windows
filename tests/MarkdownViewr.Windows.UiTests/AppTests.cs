@@ -118,6 +118,7 @@ public class AppTests
       session.InvokeMenuItem("View", "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorName", "My reading theme");
       session.EnterText("ThemeEditorCodeFont", "Consolas");
+      session.WaitForElement("ThemeEditorCodeSize").Patterns.RangeValue.Pattern.SetValue(17);
       session.EnterText("ThemeEditorColor:background", "#112233");
       session.EnterText("ThemeEditorCss", "html { background: #223344; }");
       session.ClickButton("Save theme");
@@ -127,6 +128,7 @@ public class AppTests
       Assert.Equal("My reading theme", settings.RootElement.GetProperty("DocumentTheme").GetString());
       using var theme = JsonDocument.Parse(Assert.Single(settings.RootElement.GetProperty("UserThemes").EnumerateArray()).GetString()!);
       Assert.Equal("Consolas", theme.RootElement.GetProperty("fonts").GetProperty("code").GetString());
+      Assert.Equal(17, theme.RootElement.GetProperty("sizes").GetProperty("codeFontSize").GetDouble());
       Assert.Equal("#112233", theme.RootElement.GetProperty("colors").GetProperty("background").GetString());
       Assert.Equal("html { background: #223344; }", theme.RootElement.GetProperty("customCSS").GetString());
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Custom theme acceptance")));
@@ -168,6 +170,32 @@ public class AppTests
       WaitForDocumentColor(session, System.Drawing.Color.FromArgb(30, 30, 46));
       using var settings = JsonDocument.Parse(session.ReadSettings());
       Assert.Equal(0, settings.RootElement.GetProperty("UserThemes").GetArrayLength());
+   }
+
+
+   /// <summary>The real reading surface switches between hidden, metadata-table and Markdown frontmatter modes.</summary>
+   [Fact]
+   public void Frontmatter_ChangeModes_UpdatesSurfaceAndSavesChoice()
+   {
+      using var session = new AppSession(document: "---\n**Visible metadata**\n---\n# Frontmatter body");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Frontmatter body")), "the document body", TimeSpan.FromSeconds(30));
+      Assert.Null(session.FindInApp(cf => cf.ByName("Visible metadata")));
+      session.InvokeMenuItem("View", "FrontmatterMenu");
+      session.ClickElement("FrontmatterMetadata");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the metadata table value");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Table)), "the frontmatter table");
+      session.InvokeMenuItem("View", "FrontmatterMenu");
+      session.ClickElement("FrontmatterMarkdown");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Table)), "the metadata table after switching to Markdown");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the rendered frontmatter heading");
+      session.WaitFor(
+         () => session.ReadSettings().Contains("\"Frontmatter\": \"Markdown\"", StringComparison.Ordinal) ? session.MainWindow : null,
+         "the Markdown frontmatter choice to be saved");
+      session.InvokeMenuItem("View", "FrontmatterMenu");
+      session.ClickElement("FrontmatterHide");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reloaded document.md")), "the hidden-mode reload status");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the hidden metadata");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Frontmatter body")));
    }
 
 

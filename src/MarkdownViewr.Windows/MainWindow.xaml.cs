@@ -39,6 +39,7 @@ public sealed partial class MainWindow : Window, IDisposable
       _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
       _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme());
       CreateDocumentThemeMenu();
+      (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
       Title = AppIdentity.Info.DisplayName;
       FitInitialWindow();
       this.SetAppIcon(AppIdentity.Info);
@@ -172,12 +173,13 @@ public sealed partial class MainWindow : Window, IDisposable
       }
       OpenMenuItem.IsEnabled = false;
       ReloadMenuItem.IsEnabled = false;
+      FrontmatterMenu.IsEnabled = false;
       try
       {
          _browserInitialization ??= _browser.InitializeAsync();
          await _browserInitialization;
          Core.Documents.DocumentViewport viewport = reload ? await _browser.CaptureViewportAsync() : default;
-         (DocumentFiles files, string html) = await ReadDocumentAsync(path);
+         (DocumentFiles files, string html) = await ReadDocumentAsync(path, _settings.FrontmatterKind);
          if(_closed)
          {
             return;
@@ -207,6 +209,7 @@ public sealed partial class MainWindow : Window, IDisposable
             else
             {
                OpenMenuItem.IsEnabled = true;
+               FrontmatterMenu.IsEnabled = true;
                ReloadMenuItem.IsEnabled = _documentPath is not null;
             }
          }
@@ -251,7 +254,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Retries only transient missing/sharing violations from an editor's replace/save operation.</summary>
-   private static async Task<(DocumentFiles Files, string Html)> ReadDocumentAsync(string path)
+   private static async Task<(DocumentFiles Files, string Html)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter)
    {
       for(int attempt = 0; ; attempt++)
       {
@@ -260,7 +263,7 @@ public sealed partial class MainWindow : Window, IDisposable
             return await Task.Run(() =>
             {
                var document = DocumentFiles.Open(path);
-               return (document, new Core.Documents.MarkdownRenderer().Render(document.Markdown));
+               return (document, new Core.Documents.MarkdownRenderer().Render(document.Markdown, frontmatter));
             });
          }
          catch(IOException exception) when(attempt < 3 && (exception.HResult & 0xFFFF) is 2 or 3 or 32 or 33)
@@ -332,6 +335,19 @@ public sealed partial class MainWindow : Window, IDisposable
       _settings.DocumentTheme = theme.Name;
       Save();
       await ApplyDocumentThemeAsync(theme);
+   }
+
+
+
+   /// <summary>Persists frontmatter appearance and rereads the active snapshot at its reading position.</summary>
+   private async void Frontmatter_Click(object sender, RoutedEventArgs e)
+   {
+      _settings.Frontmatter = (string)((FrameworkElement)sender).Tag;
+      Save();
+      if(_documentPath is not null)
+      {
+         await OpenDocumentAsync(_documentPath, reload: true);
+      }
    }
 
 

@@ -47,14 +47,25 @@ public sealed class MarkdownRenderer
 
 
    /// <summary>Preserves useful markup while sanitizing every parser result, including authored raw HTML.</summary>
-   public string Render(string markdown)
+   public string Render(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide)
    {
       ArgumentNullException.ThrowIfNull(markdown);
       if(markdown.Length > MaximumCharacters)
       {
          throw new ArgumentException("The document exceeds the 16 Mi-character rendering limit.", nameof(markdown));
       }
-      return _sanitizer.Sanitize(Markdown.ToHtml(markdown, s_pipeline));
+      if(!Enum.IsDefined(frontmatter))
+      {
+         throw new ArgumentOutOfRangeException(nameof(frontmatter));
+      }
+      (string? metadata, string body) = DocumentFrontmatter.Split(markdown);
+      string prefix = !string.IsNullOrEmpty(metadata) ? frontmatter switch
+      {
+         FrontmatterMode.Metadata => DocumentFrontmatter.RenderMetadata(metadata),
+         FrontmatterMode.Markdown => Markdown.ToHtml("---\n" + metadata + "\n---", s_pipeline),
+         _ => "",
+      } : "";
+      return _sanitizer.Sanitize(prefix + Markdown.ToHtml(body, s_pipeline));
    }
 
 
