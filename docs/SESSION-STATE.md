@@ -26,9 +26,12 @@ artifacts/print-path-verified-state-failed-38124425486. The subsequent unchanged
 reader viewport assertion fails (observed87.0253%). New focused fixture probes
 record before/options/PDF positions and wait for stable pre-print layout. Probe
 eba7a75/38124742261 shows200% before/options/Save and87.0253% after;200% is outside
-UIA's valid range. New paired actual heading/view rectangles distinguish stale
-accessibility range data from real glyph movement; original assertions retained.
-No product restoration change yet.
+UIA's valid range. Paired actual rectangles39f4ea3/38125002108 confirm a41pixel glyph move after
+PDF while browser bounds/font size stay unchanged. Restore validated vertical
+reading position in finally after awaited PDF output, guarded to the same ready
+navigation. Regression compares actual settled glyph/view rectangles rather than
+out-of-range UIA percentages; retains nonzero reading/source/collapse/pixel checks.
+Restoration acceptance pending.
 Full suites now expect
 52 native/published and51 per installed channel. Temporary filtered print workflow
 is a feedback loop; all required full gates remain.

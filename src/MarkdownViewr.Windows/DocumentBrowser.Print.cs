@@ -33,13 +33,53 @@ internal sealed partial class DocumentBrowser
       {
          return false;
       }
+      Uri document = _policy.DocumentUri;
+      ulong navigation = _navigationId;
+      Core.Documents.DocumentScrollState? reading = await CaptureScrollStateAsync();
+      if(reading is null || !IsMatchingFindDocument(document, navigation))
+      {
+         return false;
+      }
+      TracePdfGeometry("before", reading);
+      CoreWebView2PrintSettings settings = CreatePdfSettings(options.Backgrounds);
+      try
+      {
+         return await _view.CoreWebView2.PrintToPdfAsync(path, settings);
+      }
+      finally
+      {
+         if(IsMatchingFindDocument(document, navigation))
+         {
+            TracePdfGeometry("after PDF", await CaptureScrollStateAsync());
+            await ScrollToSourcePositionAsync(reading.Position);
+            TracePdfGeometry("restored", await CaptureScrollStateAsync());
+         }
+      }
+   }
+
+
+
+   /// <summary>Records only numeric fixture geometry at the identified PDF restoration boundary.</summary>
+   private static void TracePdfGeometry(string stage, Core.Documents.DocumentScrollState? reading)
+   {
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         App.Log.Info(FormattableString.Invariant($"[DEBUG-print-restore] {stage}: position={reading?.Position:R}; maximum={reading?.Maximum:R}; heading={reading?.Headings.GetValueOrDefault(1):R}."));
+      }
+   }
+
+
+
+   /// <summary>Configures timestamp-free document output with reference page margins and font-only scaling.</summary>
+   private CoreWebView2PrintSettings CreatePdfSettings(bool backgrounds)
+   {
       CoreWebView2PrintSettings settings = _environment!.CreatePrintSettings();
-      settings.ShouldPrintBackgrounds = options.Backgrounds;
+      settings.ShouldPrintBackgrounds = backgrounds;
       settings.ShouldPrintHeaderAndFooter = false;
       settings.ScaleFactor = 1;
       // The reference uses 36-point page margins: WebView2's native settings use inches.
       settings.MarginTop = settings.MarginBottom = settings.MarginLeft = settings.MarginRight = 0.5;
-      return await _view.CoreWebView2.PrintToPdfAsync(path, settings);
+      return settings;
    }
 
 

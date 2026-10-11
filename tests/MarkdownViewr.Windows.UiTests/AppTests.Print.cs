@@ -81,12 +81,9 @@ public partial class AppTests
       WaitForZoomGlyph(session, original * 1.1);
       session.InvokeMenuItem("View", "SourceToggle");
       session.ClickElement("OutlineHeading:1");
-      AutomationElement browserScroller = FindDocumentScroller(session);
-      WaitForReaderScroll(session, browserScroller, value => value > 1, "a nonzero actual reading viewport before printing");
-      double position = WaitForStablePrintViewport(session, browserScroller);
+      (Rectangle Glyph, Rectangle View) reading = WaitForStablePrintViewport(session);
       TracePrintViewport(session, "Before options");
-      double height = session.FindInApp(cf => cf.ByAutomationId("mv-heading-1"))!.BoundingRectangle.Height;
-      Assert.True(height > 0);
+      Assert.True(session.WaitForElement("mv-heading-0").BoundingRectangle.Top < reading.View.Top);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
       string first = Path.Combine(session.DataDirectory, "default-print.pdf");
       SavePrintPdf(session, first, configure: false);
@@ -96,7 +93,7 @@ public partial class AppTests
       Assert.True(CountPixels(clean, pixel => pixel.R > 180 && pixel.G < 80 && pixel.B < 80) > 400, "The expanded print PDF is missing the owned red image.");
       Assert.True(CountPixels(clean, pixel => pixel.R > 245 && pixel.G > 245 && pixel.B > 245) > clean.Width * clean.Height * 0.8, "Ink-saving print output must have a predominantly white page.");
       Assert.True(CountPixels(clean, pixel => pixel.R < 100 && pixel.G < 100 && pixel.B < 100) > 100, "The actual PDF is missing printed heading/body glyphs.");
-      AssertPrintScreenState(session, browserScroller, position, height, source);
+      AssertPrintScreenState(session, reading, source);
       string second = Path.Combine(session.DataDirectory, "themed-print.pdf");
       SavePrintPdf(session, second, configure: true);
       string secondEvidence = RetainPrintedFixture(session, second);
@@ -104,7 +101,7 @@ public partial class AppTests
       themed.Save(secondEvidence + ".png", ImageFormat.Png);
       Assert.Equal(0, CountPixels(themed, pixel => pixel.R > 180 && pixel.G < 80 && pixel.B < 80));
       Assert.True(CountPixels(themed, pixel => Math.Abs(pixel.R - 30) < 3 && Math.Abs(pixel.G - 30) < 3 && Math.Abs(pixel.B - 46) < 3) > 1000, "Active-theme backgrounds did not reach the actual printed PDF.");
-      AssertPrintScreenState(session, browserScroller, position, height, source);
+      AssertPrintScreenState(session, reading, source);
    }
 
 
@@ -125,11 +122,21 @@ public partial class AppTests
 
 
    /// <summary>Checks the real viewport, visible glyph size, hidden browser image and literal native source after printing.</summary>
-   private void AssertPrintScreenState(AppSession session, AutomationElement browserScroller, double position, double height, string source)
+   private static void AssertPrintScreenState(AppSession session, (Rectangle Glyph, Rectangle View) reading, string source)
    {
       Assert.Null(session.FindInApp(cf => cf.ByName("owned red image")));
-      WaitForReaderScroll(session, browserScroller, value => Math.Abs(value - position) < 0.5, "the unchanged actual reading viewport after PDF output");
-      Assert.True(Math.Abs(session.FindInApp(cf => cf.ByAutomationId("mv-heading-1"))!.BoundingRectangle.Height - height) < 1);
+      try
+      {
+         session.WaitFor(() =>
+         {
+            AutomationElement heading = session.WaitForElement("mv-heading-1");
+            return heading.BoundingRectangle == reading.Glyph && session.WaitForElement("DocumentView").BoundingRectangle == reading.View ? heading : null;
+         }, "the unchanged actual heading and reading viewport after PDF output");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException(exception.Message + " " + session.ReadLogs(), exception);
+      }
       Assert.Equal(source, session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value);
    }
 
@@ -182,18 +189,19 @@ public partial class AppTests
 
 
 
-   /// <summary>Waits for actual post-layout scroll samples before recording the unchanged-print baseline.</summary>
-   private static double WaitForStablePrintViewport(AppSession session, AutomationElement scroller)
+   /// <summary>Waits for settled actual glyph/view rectangles; WebView2 can report stale out-of-range UIA scroll percentages.</summary>
+   private static (Rectangle Glyph, Rectangle View) WaitForStablePrintViewport(AppSession session)
    {
-      double previous = double.NaN;
+      (Rectangle Glyph, Rectangle View) previous = default;
       int stable = 0;
       session.WaitFor(() =>
       {
-         double current = scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
-         stable = double.IsFinite(previous) && Math.Abs(current - previous) < 0.01 ? stable + 1 : 0;
+         AutomationElement heading = session.WaitForElement("mv-heading-1");
+         (Rectangle Glyph, Rectangle View) current = (heading.BoundingRectangle, session.WaitForElement("DocumentView").BoundingRectangle);
+         stable = current == previous ? stable + 1 : 0;
          previous = current;
-         return current > 1 && stable >= 4 ? scroller : null;
-      }, "the settled nonzero reading viewport before printing");
+         return current.Glyph.Height > 0 && current.View.IntersectsWith(current.Glyph) && stable >= 4 ? heading : null;
+      }, "the settled actual heading and reading viewport before printing");
       return previous;
    }
 

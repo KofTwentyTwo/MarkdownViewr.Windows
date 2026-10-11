@@ -29,6 +29,11 @@ Windows print UI owns printer selection and cancellation. PDF saving uses an
 explicit Windows App SDK destination picker and awaited WebView2 PDF output. PDF margins
 are 0.5 inches, matching the reference's 36 points; scale is handled in font CSS.
 No completion or successful printer job is inferred from opening native print UI.
+Hosted PDF generation moved the same screen glyph41pixels after its awaited
+operation; capture validated numeric reading geometry before PDF output and
+restore its vertical position in finally, only for the same ready navigation.
+Actual glyph/view rectangles verify restoration; the observed UIA scroll scalar
+reported200% before printing and cannot serve as the viewport baseline.
 Use the installed App SDK save picker with AppWindow.Id; do not introduce the
 legacy WinRT picker/elevation constraint into the new PDF path.
 
