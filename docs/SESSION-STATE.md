@@ -24,8 +24,11 @@ passes both cancel cases and generates a real PDF: owned red image, predominantl
 white page and actual text pixels pass. Retained PDF/PNG/TRX under
 artifacts/print-path-verified-state-failed-38124425486. The subsequent unchanged
 reader viewport assertion fails (observed87.0253%). New focused fixture probes
-record before/options/PDF positions and wait for stable pre-print layout; no
-product restoration change or relaxed after-print assertion yet.
+record before/options/PDF positions and wait for stable pre-print layout. Probe
+eba7a75/38124742261 shows200% before/options/Save and87.0253% after;200% is outside
+UIA's valid range. New paired actual heading/view rectangles distinguish stale
+accessibility range data from real glyph movement; original assertions retained.
+No product restoration change yet.
 Full suites now expect
 52 native/published and51 per installed channel. Temporary filtered print workflow
 is a feedback loop; all required full gates remain.

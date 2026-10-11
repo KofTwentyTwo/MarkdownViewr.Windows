@@ -84,7 +84,7 @@ public partial class AppTests
       AutomationElement browserScroller = FindDocumentScroller(session);
       WaitForReaderScroll(session, browserScroller, value => value > 1, "a nonzero actual reading viewport before printing");
       double position = WaitForStablePrintViewport(session, browserScroller);
-      _output.WriteLine($"[DEBUG-print-viewport] Before options: {position:R}.");
+      TracePrintViewport(session, "Before options");
       double height = session.FindInApp(cf => cf.ByAutomationId("mv-heading-1"))!.BoundingRectangle.Height;
       Assert.True(height > 0);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
@@ -142,7 +142,7 @@ public partial class AppTests
       {
          session.InvokeMenuItem("File", "PrintMenuItem");
          session.WaitForElement("PrintTheme");
-         _output.WriteLine($"[DEBUG-print-viewport] Options open: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
+         TracePrintViewport(session, "Options open");
          if(configure)
          {
             session.WaitForElement("PrintTheme").AsComboBox().Select("Active Theme");
@@ -155,10 +155,10 @@ public partial class AppTests
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
          EnterPrintFilename(filename, path);
-         _output.WriteLine($"[DEBUG-print-viewport] Before PDF: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
+         TracePrintViewport(session, "Before PDF");
          session.ClickButton("Save");
          session.WaitFor(() => File.Exists(path) && new FileInfo(path).Length > 100 ? session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("PDF saved."))) : null, "the completed actual PDF export", TimeSpan.FromSeconds(30));
-         _output.WriteLine($"[DEBUG-print-viewport] PDF saved: {FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value:R}.");
+         TracePrintViewport(session, "PDF saved");
       }
       catch(TimeoutException)
       {
@@ -167,6 +167,17 @@ public partial class AppTests
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;
       }
+   }
+
+
+
+   /// <summary>Compares actual rendered glyph coordinates with the observed accessibility scroll scalar.</summary>
+   private void TracePrintViewport(AppSession session, string stage)
+   {
+      double percent = FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
+      Rectangle glyph = session.WaitForElement("mv-heading-1").BoundingRectangle;
+      Rectangle view = session.WaitForElement("DocumentView").BoundingRectangle;
+      _output.WriteLine($"[DEBUG-print-viewport] {stage}: percent={percent:R}; glyph={glyph}; view={view}.");
    }
 
 
