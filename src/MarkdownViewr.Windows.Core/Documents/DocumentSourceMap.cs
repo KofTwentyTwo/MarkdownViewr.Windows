@@ -18,7 +18,7 @@ namespace MarkdownViewr.Windows.Core.Documents;
 /// <summary>Carries parser provenance through sanitation using a fresh private attribute removed before presentation.</summary>
 internal sealed class DocumentSourceMap
 {
-   private readonly string _source;
+   private readonly int[] _lineEnds;
    private readonly Dictionary<string, (int Start, int End)> _positions = new(StringComparer.Ordinal);
 
 
@@ -27,7 +27,15 @@ internal sealed class DocumentSourceMap
    public DocumentSourceMap(string source)
    {
       ArgumentNullException.ThrowIfNull(source);
-      _source = source;
+      var ends = new List<int>();
+      int start = 0;
+      while(source.IndexOf('\n', start) is int end && end >= 0)
+      {
+         ends.Add(end);
+         start = end + 1;
+      }
+      ends.Add(source.Length);
+      _lineEnds = ends.ToArray();
       AttributeName = "data-mv-source-" + Guid.NewGuid().ToString("N");
    }
 
@@ -86,8 +94,8 @@ internal sealed class DocumentSourceMap
    /// <summary>Raw heading markup stays on its original source line; the canonical snapshot is never rewritten.</summary>
    private int EndOfLine(int start)
    {
-      int end = _source.IndexOf('\n', start);
-      return end >= 0 ? end : _source.Length;
+      int index = Array.BinarySearch(_lineEnds, start);
+      return _lineEnds[index >= 0 ? index : ~index];
    }
 
 

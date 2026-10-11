@@ -330,3 +330,21 @@ Raw line lookup is indexed rather than rescanning all lines for each heading.
 snapshot and public renderer policy remain unchanged. Full scroll/heading/collapse
 source UI remains unimplemented, not replaced by this foundation. No GUI input,
 Azure attempt, merge/tag/release or claim of production signing.
+
+## Verified vim channels and indexed source line ends
+
+6bf125d / CI 38112298176 is fully SUCCESS. Retained TRX proves native/published
+44/44 and installed stable/dev 43/43 each, zero failures/skips. Evidence retained
+in artifacts/vim-verified-installed-38112298176, native and installed job logs.
+Four payload gates verify 536 files per payload; update probes apply/restart both
+channels. Fixtures remain synthetic/unsigned and do not prove production signing.
+All exact prior producers are terminal before this source increment's push.
+
+Local signed source-provenance a0d8fe7 has a further tested indexed-line-end fix:
+255 core tests/100% lines and zero-warning build/format pass. A 300-heading raw
+single-line regression verifies distinct offsets with one shared line end. Global
+line ends are indexed once; per-heading lookup is logarithmic. This avoids a
+quadratic full-remainder scan for adversarial long raw HTML lines. The source
+snapshot remains immutable; no new capability/dependency is introduced. Update
+PRODUCT/TODO with actual vim proof; source synchronization UI stays pending and
+full scope remains active. No local GUI input, Azure attempt, merge/tag/release.

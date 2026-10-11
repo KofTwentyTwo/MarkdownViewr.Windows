@@ -101,6 +101,23 @@ public sealed class DocumentSourceHeadingTests
 
 
 
+   /// <summary>Many raw headings on one line share one bounded line end without rescanning its entire remaining text per heading.</summary>
+   [Fact]
+   public void Create_ManyRawHeadingsOnOneLine_PreservesDistinctOffsets()
+   {
+      string source = string.Concat(Enumerable.Repeat("<h2>Same</h2>", 300));
+      var outline = new DocumentOutline(source);
+      Assert.Equal(300, outline.SourceHeadings.Count);
+      for(int index = 0; index < outline.SourceHeadings.Count; index++)
+      {
+         Assert.Equal(index * "<h2>Same</h2>".Length, outline.SourceHeadings[index].Start);
+         Assert.Equal(source.Length, outline.SourceHeadings[index].End);
+      }
+      Assert.DoesNotContain("data-mv-source-", outline.Html, StringComparison.OrdinalIgnoreCase);
+   }
+
+
+
    /// <summary>A mapped render still rejects null, oversized content and corrupt frontmatter modes before use.</summary>
    [Fact]
    public void Create_InvalidInput_PreservesRenderingLimits()

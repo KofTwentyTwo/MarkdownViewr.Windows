@@ -24,7 +24,7 @@
 - [x] Implement paired native browser/source find with bounded literal terms, shared counts, wraparound and reload guards (issue #10).
 - [x] Verify paired find and repeated local-fragment reveal on 5a9af63: 41 native/published and 40 per installed channel, zero skips.
 - [x] Implement all required vim reading/find/heading commands, timed prefixes and native focus/modifier guards (issue #10).
-- [ ] Verify physical vim browser viewport, collapsed-heading and query-typing acceptance in native/published/installed builds.
+- [x] Verify physical vim viewport, collapsed-heading and query-typing acceptance on 6bf125d: CI 38112298176, 44 native/published and 43 per installed channel, zero skips.
 - [x] Map sanitized surviving headings to original parser-derived source offsets (Setext/fences/raw HTML/frontmatter/duplicates); source UI synchronization remains pending.
 - [ ] Add synchronized source headings/scroll/collapse (issue #10); audit find/source collapse parity against the pinned reference.
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
