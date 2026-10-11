@@ -61,7 +61,7 @@ public sealed partial class MainWindow
       if(SourceText.SelectionLength == 0 && SourceText.TextLength > 0)
       {
          Microsoft.UI.Text.ITextRange visible = SourceText.Document.GetRangeFromPoint(
-            new global::Windows.Foundation.Point(SourceText.Padding.Left, SourceText.Padding.Top), Microsoft.UI.Text.PointOptions.ClientCoordinates);
+            new global::Windows.Foundation.Point(scroller.HorizontalOffset + SourceText.Padding.Left, position + SourceText.Padding.Top), Microsoft.UI.Text.PointOptions.ClientCoordinates);
          SourceText.Select(visible.StartPosition, 0);
       }
       Core.Documents.DocumentSourceText? snapshot = _sourceDocument;

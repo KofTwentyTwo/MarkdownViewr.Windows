@@ -2,6 +2,27 @@
 
 Updated: 2026-10-11
 
+## Native client caret coordinates - 2026-10-11
+
+Exact91877f7 CI38173447118 focused18/20,2failures,zero skips: outline
+now passes; initial hover-fixture color and physical source focus remain red.
+Focus probe returns selection2 at verticaloffset5297.759, disproving the
+assumption that client hit-testing coordinates start at the visible viewport.
+
+Microsoft's CTextBoxView::GetClientRect reports the full native extent; its
+viewport/world-space conversion starts from the scroll offsets. Native caret
+range hit-testing therefore needs content-client coordinates. Add the actual
+horizontal/vertical scroll offsets to the client inset before GetRangeFromPoint.
+Retain identical selection/read-only/physical click/wheel and exact glyph
+alignment assertions. Evidence is retained in
+artifacts/reader-regressions-38173447118/reader-regressions/reader-regressions.trx;
+offscreen rectangles and unshifted client-point methods are both disproven.
+
+Signed local5fa6754 fixes the separately proven foreground propagation ordering;
+its local zero-warning Release/format/hooks pass. Preserve live91877f7 full
+native/published jobs before pushing the new candidate; do not restart on timeout.
+Hosted caret/color and complete installed/release verification remain required.
+
 ## Proven native foreground replacement - 2026-10-11
 
 Exact04c1da8 CI38172448726 is terminal:18/20 focused,96/98 native,
