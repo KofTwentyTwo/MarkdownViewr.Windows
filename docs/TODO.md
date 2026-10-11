@@ -1,5 +1,9 @@
 # Development Tasks
 
+- [x] Reproduce exact raw inline/HtmlBlock closing-boundary failure and correct token provenance;598 core/100% measured lines pass.
+- [x] Prepare native tooltip placement/non-hit-testing and exact owned picker enumeration corrections from retained b5e519e evidence.
+- [ ] Verify corrected raw fold, physical source/Contents clicks and picker cancellation on the next exact hosted head; retain every assertion/deadline.
+
 - [x] Exact53755ab: published99/99, installed stable/dev98/98 each; actual five-extension registration before/after update and owned uninstall/default preservation pass.
 - [x] Exact53755ab: simultaneous stable/dev profiles/processes, isolated actual updates and stable uninstall preserving dev pass; retain coexisting-channels.json and TRXs.
 

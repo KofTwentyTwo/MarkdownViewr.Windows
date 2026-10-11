@@ -108,8 +108,67 @@ internal sealed class DocumentSourceMap
       }
       if(opening is not null)
       {
-         AnnotateInlineHeading(opening, opening.Span.End, offset);
+         AnnotateInlineHeading(opening, InlineHeadingEnd(leaf, opening), offset);
       }
+   }
+
+
+
+   /// <summary>Consecutive raw HTML blocks can finish an inline title; a new heading or Markdown block prevents borrowing later syntax.</summary>
+   private static int InlineHeadingEnd(LeafBlock leaf, HtmlInline opening)
+   {
+      ContainerBlock parent = leaf.Parent!;
+      for(int index = parent.IndexOf(leaf) + 1; index < parent.Count && parent[index] is HtmlBlock block; index++)
+      {
+         (int? end, bool boundary) = HeadingBoundary(block);
+         if(end is { } close)
+         {
+            return close;
+         }
+         if(boundary)
+         {
+            break;
+         }
+      }
+      return opening.Span.End;
+   }
+
+
+
+   /// <summary>Actual HTML tokens distinguish a finishing tag from a new heading, excluding comments and quoted-attribute lookalikes.</summary>
+   private static (int? End, bool Boundary) HeadingBoundary(HtmlBlock block)
+   {
+      StringLine[] lines = block.Lines.Lines;
+      string html = string.Join('\n', lines.Take(block.Lines.Count).Select(line => line.Slice.ToString()));
+      int? close = null;
+      bool seenTag = false;
+      var parser = new HtmlParser(new HtmlParserOptions
+      {
+         OnToken = (token, range) =>
+         {
+            if(!seenTag && token.Type is HtmlTokenType.StartTag or HtmlTokenType.EndTag
+               && token.Name.Length == 2 && token.Name[0] == 'h' && token.Name[1] is >= '1' and <= '6')
+            {
+               seenTag = true;
+               if(token.Type == HtmlTokenType.EndTag)
+               {
+                  close = range.End.Index - 1;
+               }
+            }
+         },
+      });
+      using AngleSharp.Html.Dom.IHtmlDocument document = parser.ParseDocument(html);
+      if(close is not { } position)
+      {
+         return (null, seenTag);
+      }
+      int index = 0;
+      while(position >= lines[index].Slice.Length)
+      {
+         position -= lines[index].Slice.Length + 1;
+         index++;
+      }
+      return (lines[index].Slice.Start + position, true);
    }
 
 

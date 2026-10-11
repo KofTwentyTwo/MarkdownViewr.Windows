@@ -227,7 +227,9 @@ public partial class AppTests
    {
       try
       {
-         return session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1148").And(cf.ByControlType(ControlType.Edit))), "the real Windows multi-file picker filename field");
+         return session.WaitFor(() => session.TopLevelWindows().SelectMany(window => window.FindAllDescendants())
+            .FirstOrDefault(element => string.Equals(element.Properties.AutomationId.ValueOrDefault, "1148", StringComparison.Ordinal)
+               && element.Properties.ControlType.ValueOrDefault == ControlType.Edit), "the real Windows multi-file picker filename field");
       }
       catch(TimeoutException exception)
       {

@@ -119,6 +119,9 @@ public sealed class DocumentSourceTextTests
    /// <summary>Inline raw headings may span Markdown lines; folding preserves their complete authored title and closing tag.</summary>
    [Theory]
    [InlineData("<h2 title='inline'>Raw <em>inline</em>\nheading</h2>")]
+   [InlineData("<H2\n title='metadata'>Raw child\n</H2>")]
+   [InlineData("<H2\r\n title='metadata'>Raw child\r\n</H2>")]
+   [InlineData("<H2\n title='metadata'>Raw child\n<!-- fake </h2> -->\n</H2\n>")]
    [InlineData("<h2>Raw `</h2><h3>fake</h3>`<!-- </h2> -->\nheading</h2>")]
    public void SetCollapsed_RawInlineMultilineHeading_PreservesCompleteHeader(string header)
    {
@@ -127,6 +130,25 @@ public sealed class DocumentSourceTextTests
       Assert.Equal(3, source.Headings.Count);
       Assert.True(source.SetCollapsed([1]));
       Assert.Contains(header.ReplaceLineEndings("\r"), source.Text, StringComparison.Ordinal);
+      Assert.DoesNotContain("Hidden body", source.Text, StringComparison.Ordinal);
+      Assert.Contains("# Last\rTail", source.Text, StringComparison.Ordinal);
+      Assert.True(source.SetCollapsed([]));
+      Assert.Equal(original, source.GetCopyText(0, source.Text.Length));
+   }
+
+
+
+   /// <summary>A following HTML block that starts a new heading or only contains comments cannot supply a false closing range.</summary>
+   [Theory]
+   [InlineData("<div><h3>Child</h3></div>", 4)]
+   [InlineData("<!-- fake </h2> -->", 3)]
+   public void SetCollapsed_RawInlineHeadingFollowedByBlock_DoesNotBorrowClosingTag(string block, int headings)
+   {
+      string original = "# Root\n\nIntro <h2>Header\n\n" + block + "\n\nHidden body\n\n# Last\nTail";
+      var source = new DocumentSourceText(original, new DocumentOutline(original));
+      Assert.Equal(headings, source.Headings.Count);
+      Assert.True(source.SetCollapsed([1]));
+      Assert.Contains("Intro <h2>Header\r", source.Text, StringComparison.Ordinal);
       Assert.DoesNotContain("Hidden body", source.Text, StringComparison.Ordinal);
       Assert.Contains("# Last\rTail", source.Text, StringComparison.Ordinal);
       Assert.True(source.SetCollapsed([]));

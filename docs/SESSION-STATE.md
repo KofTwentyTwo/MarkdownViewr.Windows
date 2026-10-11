@@ -2,6 +2,35 @@
 
 Updated: 2026-10-11
 
+## Multiline token boundary and native input regressions corrected locally - 2026-10-11
+
+Exactb5e519e / CI38184378762 focused19/22 and native98/100 fail with zero skips.
+Focused failures: raw-inline complete-header folding, source-navigation physical
+click/alignment, and native Open picker filename lookup. Full native reproduces
+the first two; new General/Contents presentation case passes in focused/full.
+Retain current-focused-b5e519e.log/current-native-b5e519e.log and actual focused
+TRX/screenshots under artifacts/reader-regressions-38184378762. Installed job
+114603470178 is still live at this observation; preserve it before any push.
+
+An exact core regression reproduces the raw opening-tag/newline failure: Markdig
+moves a line-start closing tag into a following HtmlBlock. Existing actual HTML
+tokens now retain complete inline titles across consecutive raw blocks, ignoring
+comment/attribute lookalikes and stopping at a new heading/Markdown boundary.
+All598 core tests pass with100% measured line coverage, including CRLF, comments,
+multiline closing syntax and unrelated blocks. Release/format pass.
+
+Owned UI evidence shows the new full-title tooltip covering a subsequent Contents
+click. Place the native tooltip to the right and make it non-hit-testable; retain
+all physical click/alignment assertions. The exact native filename control1148/
+Edit appears in owned enumeration despite the provider condition lookup timing
+out; use that same ID/type in owned enumeration, without broader controls or a
+longer deadline. These native corrections require fresh hosted acceptance.
+
+A dedicated native Printing page/shared options editor is prepared separately;
+its new apply/restore/dialog-cancel/sibling-persistence case compiles/discovers,
+not executed. Keep the goal active; final signing/review/chooser/design acceptance
+and production publication remain open. No local input or preview changes.
+
 ## Registration and simultaneous editions verified - 2026-10-11
 
 Exact53755ab / CI38182128299 is terminal success: focused21/21, native99/99,

@@ -99,7 +99,7 @@ public sealed partial class MainWindow
             row.Children.Add(label);
             var item = new ListViewItem { Content = row, Tag = heading, HorizontalContentAlignment = HorizontalAlignment.Stretch };
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, heading.Title);
-            ToolTipService.SetToolTip(item, new TextBlock { Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxWidth = 320 });
+            ToolTipService.SetToolTip(item, new ToolTip { Content = new TextBlock { Text = heading.Title, TextWrapping = TextWrapping.Wrap, MaxWidth = 320 }, Placement = PlacementMode.Right, IsHitTestVisible = false });
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "OutlineHeading:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
             OutlineList.Items.Add(item);
             if(heading == selected)
