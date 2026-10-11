@@ -9,6 +9,7 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
+using MarkdownViewr.Windows.Core.Printing;
 
 
 namespace MarkdownViewr.Windows.UiTests;
@@ -101,6 +102,115 @@ public partial class AppTests
       Assert.Equal(Title, WaitForWindowElement(session, primary, "OutlineHeading:1").Name);
       AssertSavedContentsPreferences(session, enabled: false);
       RetainDocumentWindow(session, primary, "contents-truncation-and-markers");
+   }
+
+
+
+   /// <summary>Apply shares actual defaults with the next print dialog and sibling saves; Restore and closing discard only the draft.</summary>
+   [Fact]
+   public void Settings_PrintingDefaults_ApplyRestoreAndDialogCancel()
+   {
+      using var session = new AppSession(document: "# Printing defaults fixture", documentFileName: "printing.md",
+         additionalDocuments: new Dictionary<string, string>(StringComparer.Ordinal) { ["sibling.md"] = "# Printing sibling fixture" });
+      Window primary = WaitForDocumentWindow(session, "printing.md");
+      Window sibling = WaitForDocumentWindow(session, "sibling.md");
+      AutomationElement heading = WaitForWindowHeading(session, primary, "Printing defaults fixture");
+      WaitForWindowHeading(session, sibling, "Printing sibling fixture");
+      double originalHeight = heading.BoundingRectangle.Height;
+      string originalSettings = session.ReadSettings();
+      InvokeDocumentMenu(session, primary, "SettingsMenuItem");
+      session.WaitForElement("SettingsPrintingTab").Patterns.SelectionItem.Pattern.Select();
+      var options = new PrintOptions("Nord", Backgrounds: true, Images: false, MatchScreenZoom: true, FullPage: false, Borders: true, PaddingPixels: 24);
+      ConfigurePrintOptions(session, options);
+      Assert.Equal(originalSettings, session.ReadSettings());
+      session.ClickElement("SettingsApplyPrint");
+      AssertSavedPrintingDefaults(session, options);
+      RetainDocumentWindow(session, session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow(), "printing-defaults-settings");
+      CloseSettings(session);
+      InvokeDocumentMenu(session, sibling, "SourceToggle", menuName: "View");
+      AssertSavedPrintingDefaults(session, options);
+      string savedSettings = session.ReadSettings();
+      InvokeDocumentMenu(session, primary, "PrintMenuItem");
+      AssertPrintOptionControls(session, options);
+      ConfigurePrintOptions(session, new PrintOptions());
+      session.ClickButton("Cancel");
+      session.WaitForElementGone("PrintTheme");
+      Assert.Equal(savedSettings, session.ReadSettings());
+      Assert.Equal(originalHeight, WaitForWindowHeading(session, primary, "Printing defaults fixture").BoundingRectangle.Height);
+      InvokeDocumentMenu(session, primary, "SettingsMenuItem");
+      session.WaitForElement("SettingsPrintingTab").Patterns.SelectionItem.Pattern.Select();
+      AssertPrintOptionControls(session, options);
+      ConfigurePrintOptions(session, new PrintOptions());
+      session.ClickElement("SettingsRestorePrint");
+      AssertPrintOptionControls(session, options);
+      ConfigurePrintOptions(session, new PrintOptions());
+      CloseSettings(session);
+      Assert.Equal(savedSettings, session.ReadSettings());
+   }
+
+
+
+   /// <summary>A sibling's accepted output defaults update the saved baseline while an existing Settings draft remains available to apply or restore.</summary>
+   [Fact]
+   public void Settings_PrintingDraft_SiblingSavePreservesDraftAndRefreshesRestore()
+   {
+      using var session = new AppSession(document: "# Printing draft fixture", documentFileName: "draft.md",
+         additionalDocuments: new Dictionary<string, string>(StringComparer.Ordinal) { ["sibling.md"] = "# Printing sibling output fixture" });
+      Window primary = WaitForDocumentWindow(session, "draft.md");
+      Window sibling = WaitForDocumentWindow(session, "sibling.md");
+      WaitForWindowHeading(session, primary, "Printing draft fixture");
+      WaitForWindowHeading(session, sibling, "Printing sibling output fixture");
+      InvokeDocumentMenu(session, primary, "SettingsMenuItem");
+      session.WaitForElement("SettingsPrintingTab").Patterns.SelectionItem.Pattern.Select();
+      Window settings = session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow();
+      var draft = new PrintOptions("Nord", Images: false, Borders: true, PaddingPixels: 24);
+      ConfigurePrintOptions(session, draft, settings);
+      InvokeDocumentMenu(session, sibling, "PrintMenuItem");
+      AutomationElement dialog = session.WaitForElement("PrintOptionsDialog");
+      var saved = new PrintOptions("Plain HTML", Backgrounds: true, FullPage: false, PaddingPixels: 8);
+      ConfigurePrintOptions(session, saved, dialog);
+      session.ClickButton("Print...");
+      session.WaitForElementGone("PrintOptionsDialog");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByControlType(ControlType.Button).And(cf.ByName("Cancel")).And(cf.ByClassName("Button"))), "the owned Windows print dialog's Cancel button");
+      session.ClickButton("Cancel");
+      AssertSavedPrintingDefaults(session, saved);
+      AssertPrintOptionControls(session, draft, settings);
+      session.ClickElement("SettingsRestorePrint");
+      AssertPrintOptionControls(session, saved, settings);
+      AssertSavedPrintingDefaults(session, saved);
+      CloseSettings(session);
+      InvokeDocumentMenu(session, primary, "SourceToggle", menuName: "View");
+      AssertSavedPrintingDefaults(session, saved);
+   }
+
+
+
+   /// <summary>Reads each actual native print control so shared Settings/dialog initialization cannot silently diverge.</summary>
+   private static void AssertPrintOptionControls(AppSession session, PrintOptions options, AutomationElement? owner = null)
+   {
+      Assert.Equal(options.Theme, FindPrintControl(session, owner, "PrintTheme").AsComboBox().SelectedItem?.Text);
+      Assert.Equal(options.Backgrounds, FindPrintControl(session, owner, "PrintBackgrounds").AsCheckBox().IsChecked);
+      Assert.Equal(options.Images, FindPrintControl(session, owner, "PrintImages").AsCheckBox().IsChecked);
+      Assert.Equal(options.MatchScreenZoom ? "Match screen" : "Standard (100%)", FindPrintControl(session, owner, "PrintZoom").AsComboBox().SelectedItem?.Text);
+      Assert.Equal(options.FullPage ? "Full page" : "Document width", FindPrintControl(session, owner, "PrintWidth").AsComboBox().SelectedItem?.Text);
+      Assert.Equal(options.Borders, FindPrintControl(session, owner, "PrintBorders").AsCheckBox().IsChecked);
+      Assert.Equal(options.PaddingPixels, FindPrintControl(session, owner, "PrintPadding").Patterns.RangeValue.Pattern.Value.Value);
+   }
+
+
+
+   /// <summary>Checks the real saved print record rather than a returned UI draft.</summary>
+   private static void AssertSavedPrintingDefaults(AppSession session, PrintOptions options)
+   {
+      using var saved = JsonDocument.Parse(session.ReadSettings());
+      JsonElement print = saved.RootElement.GetProperty("Print");
+      Assert.Equal(options.Theme, print.GetProperty("Theme").GetString());
+      Assert.Equal(options.Backgrounds, print.GetProperty("Backgrounds").GetBoolean());
+      Assert.Equal(options.Images, print.GetProperty("Images").GetBoolean());
+      Assert.Equal(options.MatchScreenZoom, print.GetProperty("MatchScreenZoom").GetBoolean());
+      Assert.Equal(options.FullPage, print.GetProperty("FullPage").GetBoolean());
+      Assert.Equal(options.Borders, print.GetProperty("Borders").GetBoolean());
+      Assert.Equal(options.PaddingPixels, print.GetProperty("PaddingPixels").GetDouble());
    }
 
 

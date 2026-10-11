@@ -94,16 +94,22 @@ public partial class AppTests
 
 
    /// <summary>Edits all requested print choices through their actual native controls, including the bounded NumberBox.</summary>
-   private static void ConfigurePrintOptions(AppSession session, PrintOptions options)
+   private static void ConfigurePrintOptions(AppSession session, PrintOptions options, AutomationElement? owner = null)
    {
-      session.WaitForElement("PrintTheme").AsComboBox().Select(options.Theme);
-      session.WaitForElement("PrintBackgrounds").AsCheckBox().IsChecked = options.Backgrounds;
-      session.WaitForElement("PrintImages").AsCheckBox().IsChecked = options.Images;
-      session.WaitForElement("PrintZoom").AsComboBox().Select(options.MatchScreenZoom ? "Match screen" : "Standard (100%)");
-      session.WaitForElement("PrintWidth").AsComboBox().Select(options.FullPage ? "Full page" : "Document width");
-      session.WaitForElement("PrintBorders").AsCheckBox().IsChecked = options.Borders;
-      session.WaitForElement("PrintPadding").Patterns.RangeValue.Pattern.SetValue(options.PaddingPixels);
+      FindPrintControl(session, owner, "PrintTheme").AsComboBox().Select(options.Theme);
+      FindPrintControl(session, owner, "PrintBackgrounds").AsCheckBox().IsChecked = options.Backgrounds;
+      FindPrintControl(session, owner, "PrintImages").AsCheckBox().IsChecked = options.Images;
+      FindPrintControl(session, owner, "PrintZoom").AsComboBox().Select(options.MatchScreenZoom ? "Match screen" : "Standard (100%)");
+      FindPrintControl(session, owner, "PrintWidth").AsComboBox().Select(options.FullPage ? "Full page" : "Document width");
+      FindPrintControl(session, owner, "PrintBorders").AsCheckBox().IsChecked = options.Borders;
+      FindPrintControl(session, owner, "PrintPadding").Patterns.RangeValue.Pattern.SetValue(options.PaddingPixels);
    }
+
+
+
+   /// <summary>Concurrent Settings and output dialogs retain distinct native control ownership despite sharing option identities.</summary>
+   private static AutomationElement FindPrintControl(AppSession session, AutomationElement? owner, string identity)
+      => owner is null ? session.WaitForElement(identity) : session.WaitFor(() => owner.FindFirstDescendant(cf => cf.ByAutomationId(identity)), "the owned print control " + identity);
 
 
 

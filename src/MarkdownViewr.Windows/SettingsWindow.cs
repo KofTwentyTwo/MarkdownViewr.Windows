@@ -18,7 +18,7 @@ namespace MarkdownViewr.Windows;
 internal sealed partial class SettingsWindow : Window
 {
    private readonly Grid _root = new();
-   private readonly NavigationView _navigation = new() { PaneDisplayMode = NavigationViewPaneDisplayMode.Auto, IsSettingsVisible = false, IsBackButtonVisible = NavigationViewBackButtonVisible.Collapsed, OpenPaneLength = 220, AlwaysShowHeader = true };
+   private readonly NavigationView _navigation = new() { PaneDisplayMode = NavigationViewPaneDisplayMode.Auto, ExpandedModeThresholdWidth = 840, CompactModeThresholdWidth = 640, IsSettingsVisible = false, IsBackButtonVisible = NavigationViewBackButtonVisible.Collapsed, OpenPaneLength = 220, AlwaysShowHeader = true };
    private readonly Dictionary<string, (string Title, UIElement Page)> _pages = new(StringComparer.Ordinal);
    private readonly ScrollViewer _pageScroll = new() { Padding = new Thickness(24, 12, 24, 24), HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
    private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(24, 8, 24, 12) };
@@ -33,7 +33,7 @@ internal sealed partial class SettingsWindow : Window
 
 
    /// <summary>Settings is a separate window; routine layout saves immediately and advanced CSS has an explicit Apply action.</summary>
-   public SettingsWindow(Core.AppSettings current, Func<ReadingAppearance, Task<bool>> saveAppearance, Func<bool, int, bool, bool, bool, bool> saveStartup, Func<bool, bool, bool> saveContents, Func<string, Task> runAction)
+   public SettingsWindow(Core.AppSettings current, Func<ReadingAppearance, Task<bool>> saveAppearance, Func<bool, int, bool, bool, bool, bool> saveStartup, Func<bool, bool, bool> saveContents, Func<Core.Printing.PrintOptions, bool> savePrint, IEnumerable<ReaderTheme> themes, Func<string, Task> runAction)
    {
       Title = AppIdentity.Info.DisplayName + " — Settings";
       SystemBackdrop = new MicaBackdrop();
@@ -41,6 +41,9 @@ internal sealed partial class SettingsWindow : Window
       _savedCss = current.GlobalCss;
       _saveStartup = saveStartup;
       _saveContents = saveContents;
+      _savePrint = savePrint;
+      _savedPrint = current.Print;
+      _printEditor = new PrintOptionsEditor(current.Print, themes);
       _saveAppearance = saveAppearance;
       _runAction = runAction;
       _root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -59,6 +62,7 @@ internal sealed partial class SettingsWindow : Window
       AddPage("SettingsAppearanceTab", "General", Symbol.Home, AppearancePage(current));
       AddPage("SettingsThemesTab", "Document themes", Symbol.Library, ThemesPage());
       AddPage("SettingsEditorsTab", "Editors", Symbol.Edit, EditorsPage());
+      AddPage("SettingsPrintingTab", "Printing", Symbol.Print, PrintingPage());
       AddPage("SettingsAdvancedTab", "Advanced", Symbol.Setting, AdvancedPage(current));
       _navigation.Content = _pageScroll;
       _navigation.SelectionChanged += (_, args) => SelectPage((string)((NavigationViewItem)args.SelectedItem).Tag);

@@ -40,7 +40,7 @@ public sealed partial class MainWindow
       }
       if(_settingsWindow is null)
       {
-         _settingsWindow = new SettingsWindow(_settings, SaveReadingAppearanceAsync, SaveStartupSettings, SaveContentsSettings, RunSettingsActionAsync);
+         _settingsWindow = new SettingsWindow(_settings, SaveReadingAppearanceAsync, SaveStartupSettings, SaveContentsSettings, SavePrintingSettings, _themes, RunSettingsActionAsync);
          WinUIShell.ApplyTheme((FrameworkElement)_settingsWindow.Content, _settings.ThemeKind);
          _settingsWindow.Closed += (_, _) => _settingsWindow = null;
       }

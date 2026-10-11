@@ -1,5 +1,8 @@
 # Development Tasks
 
+- [x] Prepare shared native Printing Settings options with Apply/Restore, validated checked saves and sibling draft preservation; zero-warning Release/format pass.
+- [ ] Execute both new Printing defaults/draft acceptance cases plus every existing Print/PDF/pixel case on the exact next hosted head; inspect actual Settings screenshots.
+
 - [x] Reproduce exact raw inline/HtmlBlock closing-boundary failure and correct token provenance;598 core/100% measured lines pass.
 - [x] Prepare native tooltip placement/non-hit-testing and exact owned picker enumeration corrections from retained b5e519e evidence.
 - [ ] Verify corrected raw fold, physical source/Contents clicks and picker cancellation on the next exact hosted head; retain every assertion/deadline.

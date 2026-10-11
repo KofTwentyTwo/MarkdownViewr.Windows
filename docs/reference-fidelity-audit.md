@@ -69,3 +69,20 @@ isolated updates and stable uninstall preserving the live dev edition pass.
 Retain the actual TRXs and coexisting-channels.json under
 artifacts/current-installed-evidence-38182128299. The fixtures are unsigned and
 do not establish OS chooser/Explorer interaction or production signature trust.
+
+## Current native regression findings
+
+Exactb5e519e focused19/22 and native98/100 fail, zero skips; the new General/
+Contents options case passes. A line-start closing raw tag is a separate Markdig
+HTML block; a reproduced correction now retains complete inline title syntax
+across consecutive blocks.598 core tests pass with100% measured line coverage.
+Actual tooltip placement covers a later Contents click; local placement/non-hit-
+testing is corrected. Exact picker1148/Edit exists in owned enumeration despite
+the provider lookup failure; local acceptance uses that same owned identity.
+Retain current-focused-b5e519e.log/current-native-b5e519e.log and focused TRX/
+Settings screenshot bundle. Fresh hosted runtime remains required.
+
+Printing now has a locally prepared native Settings page sharing the existing
+output editor and checked saved defaults. Apply/Restore/closing and concurrent
+sibling draft preservation have compiled actual native cases, not execution
+proof. Full owner design acceptance and production signing remain outstanding.

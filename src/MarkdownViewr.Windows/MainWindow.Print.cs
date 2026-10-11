@@ -58,8 +58,11 @@ public sealed partial class MainWindow
             return;
          }
          App.Log.Info(dialog.SaveAsPdf ? "Print options accepted for PDF export." : "Print options accepted for the Windows system dialog.");
-         _settings.Print = options;
-         Save();
+         if(!SavePrintingSettings(options))
+         {
+            StatusText.Text = "Could not save printing preferences. Please try again.";
+            return;
+         }
          if(dialog.SaveAsPdf)
          {
             await SavePrintPdfAsync(options, dialog);

@@ -2,6 +2,36 @@
 
 Updated: 2026-10-11
 
+## Shared native Printing settings prepared - 2026-10-11
+
+Add a dedicated Printing category using the same PrintOptionsEditor as the output
+dialog: theme, backgrounds/images, match-screen zoom, page/document width, borders
+and bounded padding. Apply commits validated defaults; Restore returns to latest
+saved choices and closing discards the draft. PDF destinations/open-after-save
+remain deliberate output actions. No duplicate validation, new dependency or print
+job is introduced by Settings.
+
+Both Settings and accepted Print/PDF choices use checked persistence before
+broadcasting shared print defaults/baselines. Sibling saves retain an unsubmitted
+Settings draft; Restore uses the newer saved baseline. Theme changes refresh named
+print choices without erasing other draft fields. Native NavigationView category
+labels remain visible at normal960px width and adapt at narrower widths.
+
+Release build has zero warnings/errors; format verification passes. All598 core
+cases/100% measured lines pass after the reproduced parser correction.102 native
+cases compile/discover, including new actual Apply/Restore/cancel/sibling-save
+checks with owned control scopes and a retained Settings screenshot. These new
+GUI assertions are not yet executed. Existing output/PDF/pixel cases, every
+assertion and all process deadlines remain.
+
+Signed localec78b50 retains the three evidence-based reader/picker corrections.
+Pushedb5e519e focused19/22/native98/100 fail, zero skips; General/Contents options
+case passes in both. Installed114603470178 remains live; retain it before pushing
+this Printing change. Next: inspect terminal distributed evidence, push only then,
+execute exact-head native/distributed acceptance and inspect real Settings pixels.
+Then complete default-status/theme previews and remaining release requirements.
+No local input, owner preview changes, Azure retry, shared merge or publication.
+
 ## Multiline token boundary and native input regressions corrected locally - 2026-10-11
 
 Exactb5e519e / CI38184378762 focused19/22 and native98/100 fail with zero skips.

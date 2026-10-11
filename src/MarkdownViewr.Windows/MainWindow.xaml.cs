@@ -454,6 +454,7 @@ public sealed partial class MainWindow : Window, IDisposable
    private void RefreshDocumentThemes()
    {
       _themes = Core.Themes.ThemeManagement.Enabled(_settings);
+      _settingsWindow?.UpdatePrintThemes(_themes);
       CreateDocumentThemeMenu();
    }
 

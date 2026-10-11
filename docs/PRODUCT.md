@@ -33,7 +33,7 @@ Reference source inspected at commit `6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021`.
 | Frontmatter | Hide YAML, display metadata or render it as Markdown |
 | Editor | Configurable external editor with safe literal file arguments |
 | Print | Native printing, theme/layout options, readable PDF export with optional PDF/folder opening, and restoration of screen state afterwards (#22/#23) |
-| Toolbar/settings | Mac toolbar action parity (#18), a dedicated native Settings dialog for theme/appearance configuration (#21) |
+| Toolbar/settings | Mac toolbar action parity (#18), native Settings pages for General, themes, editors, Printing defaults and Advanced startup options (#21); deliberate Apply/Restore for print/CSS drafts, independent pane defaults and shared saved preferences |
 | Foundation | AppKit About with original-author credit, repository/issues/community Help links, activity log, crash handling, stable/dev updates, tests and release controls |
 
 ## Proposed implementation for discussion
