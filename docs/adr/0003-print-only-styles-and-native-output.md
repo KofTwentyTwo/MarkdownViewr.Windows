@@ -1,6 +1,6 @@
 # ADR-0003: Independent print styles and native Windows output
 
-**Status:** Proposed; implemented on the draft branch, desktop acceptance pending
+**Status:** Proposed; focused native cases pass, full clean-head acceptance pending
 **Date:** 2026-10-11
 **Deciders:** James Maes, repository maintainer
 
@@ -59,8 +59,11 @@ hosted acceptance: exercise native cancel and save owned fixture PDFs. Use Windo
 built-in PDF rasterizer to inspect real image/background/text output, with retained
 PDF/PNG evidence. The test project targets the existing Windows SDK; no new PDF
 library or runtime dependency is added. Keep 100% measured core coverage, full native/
-published/stable/dev suites and the hostile-document controls. Desktop results are
-not yet established; broader print layout/font/padding comparisons remain open.
+published/stable/dev suites and the hostile-document controls. Original3 hosted native cases pass ec5f98f/38125751638, zero failures/skips:
+actual default/themed PDFs and unchanged glyph/view/source/collapse state. Full
+cleaned native/published/stable/dev gates and broader layout/font/padding/find
+comparisons remain open. Retained PDF/PNG/TRX evidence is under
+artifacts/print-exact-filename-38125751638.
 
 Sources: [Microsoft printing overview](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/print?tabs=dotnetcsharp),
 [App SDK save picker](https://learn.microsoft.com/en-us/windows/apps/develop/files/pickers-save-file),

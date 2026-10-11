@@ -82,7 +82,6 @@ public partial class AppTests
       session.InvokeMenuItem("View", "SourceToggle");
       session.ClickElement("OutlineHeading:1");
       (Rectangle Glyph, Rectangle View) reading = WaitForStablePrintViewport(session);
-      TracePrintViewport(session, "Before options");
       Assert.True(session.WaitForElement("mv-heading-0").BoundingRectangle.Top < reading.View.Top);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
       string first = Path.Combine(session.DataDirectory, "default-print.pdf");
@@ -149,7 +148,6 @@ public partial class AppTests
       {
          session.InvokeMenuItem("File", "PrintMenuItem");
          session.WaitForElement("PrintTheme");
-         TracePrintViewport(session, "Options open");
          if(configure)
          {
             session.WaitForElement("PrintTheme").AsComboBox().Select("Active Theme");
@@ -162,10 +160,8 @@ public partial class AppTests
          session.ClickButton("Save PDF...");
          AutomationElement filename = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("1001").And(cf.ByControlType(ControlType.Edit))), "the owned Windows PDF filename field");
          EnterPrintFilename(session, filename, path);
-         TracePrintViewport(session, "Before PDF");
          session.ClickButton("Save");
          session.WaitFor(() => File.Exists(path) && new FileInfo(path).Length > 100 ? session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("PDF saved."))) : null, "the completed actual PDF export", TimeSpan.FromSeconds(30));
-         TracePrintViewport(session, "PDF saved");
       }
       catch(TimeoutException)
       {
@@ -174,17 +170,6 @@ public partial class AppTests
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;
       }
-   }
-
-
-
-   /// <summary>Compares actual rendered glyph coordinates with the observed accessibility scroll scalar.</summary>
-   private void TracePrintViewport(AppSession session, string stage)
-   {
-      double percent = FindDocumentScroller(session).Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
-      Rectangle glyph = session.WaitForElement("mv-heading-1").BoundingRectangle;
-      Rectangle view = session.WaitForElement("DocumentView").BoundingRectangle;
-      _output.WriteLine($"[DEBUG-print-viewport] {stage}: percent={percent:R}; glyph={glyph}; view={view}.");
    }
 
 

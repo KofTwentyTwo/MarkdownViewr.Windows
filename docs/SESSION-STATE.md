@@ -11,32 +11,28 @@ draft PR #3. Owner authorizes signed/DCO commits, pushes, configuration and tick
 No merges, tags/releases, new Azure sign-ins or fabricated human review.
 Hosted Windows UI tests are authorized; no current local desktop reservation.
 
-## Print implementation in progress
+## Printing accepted in focused native run; full clean gates pending
 
-Native File/Print and Ctrl+P open a copied draft: print theme, images/backgrounds,
-font zoom, full/document width, borders and pixel padding. Screen/print styles are
-independent; no screen/DOM/find/collapse completion callback is guessed from void
-ShowPrintUI. Save PDF uses Windows' picker and awaited WebView2 output. ADR-0003
-is proposed for review. Core363/100% measured lines and build/format pass.
-First hosted38123994631 passed native Windows cancel; wrong fixture find IDs
-and UIA-only filename entry failed. Correction41a687d / filtered38124425486
-passes both cancel cases and generates a real PDF: owned red image, predominantly
-white page and actual text pixels pass. Retained PDF/PNG/TRX under
-artifacts/print-path-verified-state-failed-38124425486. The subsequent unchanged
-reader viewport assertion fails (observed87.0253%). New focused fixture probes
-record before/options/PDF positions and wait for stable pre-print layout. Probe
-eba7a75/38124742261 shows200% before/options/Save and87.0253% after;200% is outside
-UIA's valid range. Paired actual rectangles39f4ea3/38125002108 confirm a41pixel glyph move after
-PDF while browser bounds/font size stay unchanged. Restore validated vertical
-reading position in finally after awaited PDF output, guarded to the same ready
-navigation. Regression compares actual settled glyph/view rectangles rather than
-out-of-range UIA percentages; retains nonzero reading/source/collapse/pixel checks.
-Restoration6bfcf0c/38125512661 stopped before PDF: exact filename readback observed
-only a typed prefix. Wait for the full exact native filename before Save; no
-restoration verdict can be inferred from this fixture-input failure.
-Full suites now expect
-52 native/published and51 per installed channel. Temporary filtered print workflow
-is a feedback loop; all required full gates remain.
+Native File/Print/Ctrl+P, copied themes/layout preferences and explicit native PDF
+saving are implemented. Core363/100% measured lines;55 scripts; build/format pass.
+Signedec5f98f / filtered38125751638 passes all3 original cases, zero failures/skips:
+keyboard draft cancel, actual Windows print UI cancel and real default/themed PDFs.
+Actual pixels prove text, expanded folded image, white ink-saving page, hidden
+images and active-theme background. Exact actual glyph/view rectangles prove
+unchanged nonzero reader position/zoom, source text and collapsed content after
+both exports. Evidence: artifacts/print-exact-filename-38125751638.
+
+Hosted probes proved41pixel PDF reading movement. SavePdf restores validated
+vertical position in finally only for the same ready navigation; no completion is
+guessed for void native print UI. Filename typing waits for exact full native
+readback. Stale UIA200% values are replaced by actual glyph/view assertions.
+Temporary workflow/tagged probes are removed; preserve all original cases and
+require cleaned full52 native/published and51 per installed channel. Broader
+font/layout/width/padding/find-success comparisons remain open; ADR-0003 proposed.
+
+Live settings validate. Official conformance34PASS/1FAIL/1WARN/3REVIEW: required
+standards inventory lacks app, confirmed live. Exact reviewed addition prepared,
+not applied/merged; see docs/standards-readiness.md. Actual signing remains deferred.
 
 ## Current outcome
 
@@ -70,7 +66,7 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 
 ## Next steps
 
-1. Resolve actual PDF destination/keyboard acceptance on the printing head; retain TRX/PDF/PNG evidence.
+1. Require full cleaned printing gates; retain actual TRX/PDF/PNG and update evidence.
 2. Complete source raw-heading audit and broader zoom/theme/find/collapse proof.
 3. Complete print #12 output/state acceptance, windows/recents/activation and remaining theme/render/link parity.
 4. Finish standards inventory; exact signed stable/dev artifacts remain deferred.

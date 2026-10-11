@@ -40,7 +40,6 @@ internal sealed partial class DocumentBrowser
       {
          return false;
       }
-      TracePdfGeometry("before", reading);
       CoreWebView2PrintSettings settings = CreatePdfSettings(options.Backgrounds);
       try
       {
@@ -50,27 +49,14 @@ internal sealed partial class DocumentBrowser
       {
          if(IsMatchingFindDocument(document, navigation))
          {
-            TracePdfGeometry("after PDF", await CaptureScrollStateAsync());
             await ScrollToSourcePositionAsync(reading.Position);
-            TracePdfGeometry("restored", await CaptureScrollStateAsync());
          }
       }
    }
 
 
 
-   /// <summary>Records only numeric fixture geometry at the identified PDF restoration boundary.</summary>
-   private static void TracePdfGeometry(string stage, Core.Documents.DocumentScrollState? reading)
-   {
-      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
-      {
-         App.Log.Info(FormattableString.Invariant($"[DEBUG-print-restore] {stage}: position={reading?.Position:R}; maximum={reading?.Maximum:R}; heading={reading?.Headings.GetValueOrDefault(1):R}."));
-      }
-   }
-
-
-
-   /// <summary>Configures timestamp-free document output with reference page margins and font-only scaling.</summary>
+   /// <summary>Configures reference page margins and font-only scaling without browser headers or footers.</summary>
    private CoreWebView2PrintSettings CreatePdfSettings(bool backgrounds)
    {
       CoreWebView2PrintSettings settings = _environment!.CreatePrintSettings();

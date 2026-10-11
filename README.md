@@ -1,6 +1,6 @@
 # MarkdownViewr
 
-> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The reader, live reload, built-in themes/editing, frontmatter, outline/source/find, named editors and basic font zoom pass native/published and both installed channels on `2639e2d`. Native print/PDF implementation has pending output acceptance. The full port, broader parity and signed releases remain in progress.
+> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The reader, live reload, built-in themes/editing, frontmatter, outline/source/find, named editors and basic font zoom pass native/published and both installed channels on `2639e2d`. Native print cancellation and real default/themed PDF output/state cases pass; full print acceptance and broader layout comparisons remain pending. The full port, broader parity and signed releases remain in progress.
 
 A Windows Markdown viewer with live reload, themes and document navigation.
 
