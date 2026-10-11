@@ -225,14 +225,28 @@ public class AppTests
       Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
       Assert.Equal(session.App.ProcessId, session.Automation.FromPoint(start).Properties.ProcessId.ValueOrDefault);
       Assert.Equal("OutlineDivider", session.Automation.FromPoint(start).Properties.AutomationId.ValueOrDefault);
-      FlaUI.Core.Input.Mouse.DragHorizontally(start, 70);
-      session.WaitFor(
-         () =>
-         {
-            using var settings = JsonDocument.Parse(session.ReadSettings());
-            return settings.RootElement.GetProperty("OutlineWidth").GetDouble() > 240 ? session.MainWindow : null;
-         },
-         "the resized outline width to be saved");
+      FlaUI.Core.Input.Mouse.Position = start;
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.MoveTo(new System.Drawing.Point(start.X + 70, start.Y));
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
+      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
+      try
+      {
+         session.WaitFor(
+            () =>
+            {
+               using var settings = JsonDocument.Parse(session.ReadSettings());
+               return settings.RootElement.GetProperty("OutlineWidth").GetDouble() > 240 ? session.MainWindow : null;
+            },
+            "the resized outline width to be saved");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException($"{exception.Message} Divider: {divider.BoundingRectangle}; pointer: {FlaUI.Core.Input.Mouse.Position}; settings: {session.ReadSettings()}; tree: {session.DescribeDocumentStatus()}", exception);
+      }
       using var saved = JsonDocument.Parse(session.ReadSettings());
       Assert.True(saved.RootElement.GetProperty("ShowOutline").GetBoolean());
       Assert.Equal(4, saved.RootElement.GetProperty("OutlineDepth").GetInt32());

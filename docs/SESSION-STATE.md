@@ -42,15 +42,13 @@ removal after Markdown selection, still 29/30. Installed producer finished FAILU
 mode-switch assertion; CodeQL 38104015459/scripts/security passed. No run restarted.
 New diagnostic keeps the exact assertion and records fixture settings/log/UIA tree.
 
-Issue #5 tracks intermittent PSScriptAnalyzer 1.25.0 internal exceptions. Signed
-d3530d106fa54316308a532dd1bb2d784f0ef207 logs offending file/full stack and rethrows;
-all rules and required checks preserved. Current scripts 38104585530 captured the
-exact failure in InstalledUpdates.Tests.ps1: CommandInfo.get_Parameters ->
-UseCorrectCasing.AnalyzeScript, matching upstream #1708. Locally verified workaround
-checks casing alone, then every other rule; all 13 files and both negative fixtures
-pass, plus a bounded 20-iteration offending-file probe. CI must verify this change;
-no suppression, retry or analyzer-version change. Signed local ce9afc62378a1275dc723ee444066bd2c732cef5
-contains the workaround; push with the input follow-up after all prior producers ended.
+Issue #5 mitigation is verified: scripts 38104585530 captured InstalledUpdates.Tests.ps1 /
+CommandInfo.get_Parameters -> UseCorrectCasing.AnalyzeScript, matching upstream #1708.
+Signed ce9afc62378a1275dc723ee444066bd2c732cef5 isolates casing, then checks all other
+unchanged rules. Both negative fixtures, 13-file baseline and bounded 20-case probe
+pass locally. Actual 443b492 scripts 38104988748 SUCCESS: all 13 files and 55 Pester
+tests, no failures/skips; JavaScript passed. No suppression, retry or version change.
+PR #3 can close #5 on reviewed merge; upstream itself remains upstream.
 
 ## Outline milestone being prepared
 
@@ -73,6 +71,22 @@ Native persistent sidebar/depth/drag width and section operations compile. Fixed
 scripts retain independent nested collapse across matching-heading reload/theme changes.
 161 core tests pass with 100% line coverage; zero-warning build. Native resize/jump/
 collapse/state tests added, not run locally. Observe the next exact hosted handles.
+
+## Latest input acceptance
+
+443b4928eed46641c759012e741a27723e943826 is pushed. CodeQL 38104989139,
+security 38104989109, scripts 38104988748 and PR gates 38104989102 SUCCESS;
+CI 38104989141 build/format pass, native/UI 31/33. Exact-target pointer verification
+passes but Markdown choice stays Metadata, and physical resize stays unchanged.
+Installed producer is still being observed; no cancel/restart. Captured UI log:
+artifacts/pointer-ui-38104989141.log. Fixture screenshot from the prior run shows
+Markdown hover while Metadata remains checked, consistent with input not dispatched.
+
+New follow-up holds mouse-down until the native UI processes it before mouse-up;
+real divider drag separately settles start/down/move/up. Outcome assertions and
+10-second limits unchanged. Resize failures now capture saved width/rectangle/tree.
+Zero-warning build and format pass; no local input. Push after existing producers end,
+then observe its exact new handles. Full application scope remains active.
 
 ## Next and remaining scope
 

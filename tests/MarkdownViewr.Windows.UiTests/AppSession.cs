@@ -238,7 +238,9 @@ public sealed class AppSession : IDisposable
          $"an unobscured mouse target '{automationId}'");
       // Move directly: an animated path across parent-menu rows can close the target submenu.
       AssertMouseTarget(element);
-      Mouse.LeftClick();
+      Mouse.Down(MouseButton.Left);
+      Wait.UntilInputIsProcessed();
+      Mouse.Up(MouseButton.Left);
       Wait.UntilInputIsProcessed();
       LastMouseInput += $" Mouse after={Mouse.Position}; hit PID={Automation.FromPoint(Mouse.Position).Properties.ProcessId.ValueOrDefault}.";
    }
