@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 namespace MarkdownViewr.Windows.UiTests;
 
 /// <summary>
-/// End-to-end tests of the real app: the AppKit shell pieces and the example feature.
+/// End-to-end tests of the real app: the AppKit shell pieces and the document surface.
 /// UI tests share one desktop, so they never run in parallel.
 /// </summary>
 [Collection("Desktop")]
@@ -46,30 +46,6 @@ public class AppTests
       Assert.StartsWith("Version ", version.Name, StringComparison.Ordinal);
       session.ClickButton("Close");
       session.WaitForElementGone("AboutVersionText");
-   }
-
-
-
-   /// <summary>Crash net: an unhandled exception is logged and the app keeps running.</summary>
-   [Fact]
-   public void UnhandledException_IsLoggedAndTheAppSurvives()
-   {
-      using var session = new AppSession();
-      try
-      {
-         session.MouseClickElement("ThrowButton");
-         _output.WriteLine(session.LastMouseInput);
-         session.WaitFor(
-            () => session.ReadLogs().Contains("Deliberately unhandled exception from the template", StringComparison.Ordinal) ? session.MainWindow : null,
-            "the crash net's log entry");
-      }
-      catch(TimeoutException exception)
-      {
-         AutomationElement? status = session.FindInApp(cf => cf.ByAutomationId("StatusText"));
-         throw new TimeoutException($"{exception.Message} {session.LastMouseInput} Observed status: '{status?.Properties.Name.ValueOrDefault}'. App logs: {session.ReadLogs()}", exception);
-      }
-      Assert.False(session.App.HasExited);
-      Assert.Contains("Unhandled UI exception", session.ReadLogs(), StringComparison.Ordinal);
    }
 
 
@@ -124,33 +100,31 @@ public class AppTests
 
 
 
-   /// <summary>Example feature: greeting a name shows the greeting and saves the name.</summary>
+   /// <summary>The launched document appears in the actual browser accessibility tree.</summary>
    [Fact]
-   public void Greet_ShowsTheGreetingAndSavesTheName()
+   public void OpenDocument_GfmDocument_ShowsRenderedContent()
    {
-      using var session = new AppSession();
-      session.EnterText("NameBox", "Ada");
-      session.ClickElement("GreetButton");
-      string? observedGreeting = null;
-      try
-      {
-         session.WaitFor(
-            () =>
-            {
-               AutomationElement? text = session.FindInApp(cf => cf.ByAutomationId("GreetingText"));
-               observedGreeting = text?.Properties.Name.ValueOrDefault;
-               return observedGreeting?.EndsWith(", Ada!", StringComparison.Ordinal) == true ? text : null;
-            },
-            "the greeting");
-      }
-      catch(TimeoutException exception)
-      {
-         throw new TimeoutException($"{exception.Message} Observed greeting: '{observedGreeting}'. App logs: {session.ReadLogs()}", exception);
-      }
-      session.WaitFor(
-         () => session.ReadSettings().Contains("\"LastName\": \"Ada\"", StringComparison.Ordinal) ? session.MainWindow : null,
-         "settings.json to record the name");
+      using var session = new AppSession(document: "# Reader acceptance\n\n| Column | Value |\n| --- | --- |\n| One | Two |\n\n- [x] Finished\n\n<script>document.body.textContent='UNSAFE EXECUTION'</script>");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reader acceptance")), "the rendered document heading", TimeSpan.FromSeconds(30));
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Two")), "the rendered table cell");
+      Assert.Null(session.FindInApp(cf => cf.ByName("UNSAFE EXECUTION")));
+      Assert.Contains("Opened a Markdown document.", session.ReadLogs(), StringComparison.Ordinal);
    }
+
+
+
+   /// <summary>Reload uses the actual source file again instead of preserving an obsolete rendered snapshot.</summary>
+   [Fact]
+   public void Reload_ChangedDocument_ShowsNewContent()
+   {
+      using var session = new AppSession(document: "# Before reload");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Before reload")), "the initial heading", TimeSpan.FromSeconds(30));
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# After reload");
+      session.InvokeMenuItem("File", "ReloadMenuItem");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("After reload")), "the reloaded heading");
+      Assert.Null(session.FindInApp(cf => cf.ByName("Before reload")));
+   }
+
 }
 
 

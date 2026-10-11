@@ -6,6 +6,7 @@
         point K22_UITEST_EXE at the exe to test. -->
    <PropertyGroup>
       <TargetFramework>net10.0-windows</TargetFramework>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    </PropertyGroup>
 
    <ItemGroup>
@@ -27,6 +28,11 @@
       <!-- The app's own namespaces are global usings: their sort position against other
            usings depends on the app's name, which the template replaces. -->
       <Using Include="MarkdownViewr.Windows.Core" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <!-- Exercise the actual native file adapter without loading WinUI or reserving the desktop. -->
+      <Compile Include="..\..\src\MarkdownViewr.Windows\DocumentFiles.cs" Link="WindowsAdapters\DocumentFiles.cs" />
    </ItemGroup>
 
 </Project>

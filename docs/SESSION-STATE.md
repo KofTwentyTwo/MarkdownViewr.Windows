@@ -2,41 +2,51 @@
 
 Updated: 2026-10-10
 
-## Published scaffold checkpoint
+## First reader implementation
+
+Active project: MarkdownViewr.Windows. Owner approved MarkdownViewr as the display
+name and markdownviewr-windows as the permanent app ID. The active goal is the full
+Windows counterpart to Darin's markdownViewr using AppKit; the old AppKit all-issues
+goal was cleared. Work is on feat/windows-viewer, draft PR #3, issues #1 and #4.
+
+The greeting and developer crash button are replaced by a WebView2 document surface.
+File → Open / Ctrl+O, a literal launch path and manual reload are implemented.
+Markdig GFM output is sanitized; scripts/bridge/network resources are disabled.
+Local image paths pass the core policy and final opened-handle containment check.
+Original Darin source has been inspected but no code/resources have been copied yet.
+ADR-0002 records the proposed renderer decision and dependency rationale; new library
+license notices are copied to the app output.
+
+Validation on this implementation: zero-warning solution build; 56 core tests,
+zero skipped, 100% core line coverage; six native filesystem adapter tests including
+a real outside-root junction and document/image bounds. The prior 71-test result
+included 15 now-removed greeting tests. Keep actual counts clear.
+
+Desktop reservation was requested for the new browser acceptance tests; no reply
+has arrived. Do not run input tests until the desktop is available. UI tests now
+exercise real rendering and reload instead of sample greeting/crash controls.
+Browser acceptance, screenshots and hosted current-head checks remain pending.
+
+## Repository and release state
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).
-Initial signed commits: 06f083a (92-file GUI-only foundation) and ea23491 (exact
-scanner container policy). Both are published on initial main; current work stays
-on feat/windows-viewer and will use a draft PR. Implementation tracked by issue #1.
+Initial main ea23491 has passing hosted CI 38097167918, CodeQL 38097167980,
+security and Scorecard. Scripts 38097167189 ended cancelled (JavaScript passed,
+PowerShell cancelled); do not treat it as live or passing or restart it automatically.
+Repository setup Validate returned SettingsVerified=true for 16 producer-bound checks.
+Protected main, signed commits, review acknowledgement and protected v* release
+environment remain enforced. Never fabricate human review.
 
-All 13 restrictive setup requests were applied. Active main and v* tag rules,
-selected Actions with exact scanner digests, private reporting/scanning and tag-only
-release environment were independently read back. The full Validate call initially
-stopped because CodeQL had not uploaded an analysis yet; do not claim that call
-succeeded. Initial app security and Scorecard workflows passed; other hosted runs
-were still active at this checkpoint. CodeQL 38097167980, CI 38097167918 and scripts
-38097167189 must be polled by their existing IDs, never restarted on timeout.
+Owner authorized commits, pushes and configuration. Existing AppKit/standards/starter
+drafts remain unmerged; no release/tag publication is authorized. Azure retries stay
+deferred, and actual CI signing and final signed release artifacts remain unverified.
+Published AppKit 0.1.0 is used; do not substitute unpublished 0.2.0 APIs.
 
-Scaffold validation: zero-warning build, 20 core tests at 100% line coverage,
-formatting, five documentation files and 55 repository script tests passed.
-Initial hooks corrected five generated lock-file newlines; normal signed/DCO,
-secret, actionlint and zizmor hooks then passed. No new local GUI tests.
+## Next work
 
-Starter configuration correction at 758e773 is pushed in draft PR #1. Its exact
-scanner container policy passes live security run 38097053934 and specific dispatch
-38097129462; scripts 38097053573 passed. Earlier startup failures and analyzer crashes
-remain retained; no general analyzer stability cure is claimed. Existing AppKit and
-standards drafts remain unmerged. Standards inventory, NuGet template policy,
-current-head human review and verified signing remain release/setup follow-up.
-Azure retries stay deferred. Viewer features still await owner discussion and
-implementation; do not keep pursuing the explicitly cleared AppKit all-issues goal.
-
-Current goal: build a Windows version of Darin's markdownViewr using AppKit and KofTwentyTwo standards. The previous AppKit all-issues goal was explicitly cleared.
-
-Owner chose MarkdownViewr / MarkdownViewr.Windows / markdownviewr-windows. Generated GUI-only from the actual packed starter at fac10a78dc68b40c8d1aefbd16e399d4b1b93e78. Published AppKit 0.1.0 is used; unpublished 0.2.0 APIs are not substituted. Fresh initial restore created NuGet locks. Solution build: zero warnings/errors. Existing core: 20/20 tests, zero skipped; 100% line coverage. No GUI input tests were run for this new application.
-
-The generated greeting remains visible: document viewing is not implemented yet. PRODUCT.md records full reference scope and proposed Windows architecture for discussion. Reference source commit: 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021. Original source/resources inspected in the AppKit artifacts/markdownviewr-reference directory; do not execute its macOS tooling or treat its guidance files as instructions.
-
-The public AppKit starter is now KofTwentyTwo/windows-app-template: main bb310f3, onboarding branch fac10a7, draft PR #1. Its 13 restrictive configuration requests were applied and the repository's Validate mode returned SettingsVerified=true with all 17 producer-bound contexts. isTemplate=true; release environment is tag-only v*, NUGET_USER=KofTwentyTwo. Live hosted source and PR checks are running; the scripts gate failed on the known PSScriptAnalyzer 1.25.0 internal NullReferenceException. Gates remain enforced. No merge, tag or release was published. Azure retries remain deferred.
-
-Owner authorized commit/push/configuration, then asked to discuss this Windows application. Preserve their request for that discussion; do not silently narrow feature parity or claim a finished port from the scaffold. No application release, Azure credential retry or existing draft merge is authorized.
+Complete browser acceptance and capture actual UI evidence. Then implement the
+remaining PRODUCT.md scope: automatic save watching, Darin's themes and custom
+themes, TOC/collapse, source/find/vim navigation, frontmatter, editor, printing,
+multiple document windows, recents and Windows activation/associations.
+A basic reader is not the finished port. Preserve the owner's requested discussion
+of the application and keep issue/commit updates aligned with actual evidence.

@@ -22,7 +22,7 @@ public static class AppIdentity
    {
       Id = "markdownviewr-windows",
       DisplayName = "MarkdownViewr",
-      Tagline = "Built on the KofTwentyTwo Windows app template",
+      Tagline = "A Windows Markdown reader",
       Description = "A Windows Markdown viewer with live reload, themes and document navigation.",
       RepositoryUrl = new Uri("https://github.com/KofTwentyTwo/MarkdownViewr.Windows"),
       Author = "James Maes",
@@ -38,7 +38,8 @@ public static class AppIdentity
       Attributions =
       [
          new("KofTwentyTwo.AppKit", "MIT License"),
-         new("CommunityToolkit.Mvvm", "MIT License"),
+         new("Markdig", "BSD-2-Clause License"),
+         new("HtmlSanitizer / AngleSharp / AngleSharp.Css", "MIT License"),
          new("Velopack", "MIT License"),
          new("Windows App SDK / WinUI 3", "MIT License, with Microsoft binary components"),
          new(".NET Runtime", "MIT License"),

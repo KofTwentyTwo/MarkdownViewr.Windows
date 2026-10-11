@@ -32,7 +32,7 @@ public sealed class AppSession : IDisposable
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false)
+   public AppSession(bool showSplash = false, string? document = null)
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
@@ -43,6 +43,12 @@ public sealed class AppSession : IDisposable
 
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
       startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
+      if(document is not null)
+      {
+         string path = Path.Combine(DataDirectory, "document.md");
+         File.WriteAllText(path, document);
+         startInfo.ArgumentList.Add(path);
+      }
 
       _dpi = new DpiAwarenessScope();
       try

@@ -1,6 +1,6 @@
 # MarkdownViewr
 
-> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The application currently shows the starter's greeting screen; Markdown viewing is not implemented yet. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
+> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The first reader implementation opens Markdown, renders GFM and supports manual reload. Live reload, document themes, navigation and printing are still in development; desktop acceptance is pending. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
 
 A Windows Markdown viewer with live reload, themes and document navigation.
 
@@ -15,6 +15,8 @@ A Windows Markdown viewer with live reload, themes and document navigation.
 
 ## Install
 
+No Windows release has been published. The following describes the planned release artifacts.
+
 Download `markdownviewr-windows-stable-Setup.exe` from the
 [latest release](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest) and run it. It
 installs per user (no administrator rights needed) and updates itself in place from
@@ -26,9 +28,8 @@ Prerelease tags (`v1.2.3-beta.1`) publish to the `dev` channel
 
 ## Usage
 
-- **Greeting (example feature):** type a name and press **Greet**. The name is remembered
-  for next time. This is the template's example of a feature: logic and state in
-  `MarkdownViewr.Windows.Core`, a thin view in `MarkdownViewr.Windows`.
+- **File → Open / Ctrl+O:** choose a Markdown document. A literal file path can also be supplied when launching the executable.
+- **File → Reload:** reread the current file. Local images stay within the document folder; remote images and authored scripts/styles are blocked.
 - **View:** choose the light, dark, or system theme; turn the startup splash and the
   startup update check on or off. Choices are saved immediately.
 - **Help → Activity log:** a live view of the app's log, with an errors-only filter and a
@@ -44,6 +45,7 @@ different folder, for example a portable one.
 Prerequisites:
 
 - Windows 10 version 1809 or later, x64 or ARM64
+- Microsoft Edge WebView2 evergreen Runtime
 - .NET 10 SDK (the feature band is pinned by `global.json`)
 - Optionally Visual Studio 2026 (Windows App SDK workload) or Rider
 

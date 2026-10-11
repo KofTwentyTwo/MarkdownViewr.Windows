@@ -22,7 +22,6 @@
    <ItemGroup>
       <!-- The app's own namespaces are global usings: their sort position against other
            usings depends on the app's name, which the template replaces. -->
-      <Using Include="MarkdownViewr.Windows.Core.Greetings" />
    </ItemGroup>
 
 </Project>

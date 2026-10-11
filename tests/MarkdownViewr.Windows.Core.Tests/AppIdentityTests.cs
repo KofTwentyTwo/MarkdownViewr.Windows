@@ -49,25 +49,24 @@ public class AppIdentityTests
 /// <summary>Tests of the app's settings.</summary>
 public class AppSettingsTests
 {
-   /// <summary>Sanitize: a null name from JSON becomes empty, and the shell settings are repaired too.</summary>
+   /// <summary>Sanitize: invalid shell preferences fall back to their supported defaults.</summary>
    [Fact]
-   public void Sanitize_RepairsNullsAndShellSettings()
+   public void Sanitize_RepairsShellSettings()
    {
-      var settings = new AppSettings { LastName = null!, Theme = "Purple" };
+      var settings = new AppSettings { Theme = "Purple" };
       settings.Sanitize();
-      Assert.Equal("", settings.LastName);
       Assert.Equal("System", settings.Theme);
    }
 
 
 
-   /// <summary>Round trip: the name survives a save and a load.</summary>
+   /// <summary>Round trip: the shell theme survives a save and a load.</summary>
    [Fact]
-   public void SaveAndLoad_KeepTheName()
+   public void SaveAndLoad_KeepsTheTheme()
    {
       using var temp = new TempDirectory();
       var store = new KofTwentyTwo.AppKit.Settings.SettingsStore<AppSettings>(temp.File("settings.json"), AppSettingsContext.Default.AppSettings);
-      Assert.True(store.Save(new AppSettings { LastName = "Ada" }));
-      Assert.Equal("Ada", store.Load().LastName);
+      Assert.True(store.Save(new AppSettings { Theme = "Dark" }));
+      Assert.Equal("Dark", store.Load().Theme);
    }
 }

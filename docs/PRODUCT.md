@@ -2,7 +2,7 @@
 
 Build a Windows counterpart to [Darin Kelkhoff's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), using the KofTwentyTwo AppKit foundations and standards. The agreed display name is MarkdownViewr, repository MarkdownViewr.Windows, and permanent application ID markdownviewr-windows.
 
-The current tree is a generated, building AppKit scaffold. Its greeting screen remains a sample; it is not yet a Markdown viewer. The following features are requirements, not implemented claims.
+The first reader implementation opens Markdown with a Windows picker or literal launch argument, renders sanitized GFM and supports manual reload and bounded local images. Desktop acceptance is pending. The full feature list below remains the target; the first reader is not a completed port.
 
 ## Reference and feature scope
 
@@ -25,7 +25,7 @@ Reference source inspected at commit `6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021`.
 
 ## Proposed implementation for discussion
 
-Use a WinUI 3 shell with a WebView2 document surface, a pure .NET core for document/rendering state, and thin Windows adapters for file activation, watching, editor launch and printing. Evaluate a maintained .NET Markdown parser against the original's actual output before choosing it. Reuse compatible original HTML/CSS/navigation resources where useful, retaining attribution and replacing the macOS message bridge.
+Use a WinUI 3 shell with a WebView2 document surface, a pure .NET core for document/rendering state, and thin Windows adapters for file activation, watching, editor launch and printing. Markdig and HtmlSanitizer implement the first GFM and passive-markup boundary; see ADR-0002. Reuse compatible original HTML/CSS/navigation resources where useful, retaining attribution and replacing the macOS message bridge.
 
 Treat document Markdown, HTML, images, CSS, links and web messages as untrusted. Document content must not execute arbitrary script or gain access to native host commands. Local-resource access must remain bounded to explicitly allowed document resources; remote navigation and external editor launch require deliberate user actions. Define and test the renderer policy before loading user files.
 
