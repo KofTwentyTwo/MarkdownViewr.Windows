@@ -149,7 +149,14 @@ public class AppTests
    {
       using var session = new AppSession(document: "# Last readable version");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last readable version")), "the initial heading", TimeSpan.FromSeconds(30));
-      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("Opened document.md"))), "the accessible initial document status");
+      try
+      {
+         session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("Opened document.md"))), "the accessible initial document status");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException($"{exception.Message} Native tree: {session.DescribeDocumentStatus()}", exception);
+      }
       string path = Path.Combine(session.DataDirectory, "document.md");
       File.Delete(path);
       try
@@ -161,7 +168,7 @@ public class AppTests
       catch(TimeoutException exception)
       {
          AutomationElement? status = session.FindInApp(cf => cf.ByAutomationId("StatusText"));
-         throw new TimeoutException($"{exception.Message} Observed status: '{status?.Properties.Name.ValueOrDefault}'. Logs: {session.ReadLogs()}", exception);
+         throw new TimeoutException($"{exception.Message} Observed status: '{status?.Properties.Name.ValueOrDefault}'. Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
       }
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Last readable version")));
       File.WriteAllText(path, "# Recovered document");

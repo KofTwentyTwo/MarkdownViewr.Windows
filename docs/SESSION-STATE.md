@@ -41,7 +41,7 @@ the UI thread, but the status text was absent from automation. The next targeted
 change exposes StatusText with an explicit automation ID, text-bound accessible
 name and content view. The deletion assertion remains unchanged; it also requires
 the initial Opened status to be accessible. Build and formatting pass locally;
-hosted recovery proof is pending. Scripts 38100976565 reproduced the analyzer
+hosted recovery proof is pending. Accessibility head 23928bc still failed the initial status lookup (24/25 UI tests passed); properties alone did not resolve it. The next diagnostic retains the native tree and fixture-window PNG in hosted installed evidence. No deletion assertion is weakened. Scripts 38100976565 reproduced the analyzer
 engine crash; no scripts/settings/workflow changed and issue #5 remains open.
 ## Repository and authorization
 

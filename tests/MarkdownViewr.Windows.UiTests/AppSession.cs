@@ -95,6 +95,19 @@ public sealed class AppSession : IDisposable
 
 
 
+   /// <summary>Retains only this fixture window and its accessibility tree when document status acceptance fails.</summary>
+   public string DescribeDocumentStatus()
+   {
+      string directory = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? DataDirectory, "artifacts", "installed-smoke-ui");
+      Directory.CreateDirectory(directory);
+      string name = Guid.NewGuid().ToString("N");
+      MainWindow.CaptureToFile(Path.Combine(directory, name + ".png"));
+      string tree = FlaUI.Core.Debug.Details(MainWindow);
+      File.WriteAllText(Path.Combine(directory, name + ".log"), tree);
+      return tree;
+   }
+
+
    /// <summary>The settings file as the app last saved it.</summary>
    public string ReadSettings() => ReadShared(Path.Combine(DataDirectory, "settings.json"));
 
