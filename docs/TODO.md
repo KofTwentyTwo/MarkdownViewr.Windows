@@ -5,7 +5,9 @@
 - [x] Exact9994eda: published98/98 and installed stable/dev97/97 each, real update/apply/restart and target hashes pass; zero skips.
 - [x] Exact764c7ac: retain focused20/21, native98/99 and published98/99; only the new raw multiline-heading fold fails, zero skips. Installed lifecycle phase is not reached.
 - [x] Reproduce multiline raw-header loss in core tests and correct parser token end spans;589 core/100% measured lines, zero-warning Release/format pass.
-- [ ] Verify the correction with unchanged raw-HTML runtime assertions and actual install/update/uninstall registration readbacks on the next exact head.
+- [x] Exactbd3d72a: raw-HTML correction passes focused21/21 and native99/99; retain published process log with two real initial print-fixture failures and600-second outer timeout/no TRX.
+- [ ] Diagnose actual published print startup failures using owned logs/tree/screenshots and per-case progress; preserve deadlines/assertions.
+- [ ] Verify full published/installed suites and new registration lifecycle/coexistence readbacks on the next exact head.
 
 - [x] Generate and publish the GUI-only AppKit application with the approved identity.
 - [x] Configure/read back repository protections and establish the initial hosted CI baseline.

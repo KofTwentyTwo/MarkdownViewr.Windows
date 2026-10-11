@@ -22,7 +22,7 @@ public partial class AppTests
    public void Print_KeyboardDraftCancel_PreservesReadingStateAndPreferences()
    {
       using var session = new AppSession(document: "# Print cancellation fixture\n\nSearch needle for paired find.\n\n## Print child\nMore text.");
-      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the print fixture", TimeSpan.FromSeconds(30));
+      WaitForPrintFixture(session, "the print fixture");
       session.ClickElement("ZoomInButton");
       session.InvokeMenuItem("View", "SourceToggle");
       session.InvokeMenuItem("Edit", "FindMenuItem");
@@ -48,12 +48,29 @@ public partial class AppTests
 
 
 
+   /// <summary>Retains the actual owned logs/window when a print fixture fails to render before the unchanged startup deadline.</summary>
+   private AutomationElement WaitForPrintFixture(AppSession session, string description)
+   {
+      try
+      {
+         return session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), description, TimeSpan.FromSeconds(30));
+      }
+      catch(TimeoutException)
+      {
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
+   }
+
+
+
    /// <summary>The real Windows print dialog is opened then cancelled; no job is sent to any printer.</summary>
    [Fact]
    public void Print_WindowsDialogCancel_PreservesReadyDocument()
    {
       using var session = new AppSession(document: "# Windows print fixture\n\nNever submit this fixture to a physical printer.");
-      AutomationElement heading = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the Windows print fixture", TimeSpan.FromSeconds(30));
+      AutomationElement heading = WaitForPrintFixture(session, "the Windows print fixture");
       double height = heading.BoundingRectangle.Height;
       session.InvokeMenuItem("File", "PrintMenuItem");
       session.ClickButton("Print...");

@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Published print startup failures retained; next diagnostic candidate - 2026-10-11
+
+Exactbd3d72a / CI38180868496 is terminal: focused21/21 and native99/99 pass,
+zero skips. Installed job114592949188 times out in the published suite at the
+unchanged600-second process bound; no final TRX or installed lifecycle outcomes.
+Retained process-15.log shows two actual30-second failures before Print opens:
+Print_KeyboardDraftCancel and Print_WindowsDialogCancel cannot find their initial
+rendered heading. Other retained screenshots/PDFs prove the suite continued,
+including raw-HTML and source cases. Do not call this a proven installer bug or
+assume it is mere suite slowness.
+
+Retain current-installed-bd3d72a.log and actual artifact bundle under
+artifacts/current-installed-evidence-38180868496. Add normal per-case console
+reporting to the existing full published/installed suites and owned screenshot/
+activity-log/accessibility-tree reporting only when either print fixture startup
+fails. Existing deadlines, assertions, all cases and failure status are unchanged.
+This distinguishes slow aggregate execution, a specific blocked case and runner
+shutdown; actual startup logs distinguish missing activation/render from readiness.
+
+Signed local5de4125 coexistence acceptance and489af75 pinned audit can now be
+pushed with this targeted test-only evidence change because the earlier run is
+terminal. Production signing, actual Windows chooser/Explorer, genuine review
+and owner design acceptance remain required. No local GUI input or release.
+
 ## Full native correction passes; pinned reference audit retained - 2026-10-11
 
 Pushedbd3d72a / CI38180868496 passes full native99/99 and focused21/21,
