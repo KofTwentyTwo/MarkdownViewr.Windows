@@ -19,11 +19,15 @@
 - [x] Implement persistent resizable TOC/depth, safe heading/local-fragment jumps and independent nested section collapse (issue #9).
 - [x] Verify hosted heading jumps, independent nested collapse and theme/reload state on 5c3988e (31/33 UI pass).
 - [ ] Verify physical sidebar resize and frontmatter input follow-up; keep exact assertions.
-- [ ] Add source pane, synchronized navigation, find and vim keys.
+- [x] Implement literal read-only source pane, saved visibility/width and shared committed reload snapshots (issue #10).
+- [ ] Verify hosted source visibility/read-only/literal/reload acceptance and physical source resize.
+- [ ] Add synchronized headings/scroll/collapse, paired find and vim keys (issue #10).
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
-- [ ] Verify actual hosted frontmatter mode switching and code-font size editing.
+- [x] Verify actual code-font size 17 editing in hosted UI runs.
+- [ ] Verify actual hosted frontmatter mode switching.
 - [ ] Add safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
-- [ ] Verify hosted checks on each actual implementation head; PSScriptAnalyzer engine crash remains tracked in #5.
+- [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
+- [ ] Verify hosted checks on each actual implementation head.
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.
 - [ ] Verify actual signed stable/dev installers and exact shipped bytes before release publication.

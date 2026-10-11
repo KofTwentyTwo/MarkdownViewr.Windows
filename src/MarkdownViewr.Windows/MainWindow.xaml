@@ -9,7 +9,7 @@
       <MicaBackdrop />
    </Window.SystemBackdrop>
 
-   <Grid x:Name="RootGrid">
+   <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged">
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
          <RowDefinition Height="*" />
@@ -28,6 +28,7 @@
             <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
          </MenuBarItem>
          <MenuBarItem Title="View">
+            <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
             <ToggleMenuFlyoutItem x:Name="OutlineToggle" Text="Table of contents" Click="Outline_Click" />
             <MenuFlyoutSeparator />
             <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
@@ -61,6 +62,8 @@
             <ColumnDefinition x:Name="OutlineColumn" Width="0" />
             <ColumnDefinition x:Name="OutlineDividerColumn" Width="0" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="SourceDividerColumn" Width="0" />
+            <ColumnDefinition x:Name="SourceColumn" Width="0" />
          </Grid.ColumnDefinitions>
          <Grid x:Name="OutlinePanel" Visibility="Collapsed" Padding="8">
             <Grid.RowDefinitions>
@@ -94,6 +97,14 @@
             </primitives:Thumb.Template>
          </primitives:Thumb>
          <WebView2 x:Name="DocumentView" Grid.Column="2" Loaded="DocumentView_Loaded" AutomationProperties.Name="Markdown document" />
+         <primitives:Thumb x:Name="SourceDivider" Grid.Column="3" Background="{ThemeResource DividerStrokeColorDefaultBrush}" DragDelta="SourceDivider_DragDelta" DragCompleted="SourceDivider_DragCompleted" AutomationProperties.Name="Resize Markdown source">
+            <primitives:Thumb.Template>
+               <ControlTemplate TargetType="primitives:Thumb">
+                  <Border Background="{TemplateBinding Background}" />
+               </ControlTemplate>
+            </primitives:Thumb.Template>
+         </primitives:Thumb>
+         <TextBox x:Name="SourceText" Grid.Column="4" Visibility="Collapsed" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" FontFamily="Consolas" Padding="12" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Markdown source" />
       </Grid>
    </Grid>
 </Window>

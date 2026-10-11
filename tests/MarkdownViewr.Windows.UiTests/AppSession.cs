@@ -43,6 +43,7 @@ public sealed class AppSession : IDisposable
 
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
       startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment["MARKDOWNVIEWR_INPUT_TRACE"] = "1";
       if(document is not null)
       {
          string path = Path.Combine(DataDirectory, "document.md");

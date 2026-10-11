@@ -34,8 +34,7 @@ public sealed partial class MainWindow
    private void ApplyOutlineVisibility()
    {
       OutlinePanel.Visibility = _settings.ShowOutline ? Visibility.Visible : Visibility.Collapsed;
-      OutlineColumn.Width = new GridLength(_settings.ShowOutline ? _settings.OutlineWidth : 0);
-      OutlineDividerColumn.Width = new GridLength(_settings.ShowOutline ? 6 : 0);
+      ApplyReadingWidths();
    }
 
 
@@ -129,7 +128,7 @@ public sealed partial class MainWindow
    private void OutlineDivider_DragDelta(object sender, DragDeltaEventArgs e)
    {
       _settings.OutlineWidth = Math.Clamp(OutlineColumn.ActualWidth + e.HorizontalChange, 140, 500);
-      OutlineColumn.Width = new GridLength(_settings.OutlineWidth);
+      ApplyReadingWidths();
    }
 
 

@@ -25,6 +25,8 @@ physical directory. It does not authorize native commands or remote resource acc
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
 | Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
+| Source pane | Same bounded committed snapshot in a native read-only TextBox; literal HTML/CSS/script text never enters a renderer or command interpreter; hidden pane removed from accessibility surface |
+| Fixture input diagnostics | Explicit opt-in environment switch; observes handled native pointer/drag events without changing routing; logs owned control names, coordinates and button state only, never document text or keystrokes |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
 | Remote resources | Denied by CSP and resource interception |

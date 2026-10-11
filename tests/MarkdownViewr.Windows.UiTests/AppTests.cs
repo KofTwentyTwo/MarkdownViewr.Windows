@@ -206,6 +206,35 @@ public class AppTests
    }
 
 
+   /// <summary>Source remains literal and read-only, follows committed reloads and persists its visibility.</summary>
+   [Fact]
+   public void Source_ShowReloadAndHide_PreservesLiteralSnapshot()
+   {
+      const string Markdown = "---\nsecret: literal metadata\n---\n# Source acceptance\n\n<script>document.body.textContent='Executed source';</script>\n\n```html\n<button onclick='evil()'>Literal code</button>\n```";
+      using var session = new AppSession(document: Markdown);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("SourceText")));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      Assert.True(source.Patterns.Value.Pattern.IsReadOnly.Value);
+      string value = source.Patterns.Value.Pattern.Value.Value.Replace("\r\n", "\n", StringComparison.Ordinal);
+      Assert.Equal(Markdown, value);
+      using(var settings = JsonDocument.Parse(session.ReadSettings()))
+      {
+         Assert.True(settings.RootElement.GetProperty("ShowSource").GetBoolean());
+         Assert.Equal(320, settings.RootElement.GetProperty("SourceWidth").GetDouble());
+      }
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Source replacement\n\n**New literal text**");
+      session.WaitFor(() => source.Patterns.Value.Pattern.Value.Value.Contains("**New literal text**", StringComparison.Ordinal) ? source : null, "the source snapshot after reload");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source replacement")), "the rendered replacement heading");
+      session.InvokeMenuItem("View", "SourceToggle");
+      session.WaitForElementGone("SourceText");
+      using var hidden = JsonDocument.Parse(session.ReadSettings());
+      Assert.False(hidden.RootElement.GetProperty("ShowSource").GetBoolean());
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
    /// <summary>The native depth choice filters exact headings and a real divider drag saves its new width.</summary>
    [Fact]
    public void Outline_DepthAndResize_PersistsNativeChoices()
@@ -245,7 +274,7 @@ public class AppTests
       }
       catch(TimeoutException exception)
       {
-         throw new TimeoutException($"{exception.Message} Divider: {divider.BoundingRectangle}; pointer: {FlaUI.Core.Input.Mouse.Position}; settings: {session.ReadSettings()}; tree: {session.DescribeDocumentStatus()}", exception);
+         throw new TimeoutException($"{exception.Message} Divider: {divider.BoundingRectangle}; pointer: {FlaUI.Core.Input.Mouse.Position}; logs: {session.ReadLogs()}; settings: {session.ReadSettings()}; tree: {session.DescribeDocumentStatus()}", exception);
       }
       using var saved = JsonDocument.Parse(session.ReadSettings());
       Assert.True(saved.RootElement.GetProperty("ShowOutline").GetBoolean());

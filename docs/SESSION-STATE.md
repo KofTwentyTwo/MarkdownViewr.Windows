@@ -99,3 +99,24 @@ before production publication; active Azure profiles do not prove successful sig
 
 Pinned reference: 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 under
 AppKit/artifacts/markdownviewr-reference. Preserve original MIT attribution on adaptations.
+
+## Literal source and precise native event follow-up
+
+Latest prior head d59dba2c96d126730f491720fd548c43c30dd97b: CI 38105483808
+terminal FAILURE (31/33 loose native/UI); CodeQL 38105483850 and scripts
+38105483489 SUCCESS. Mouse down/up settling did not solve the two input cases.
+Retained log: artifacts/pointer-states-ui-38105483808.log. No local GUI input.
+
+Issue #10 records the full source/sync/find/keys acceptance. The next implementation
+adds a native read-only literal source pane (including hidden frontmatter), persisted
+visibility/preferred width, both-side width bounds and the same committed reload snapshot.
+This does not complete synchronized headings/scroll/collapse, paired find or vim keys.
+The browser's scripts/messages/host objects remain disabled. New actual UI test checks
+literal hostile source, read-only state, saved settings, reload and hiding.
+166 core tests/100% line coverage, zero-warning build and formatting pass locally.
+Hosted acceptance and physical source resize remain required.
+
+Fixture-only MARKDOWNVIEWR_INPUT_TRACE=1 records native pressed/released/capture-lost,
+outline drag events and frontmatter clicks without changing routing or logging content.
+This tests whether WinUI receives the exact physical events; no third timing workaround
+or weakened outcome assertion. The next exact hosted handles must be observed.

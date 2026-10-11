@@ -46,10 +46,21 @@ public sealed class AppSettings : ShellSettings
    public double OutlineWidth { get; set; } = 220;
 
 
+   /// <summary>Shows the literal, read-only Markdown snapshot beside the rendered document.</summary>
+   public bool ShowSource { get; set; }
+
+
+
+   /// <summary>Last source pane width in device-independent pixels.</summary>
+   public double SourceWidth { get; set; } = 320;
+
+
+
    /// <inheritdoc/>
    public override void Sanitize()
    {
       base.Sanitize();
+      SourceWidth = double.IsFinite(SourceWidth) ? Math.Clamp(SourceWidth, 160, 600) : 320;
       OutlineDepth = Math.Clamp(OutlineDepth, 1, 6);
       OutlineWidth = double.IsFinite(OutlineWidth) ? Math.Clamp(OutlineWidth, 140, 500) : 220;
       Frontmatter = FrontmatterKind.ToString();
