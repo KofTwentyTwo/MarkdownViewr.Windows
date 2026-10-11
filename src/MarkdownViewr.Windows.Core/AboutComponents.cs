@@ -39,7 +39,10 @@ public static class AboutComponents
 
 
    /// <summary>User-facing acknowledgements include shipped open-source libraries; the full inventory remains available for license audits.</summary>
-   public static IReadOnlyList<AboutComponent> OpenSource { get; } = Array.AsReadOnly(Runtime.Where(component => !component.License.Contains("Microsoft package license", StringComparison.Ordinal)).ToArray());
+   public static IReadOnlyList<AboutComponent> OpenSource { get; } = Array.AsReadOnly(Runtime
+      .Where(component => !component.License.Contains("Microsoft package license", StringComparison.Ordinal))
+      .Append(new AboutComponent("WinUI 3", "2.3.9 (package)", "MIT (open-source project)", "https://github.com/microsoft/microsoft-ui-xaml", "https://github.com/microsoft/microsoft-ui-xaml/blob/main/LICENSE"))
+      .ToArray());
 
 
 

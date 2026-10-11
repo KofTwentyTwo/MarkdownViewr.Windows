@@ -30,6 +30,25 @@ public class AppIdentityTests
 
 
 
+   /// <summary>Development channel metadata cannot reuse stable titles, settings variables or service identities.</summary>
+   [Theory]
+   [InlineData(null, "markdownviewr-windows", "MarkdownViewr")]
+   [InlineData("stable", "markdownviewr-windows", "MarkdownViewr")]
+   [InlineData("dev", "markdownviewr-windows-dev", "MarkdownViewr (dev)")]
+   [InlineData("unknown", "markdownviewr-windows", "MarkdownViewr")]
+   public void ForChannel_InstalledEdition_SelectsIsolatedIdentity(string? channel, string id, string displayName)
+   {
+      KofTwentyTwo.AppKit.AppInfo info = AppIdentity.ForChannel(channel);
+      Assert.Equal(id, info.Id);
+      Assert.Equal(displayName, info.DisplayName);
+      Assert.Equal(id.ToUpperInvariant().Replace('-', '_') + "_DATA_DIR", info.DataDirectoryVariable);
+      Assert.Equal(AppIdentity.Info.RepositoryUrl, info.RepositoryUrl);
+      Assert.NotEqual(AppIdentity.ForChannel("stable").DataDirectoryVariable, AppIdentity.ForChannel("dev").DataDirectoryVariable, StringComparer.Ordinal);
+      Assert.Equal("markdownviewr-windows", AppIdentity.Info.Id);
+   }
+
+
+
    /// <summary>Paths and SettingsStore: settings live in the app's data folder.</summary>
    [Fact]
    public void SettingsStore_UsesTheAppsSettingsFile()

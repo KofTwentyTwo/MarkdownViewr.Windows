@@ -30,13 +30,20 @@ public static class AppIdentity
       // Keep the gradient in step with the mark (regenerate both with AppKit's BrandTool).
       Brand = new AppBrand
       {
-         GradientStart = "#0F766E",
-         GradientEnd = "#134E4A",
+         GradientStart = "#1A2B4D",
+         GradientEnd = "#0C1836",
          IconSvgPath = "Assets/Brand/app-icon.svg",
          IconIcoPath = "Assets/Brand/app.ico",
       },
       Attributions = AboutComponents.Runtime.Select(component => new Attribution(component.Name, component.License)).ToArray(),
    };
+
+
+
+   /// <summary>Installed package channels select a separate development identity; loose builds retain the stable identity.</summary>
+   public static AppInfo ForChannel(string? channel) => string.Equals(channel, "dev", StringComparison.Ordinal)
+      ? Info with { Id = "markdownviewr-windows-dev", DisplayName = "MarkdownViewr (dev)" }
+      : Info;
 
 
 

@@ -70,7 +70,7 @@ public partial class AppTests
       WaitForWindowElement(session, first, "ZoomResetButton").Focus();
       Wait.UntilInputIsProcessed();
       SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_N);
-      Window blank = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, AppIdentity.Info.DisplayName, StringComparison.Ordinal)), "a genuinely blank native Ctrl+N window").AsWindow();
+      Window blank = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, session.DisplayName, StringComparison.Ordinal)), "a genuinely blank native Ctrl+N window").AsWindow();
       Assert.Null(blank.FindFirstDescendant(cf => cf.ByAutomationId("mv-heading-0")));
       Assert.Equal(3, DocumentWindows(session).Length);
       InvokeDocumentMenu(session, blank, "RecentDocument:" + Array.IndexOf(history, Path.Combine(session.DataDirectory, "one.md")), recent: true);
@@ -82,7 +82,7 @@ public partial class AppTests
       session.WaitFor(() => DocumentWindows(session).Length == 1 ? first : null, "the first reader remaining after both other windows close");
       File.Delete(Path.Combine(session.DataDirectory, "two.markdown"));
       InvokeDocumentMenu(session, first, "RecentDocument:" + Array.IndexOf(history, Path.Combine(session.DataDirectory, "two.markdown")), recent: true);
-      Window missing = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, AppIdentity.Info.DisplayName, StringComparison.Ordinal)), "the separate missing-file window").AsWindow();
+      Window missing = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, session.DisplayName, StringComparison.Ordinal)), "the separate missing-file window").AsWindow();
       session.WaitFor(() => missing.FindFirstDescendant(cf => cf.ByAutomationId("StatusText")) is { } status && status.Name.StartsWith("Could not open this document:", StringComparison.Ordinal) ? status : null, "the actual missing recent-file error");
       Assert.NotNull(first.FindFirstDescendant(cf => cf.ByName("Recent first")));
       Assert.Equal(history, ReadRecentDocuments(session));

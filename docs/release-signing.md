@@ -12,7 +12,7 @@ Use an existing authorized Artifact Signing account and Active Public Trust
 profile. Verify its deployed region/endpoint, actual tenant GUID and full
 certificate publisher subject. A subscription ID or directory domain is not the
 tenant GUID. Each repository needs an approved CI identity, GitHub OIDC trust
-restricted to `repo:Owner/Repository:environment:release`, and the Artifact Signing
+restricted to the repository's actual release-environment OIDC subject, and the Artifact Signing
 Certificate Profile Signer role scoped to its profile. Owner/Contributor alone
 does not grant signing permission. Preserve other identities and assignments.
 
@@ -69,3 +69,10 @@ trusted signatures, SHA256 digests and RFC3161 timestamps. Verification failures
 must stop publication. For future MSIX packaging, its Publisher must match the
 verified subject. Local signing uses Microsoft's Artifact Signing Client Tools
 and the installed SignTool/dlib paths with an authorized identity.
+
+
+MarkdownViewr-specific verified OIDC claims and the precise remaining Azure
+administrator steps are in [azure-signing-admin.md](azure-signing-admin.md).
+This repository uses immutable owner/repository IDs in its subject; a copied
+name-only trust from gclo would not match. No Azure configuration or successful
+representative signing is claimed until those steps and artifact checks pass.

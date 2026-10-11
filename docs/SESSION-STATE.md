@@ -22,6 +22,33 @@ Actual installed chooser, Explorer double-click and lifecycle acceptance remain
 pending under issue #14. Source-hover regression and signed release acceptance
 remain open; latest review launch does not establish release readiness.
 
+## Committed implementation and edition follow-up - 2026-10-11
+
+Signed/DCO0eb3a0e and841798c are pushed to feat/windows-viewer/PR#3.
+All normal commit hooks passed. Vendor notices retain original bytes through
+scoped Git/hygiene attributes; secret/workflow checks remain enabled.
+Exact hosted CI38164841448 is live on0eb3a0e. Build/core/format, scripts,
+security and CodeQL have passed; native and published/installed acceptance
+are still running. The current source-hover case has not yet emitted a verdict.
+
+Subsequent local work implements a distinct installed dev identity and package ID,
+with edition-specific title/settings/log variables and edition-aware isolated
+smoke fixtures. The new host composition reads the actual Velopack channel before
+activation/UI/log services. Core586/586 and100% measured lines, zero-warning
+Release, format and55 script tests pass; changed script passes both analyzer
+partitions. Separate stable/dev IDs are prepared for the release caller; signing
+remains fail-closed until the reviewed/published catalog builder is available.
+
+A distinct gclo-family navy Markdown/reading vector was generated through AppKit
+BrandTool; all nine ICO frames16..256 are valid and the256px frame was visually
+inspected. The app gradient now matches it. WinUI3 receives a source-project MIT
+credit in Components while proprietary binary-package license notices remain in
+the audit/distribution inventory. Final icon/credit/edition build has zero warnings/errors;586 core tests and
+100% measured lines pass with TRX/Cobertura in artifacts/edition-final-core.
+Formatting passes. A focused hosted source-hover job is prepared to produce a
+fast actual pointer/color verdict and retained TRX, alongside full acceptance. The owner preview PID55472 still
+runs from its preserved earlier output; it has not been replaced.
+
 ## Active work and authority
 
 Build the full Windows counterpart to Darin's markdownViewr with published
@@ -568,3 +595,36 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 Update TODO and tickets with measured results; keep the PR draft until reviewed.
 Current exact commit/job IDs are in ignored artifacts/CURRENT-CHECKPOINT.json.
 Historical details: [reader/source notes](history/reader-source-session-2026-10-11.md).
+
+
+## Exact current native failure evidence - 2026-10-11
+
+CI38164841448 is terminal on0eb3a0e:72/97 native cases pass,25 fail,zero skips.
+Build/core/format/scripts/security/CodeQL pass. Published acceptance exceeds the
+600-second process budget and is terminated before installed-channel outcomes;
+this is not installed acceptance. Native/installed logs and artifacts are retained
+under artifacts/current-native-0eb3a0e.log, current-installed-0eb3a0e.log and
+current-installed-evidence-38164841448. The actual native suite took11m42s with
+25 failures; investigate failures before making a measured process-budget change.
+
+Source hover is reproduced exactly: initial heading color#75628B becomes#000000
+at the first post-pointer assertion (SourceHighlighting.cs line37, before focus).
+Ranked hypotheses shared: native whole-document hover foreground, focus/selection
+reset, asynchronous repaint cancellation. Pinned WinUI generic.xaml confirms
+PointerOver/Focused/Disabled storyboards target ContentElement.Foreground. The
+first candidate removes only those foreground animations on template application,
+retaining native chrome and semantic range formatting. It requires the focused
+hosted regression before being called fixed; no local GUI input performed.
+
+Other failures include document scroller/paint/typography/source geometry, native
+picker filename discovery, print-width output, new-window outline assertion,
+recent-window foreground and one pipe disconnect recovery case. Full scope and
+assertions remain; no failures skipped or weakened. The next focused hover job
+retains a real TRX alongside the full suite.
+
+Actual GitHub OIDC readback uses immutable IDs:
+repo:KofTwentyTwo@47367449/MarkdownViewr.Windows@1413777106:environment:release.
+A name-only copied trust is invalid here. Administrator runbook reads actual
+account/profile/subject via stable ARM2025-10-13, retains existing identities,
+assigns profile-scoped signer permissions and documents required actual signature
+proof. Azure authentication remains unavailable; no new sign-in or cloud mutation.

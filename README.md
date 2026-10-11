@@ -128,3 +128,19 @@ Contents pane. The footer shows the loaded file's modification time, marks faile
 reloads/stale files and offers Open folder. Disabled editor commands explain their
 configuration state. These owner-review changes have passing local build/core/
 adapter/style gates; current native/distributed acceptance remains pending.
+
+
+Stable releases use `markdownviewr-windows`; prereleases use
+`markdownviewr-windows-dev` and show **MarkdownViewr (dev)**. Each installed edition
+has its own install directory, settings/recent files, activity logs and update
+channel. Local loose builds retain the stable identity. Edition selection reads
+the actual Velopack channel before activation or window services initialize.
+Current local identity tests pass; actual side-by-side install/update acceptance
+remains required before publication.
+
+The icon uses a distinct white Markdown/reading mark on the navy rounded tile
+shared with gclo. AppKit BrandTool generates its vector and all nine ICO sizes:
+
+```powershell
+brandtool --out src/MarkdownViewr.Windows/Assets/Brand --start '#1A2B4D' --end '#0C1836' --glyph 'M 144 328 V 184 L 208 260 L 272 184 V 328 M 344 184 V 328 M 312 296 L 344 328 L 376 296 M 144 380 H 376' --stroke 28
+```

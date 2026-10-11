@@ -15,6 +15,36 @@ namespace MarkdownViewr.Windows;
 /// <summary>Parser classification runs off-thread; bounded native paint batches discard stale snapshots and palettes.</summary>
 public sealed partial class SourceTextView
 {
+   /// <summary>Native hover/focus chrome remains intact; semantic document ranges own their foreground across visual states.</summary>
+   protected override void OnApplyTemplate()
+   {
+      base.OnApplyTemplate();
+      if(VisualTreeHelper.GetChildrenCount(this) > 0 && VisualTreeHelper.GetChild(this, 0) is FrameworkElement root)
+      {
+         foreach(VisualStateGroup group in VisualStateManager.GetVisualStateGroups(root))
+         {
+            foreach(VisualState state in group.States)
+            {
+               if(state.Storyboard is null)
+               {
+                  continue;
+               }
+               Microsoft.UI.Xaml.Media.Animation.Timeline[] foregroundAnimations = state.Storyboard.Children
+                  .Where(animation => string.Equals(Microsoft.UI.Xaml.Media.Animation.Storyboard.GetTargetName(animation), "ContentElement", StringComparison.Ordinal)
+                     && string.Equals(Microsoft.UI.Xaml.Media.Animation.Storyboard.GetTargetProperty(animation), "Foreground", StringComparison.Ordinal))
+                  .ToArray();
+               foreach(Microsoft.UI.Xaml.Media.Animation.Timeline animation in foregroundAnimations)
+               {
+                  state.Storyboard.Children.Remove(animation);
+               }
+            }
+         }
+      }
+      _ = PaintAsync();
+   }
+
+
+
    /// <summary>Only the most recent literal snapshot can install tokens after background parsing completes.</summary>
    private async Task HighlightAsync(string text, int generation, CancellationToken cancellationToken)
    {

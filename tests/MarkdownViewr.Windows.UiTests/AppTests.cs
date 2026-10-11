@@ -264,7 +264,7 @@ public partial class AppTests
    {
       using var session = new AppSession();
       session.InvokeMenuItem("Help", "ActivityLogMenuItem");
-      string title = AppIdentity.Info.DisplayName + " — Activity log";
+      string title = session.DisplayName + " — Activity log";
       session.WaitFor(
          () => session.TopLevelWindows().FirstOrDefault(window => string.Equals(window.Name, title, StringComparison.Ordinal)),
          "the activity log window");

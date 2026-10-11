@@ -47,7 +47,8 @@ public sealed class AppSession : IDisposable
       }
 
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
-      startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment[AppIdentity.ForChannel("stable").DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment[AppIdentity.ForChannel("dev").DataDirectoryVariable] = DataDirectory;
       startInfo.Environment["MARKDOWNVIEWR_INPUT_TRACE"] = "1";
       if(editorProbe)
       {
@@ -86,6 +87,12 @@ public sealed class AppSession : IDisposable
    public string ExePath { get; }
 
    public string DataDirectory { get; }
+
+
+
+   /// <summary>The smoke harness declares the channel being tested; actual native titles must match that edition. Loose runs use stable.
+   /// </summary>
+   public string DisplayName { get; } = AppIdentity.ForChannel(Environment.GetEnvironmentVariable("K22_UITEST_CHANNEL")).DisplayName;
 
    public UIA3Automation Automation { get; }
 

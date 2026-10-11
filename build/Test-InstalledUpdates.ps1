@@ -42,7 +42,10 @@ Set-Content -LiteralPath $idFile -Value $packageId
 Set-Content -LiteralPath (Join-Path $outputRoot 'build-directory.txt') -Value $buildRoot
 $fixtureRoot = Join-Path $outputRoot 'fixture'
 $dataVariable = $AppId.ToUpperInvariant().Replace('-', '_') + '_DATA_DIR'
+$devDataVariable = ($AppId + '-dev').ToUpperInvariant().Replace('-', '_') + '_DATA_DIR'
 $oldDataDirectory = [Environment]::GetEnvironmentVariable($dataVariable)
+$oldDevDataDirectory = [Environment]::GetEnvironmentVariable($devDataVariable)
+$oldUiChannel = $env:K22_UITEST_CHANNEL
 $oldUiExe = $env:K22_UITEST_EXE
 $versions = @(
    @{ channel = 'stable'; version = '0.1.0'; target = '0.4.0' },
@@ -150,6 +153,7 @@ try
    foreach($release in $versions)
    {
       $version = $release.version
+      $releasePackageId = $packageId + '-' + $release.channel
       Write-Output "Packaging $version ($($release.channel))"
       $publish = Join-Path $buildRoot "publish/$version"
       $probe = Join-Path $buildRoot "probe/$version"
@@ -167,8 +171,8 @@ try
          $versionOutput = Get-Content -LiteralPath (Join-Path $outputRoot "process-$script:smokeProcessNumber.log") -Raw
          Assert-SmokeCliVersion -Output $versionOutput -Version $version
       }
-      Invoke-SmokeProcess -File $vpk -Arguments @('pack', '--runtime', 'win-x64', '--packId', $packageId, '--packVersion', $version, '--packDir', $publish, '--mainExe', $mainExe, '--channel', $release.channel, '--outputDir', (Join-Path $fixtureRoot $version), '--shortcuts', 'None', '--delta', 'None', '--skip-updates', '--yes') -TimeoutSeconds 300
-      & "$PSScriptRoot/Assert-PackageBytes.ps1" -PublishDirectory $publish -PortableArchive (Join-Path $fixtureRoot "$version/$packageId-$($release.channel)-Portable.zip") -FullPackage (Join-Path $fixtureRoot "$version/$packageId-$version-$($release.channel)-full.nupkg")
+      Invoke-SmokeProcess -File $vpk -Arguments @('pack', '--runtime', 'win-x64', '--packId', $releasePackageId, '--packVersion', $version, '--packDir', $publish, '--mainExe', $mainExe, '--channel', $release.channel, '--outputDir', (Join-Path $fixtureRoot $version), '--shortcuts', 'None', '--delta', 'None', '--skip-updates', '--yes') -TimeoutSeconds 300
+      & "$PSScriptRoot/Assert-PackageBytes.ps1" -PublishDirectory $publish -PortableArchive (Join-Path $fixtureRoot "$version/$releasePackageId-$($release.channel)-Portable.zip") -FullPackage (Join-Path $fixtureRoot "$version/$releasePackageId-$version-$($release.channel)-full.nupkg")
    }
    $releases = foreach($release in $versions)
    {
@@ -184,12 +188,14 @@ try
    $loose = Get-SmokeResult -Exe (Join-Path $buildRoot "publish/0.1.0/$probeExe") -ResultPath (Join-Path $outputRoot 'loose.json')
    if($loose.Installed -or $loose.AppKitSupported -or $null -ne $loose.Version) { throw 'Loose publish output unexpectedly supports updates.' }
    $records.Add(@{ kind = 'loose'; result = $loose })
+   $env:K22_UITEST_CHANNEL = 'stable'
    $env:K22_UITEST_EXE = Join-Path $buildRoot "publish/0.1.0/$mainExe"
    Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 600
    foreach($initial in @($versions[0], $versions[2]))
    {
+      $initialPackageId = $packageId + '-' + $initial.channel
       $portableDirectory = Join-Path $outputRoot "portable-$($initial.channel)"
-      [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $fixtureRoot "$($initial.version)/$packageId-$($initial.channel)-Portable.zip"), $portableDirectory)
+      [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $fixtureRoot "$($initial.version)/$initialPackageId-$($initial.channel)-Portable.zip"), $portableDirectory)
       $portable = Get-SmokeResult -Exe (Join-Path $portableDirectory "current/$probeExe") -ResultPath (Join-Path $outputRoot "$($initial.channel)-portable.json")
       if(-not $portable.Installed -or -not $portable.IsPortable -or -not $portable.AppKitSupported -or $portable.Channel -ne $initial.channel -or $portable.UpdateVersion -ne $initial.target) { throw 'Portable bundle identity/update behavior is incorrect.' }
       $records.Add(@{ kind = 'portable'; result = $portable })
@@ -197,13 +203,16 @@ try
    foreach($initial in @($versions[0], $versions[2]))
    {
       $channel = $initial.channel
+      $initialPackageId = $packageId + '-' + $channel
+      $env:K22_UITEST_CHANNEL = $channel
       $install = Join-Path $outputRoot "installed-$channel"
       if(Test-Path -LiteralPath $install) { throw "Existing installation requires investigation: $install" }
-      $setup = Join-Path $fixtureRoot "$($initial.version)/$packageId-$channel-Setup.exe"
+      $setup = Join-Path $fixtureRoot "$($initial.version)/$initialPackageId-$channel-Setup.exe"
       $data = Join-Path $outputRoot "data-$channel"
       New-Item -ItemType Directory -Path $data -Force | Out-Null
       '{"ShowSplashScreen":false,"CheckForUpdatesOnStartup":false}' | Set-Content -LiteralPath (Join-Path $data 'settings.json')
       [Environment]::SetEnvironmentVariable($dataVariable, $data)
+      [Environment]::SetEnvironmentVariable($devDataVariable, $data)
       Invoke-SmokeProcess -File $setup -Arguments @('--silent', '--installto', $install, '--log', (Join-Path $outputRoot "install-$channel.log"))
       try
       {
@@ -247,12 +256,12 @@ try
          {
             $manifestPath = Join-Path $install 'current/sq.version'
             $manifestValue = [xml](Get-Content -LiteralPath $manifestPath -Raw)
-            if(-not $install.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase) -or $manifestValue.package.metadata.id -ne $packageId) { throw 'Refusing to uninstall an unexpected application.' }
+            if(-not $install.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase) -or $manifestValue.package.metadata.id -ne $initialPackageId) { throw 'Refusing to uninstall an unexpected application.' }
             Invoke-SmokeProcess -File $updater -Arguments @('--silent', '--rootDir', $install, 'uninstall')
             $deadline = [DateTime]::UtcNow.AddSeconds(10)
             while((Test-Path -LiteralPath $install) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 200 }
             if(Test-Path -LiteralPath $install) { throw "Smoke installation was not removed: $install" }
-            if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$packageId") { throw 'Smoke uninstall registry entry remains.' }
+            if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$initialPackageId") { throw 'Smoke uninstall registry entry remains.' }
          }
       }
    }
@@ -262,5 +271,7 @@ try
 finally
 {
    [Environment]::SetEnvironmentVariable($dataVariable, $oldDataDirectory)
+   [Environment]::SetEnvironmentVariable($devDataVariable, $oldDevDataDirectory)
+   $env:K22_UITEST_CHANNEL = $oldUiChannel
    $env:K22_UITEST_EXE = $oldUiExe
 }

@@ -106,14 +106,16 @@ checks below do not substitute for current native/distributed acceptance.
 - [ ] #26: Verify actual footer changes during locked/replaced/missing files and independent windows.
 - [x] #28: Add accessible/native delayed disabled-editor explanation with the actual unavailable reason and Settings guidance.
 - [ ] #28: Verify actual disabled hover, mouse exit, state changes and keyboard accessibility.
-- [ ] #29: Design/review a distinct gclo-family MarkdownViewr icon and integrate the accepted artwork through existing Windows brand generation.
+- [x] #29: Generate distinct navy Markdown/reading mark through AppKit BrandTool; visually inspect the256px frame and validate all nine ICO sizes.
+- [ ] #29: Verify icon in current distributed app/window/taskbar/splash and obtain owner design feedback.
 - [x] #24: Limit Components to shipped open-source credits/project/license links; preserve full audit catalog and notices, with Darin in Contributions.
 - [ ] #24: Verify current native About layout, Contributions and all credit links.
 - [x] Port pinned document CSS/container/scroll/print semantics locally. Current combined582 core tests/100% lines,25 adapter tests,zero-warning Release/format/publish pass.
 - [ ] Audit complete CSS selector/raw-HTML/source/TOC parity and run current actual paint/native/distributed acceptance. Attribution/threat-model updated; local port is not full parity proof.
 
 - [ ] Pass hosted CI on the actual current implementation; retain native/published/installed TRXs, screenshots and real PDFs.
-- [ ] Implement gclo-style isolated stable/dev IDs, titles, data, installs and feeds; verify side-by-side behavior.
+- [x] Implement gclo-style separate stable/dev package IDs and installed-channel title/data identity;586 core tests/100% measured lines pass.
+- [ ] Verify current side-by-side stable/dev install/activation/registration/update behavior and exact package IDs.
 - [ ] Adopt the reviewed/published owned-file signing builder; verify actual Azure resource/profile/publisher and repository-bound OIDC/profile-signer permission.
 - [ ] Obtain genuine current-head maintainer review acknowledgement, complete required checks and merge.
 - [ ] Publish signed stable1.0/dev releases with verification of exact distributed artifacts, timestamp/publisher/checksums and installed update acceptance.

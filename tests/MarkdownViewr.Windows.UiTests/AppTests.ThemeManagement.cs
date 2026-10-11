@@ -72,7 +72,7 @@ public partial class AppTests
       using var session = new AppSession(document: "# Shared theme management");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Shared theme management")), "the actual first reader", TimeSpan.FromSeconds(30));
       session.InvokeMenuItem("File", "NewWindowMenuItem");
-      Window sibling = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, AppIdentity.Info.DisplayName, StringComparison.Ordinal)), "the blank theme sibling").AsWindow();
+      Window sibling = session.WaitFor(() => DocumentWindows(session).FirstOrDefault(window => string.Equals(window.Name, session.DisplayName, StringComparison.Ordinal)), "the blank theme sibling").AsWindow();
       session.InvokeMenuItem("View", "DocumentThemesMenu");
       session.ClickElement("DocumentTheme:GitHub Light");
       WaitForAppearanceWindowColor(session, session.MainWindow, Color.White);

@@ -67,7 +67,8 @@ public partial class AppTests
    private static void ForwardFileActivation(AppSession session, string directory, params string[] paths)
    {
       var start = new ProcessStartInfo(session.ExePath) { WorkingDirectory = directory, UseShellExecute = false };
-      start.Environment[AppIdentity.Info.DataDirectoryVariable] = session.DataDirectory;
+      start.Environment[AppIdentity.ForChannel("stable").DataDirectoryVariable] = session.DataDirectory;
+      start.Environment[AppIdentity.ForChannel("dev").DataDirectoryVariable] = session.DataDirectory;
       foreach(string path in paths)
       {
          start.ArgumentList.Add(path);

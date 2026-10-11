@@ -97,7 +97,8 @@ jobs:
     with:
       solution: MarkdownViewr.Windows.slnx
       app-project: src/MarkdownViewr.Windows/MarkdownViewr.Windows.csproj
-      app-id: markdownviewr-windows
+      # Separate package IDs install side by side; the installed channel selects its title/data root.
+      app-id: ${{ contains(github.ref_name, '-') && 'markdownviewr-windows-dev' || 'markdownviewr-windows' }}
       main-exe: MarkdownViewr.Windows.exe
       icon: src/MarkdownViewr.Windows/Assets/Brand/app.ico
       platform: x64

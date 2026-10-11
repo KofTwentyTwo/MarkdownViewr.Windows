@@ -90,7 +90,7 @@ public partial class AppTests
       using var session = new AppSession(document: "# Standard settings fixture");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Standard settings fixture")), "the native Settings fixture", TimeSpan.FromSeconds(30));
       session.InvokeMenuItem("File", "SettingsMenuItem");
-      Window window = session.TopLevelWindows().Single(element => string.Equals(element.Name, AppIdentity.Info.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow();
+      Window window = session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow();
       Assert.True(session.MainWindow.IsEnabled);
       Assert.True(window.Patterns.Transform.Pattern.CanResize.Value);
       window.Patterns.Transform.Pattern.Resize(780, 600);
@@ -202,7 +202,7 @@ public partial class AppTests
    private static void CloseSettings(AppSession session)
    {
       session.WaitForElement("SettingsWindowRoot", TimeSpan.FromSeconds(30));
-      session.TopLevelWindows().Single(window => string.Equals(window.Name, AppIdentity.Info.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow().Close();
+      session.TopLevelWindows().Single(window => string.Equals(window.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow().Close();
       session.WaitForElementGone("SettingsWindowRoot");
    }
 }

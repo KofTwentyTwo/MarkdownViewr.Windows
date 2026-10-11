@@ -18,6 +18,42 @@ concurrency:
 
 jobs:
 
+  source-highlighting:
+    name: source-highlighting
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build locked dependencies
+        shell: pwsh
+        run: |
+          dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Observe actual source colors before and after pointer input
+        shell: pwsh
+        run: dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter FullyQualifiedName~SourceHighlighting_PointerHoverAndFocus_RetainsNativeTokenColors --logger 'trx;LogFileName=source-hover.trx' --results-directory artifacts/source-hover
+      - name: Retain source regression evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: source-hover-results
+          path: |
+            artifacts/source-hover/*.trx
+            artifacts/installed-smoke-ui/*.png
+            artifacts/installed-smoke-ui/*.log
+          retention-days: 7
+
   installed-updates:
     name: installed-updates
     runs-on: windows-latest
