@@ -28,6 +28,8 @@
          </MenuBarItem>
          <MenuBarItem Title="View">
             <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
+            <MenuFlyoutItem x:Name="EditDocumentThemeMenu" Text="Edit document theme..." Click="EditDocumentTheme_Click" />
+            <MenuFlyoutItem x:Name="RestoreDocumentThemesMenu" Text="Restore built-in themes" Click="RestoreDocumentThemes_Click" />
             <MenuFlyoutSeparator />
             <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
             <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />

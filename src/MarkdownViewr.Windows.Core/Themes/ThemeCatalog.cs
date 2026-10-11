@@ -25,6 +25,19 @@ public static class ThemeCatalog
 
 
 
+   /// <summary>User themes override matching built-in names; new names join the alphabetic catalog.</summary>
+   public static IReadOnlyList<ReaderTheme> Combine(IEnumerable<ReaderTheme> userThemes)
+   {
+      ArgumentNullException.ThrowIfNull(userThemes);
+      Dictionary<string, ReaderTheme> themes = s_builtIn.ToDictionary(theme => theme.Name, StringComparer.Ordinal);
+      foreach(ReaderTheme theme in userThemes)
+      {
+         themes[theme.Name] = theme;
+      }
+      return Array.AsReadOnly(themes.Values.OrderBy(theme => theme.Name, StringComparer.Ordinal).ToArray());
+   }
+
+
    /// <summary>Parses the shipped JSON with the same validation used for user themes.</summary>
    private static ReaderTheme[] LoadBuiltIn()
    {

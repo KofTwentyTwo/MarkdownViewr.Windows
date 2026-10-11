@@ -28,6 +28,42 @@ public sealed class ReaderThemeTests
 
 
 
+   /// <summary>User edits replace bundled names without duplicates; new themes are sorted and retained.</summary>
+   [Fact]
+   public void Combine_UserOverridesAndNewTheme_PreservesEdits()
+   {
+      string original = OriginalJson();
+      var edited = ReaderTheme.Parse(original.Replace("#1e1e2e", "#123456", StringComparison.Ordinal));
+      var custom = ReaderTheme.Parse(original.Replace("Catppuccin Mocha", "A Custom Theme", StringComparison.Ordinal));
+      IReadOnlyList<ReaderTheme> combined = ThemeCatalog.Combine([edited, custom]);
+      Assert.Equal(21, combined.Count);
+      Assert.Same(custom, combined[0]);
+      Assert.Same(edited, combined.Single(theme => string.Equals(theme.Name, edited.Name, StringComparison.Ordinal)));
+      Assert.Contains("--background:#123456;", edited.Styles, StringComparison.Ordinal);
+      Assert.Equal(original.Replace("#1e1e2e", "#123456", StringComparison.Ordinal), edited.Json);
+      Assert.Equal(20, ThemeCatalog.Combine([]).Count);
+      Assert.Throws<ArgumentNullException>(() => ThemeCatalog.Combine(null!));
+   }
+
+
+
+   /// <summary>Preferences discard corrupt custom themes while retaining valid edits and repairing invalid selection names.</summary>
+   [Fact]
+   public void Sanitize_CorruptSavedThemes_KeepsValidThemes()
+   {
+      string json = OriginalJson();
+      var settings = new AppSettings { DocumentTheme = "\n", UserThemes = [null!, "", "{", json] };
+      settings.Sanitize();
+      Assert.Equal("Catppuccin Mocha", settings.DocumentTheme);
+      Assert.Equal([json], settings.UserThemes, StringComparer.Ordinal);
+      settings.UserThemes = null!;
+      settings.DocumentTheme = new string('x', 81);
+      settings.Sanitize();
+      Assert.Empty(settings.UserThemes);
+      Assert.Equal("Catppuccin Mocha", settings.DocumentTheme);
+   }
+
+
    /// <summary>Color, font and size values become CSS variables using invariant numbers.</summary>
    [Fact]
    public void Parse_OriginalTheme_PreservesPaletteAndMapsFonts()

@@ -22,7 +22,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Picker / literal process argument | Read-only bounded snapshot; no shell interpolation |
 | Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
-| Theme JSON / CSS | Embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
+| Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
@@ -47,9 +47,9 @@ physical directory. It does not authorize native commands or remote resource acc
 
 ## Remaining risks and work
 
-This is a first reader, not a completed port. User themes, external editor commands,
+This is a first reader, not a completed port. User theme editor acceptance, external editor commands,
 print and any future browser bridge need their own controls and tests. Save watching is
-implemented; real browser replacement/deletion/scroll acceptance remains pending.
+implemented; hosted real browser replacement/deletion/scroll and remote-image denial pass on 77dd04d.
 Local links to other documents and mailto links are currently blocked. WebView2 uses
 the installed evergreen runtime; installed deployment acceptance remains required.
 

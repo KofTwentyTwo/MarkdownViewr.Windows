@@ -1,6 +1,6 @@
 # MarkdownViewr
 
-> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The first reader implementation opens Markdown, renders GFM and supports manual and automatic reload. The 20 original document themes are implemented; user-theme editing, navigation and printing remain in development; hosted automatic-reload acceptance is pending. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
+> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The first reader implementation opens Markdown, renders GFM and supports manual and automatic reload. The 20 original document themes are implemented; user-theme editing is implemented with acceptance pending; navigation and printing remain in development. Hosted reader/reload and both installed update channels pass. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
 
 A Windows Markdown viewer with live reload, themes and document navigation.
 
@@ -32,6 +32,7 @@ Prerelease tags (`v1.2.3-beta.1`) publish to the `dev` channel
 - **Live reload:** saves automatically refresh the document, including replacement saves. Deletion keeps the last version visible until the file is restored. The relative reading position is preserved.
 - **File → Reload:** reread the current file manually. Local images stay within the document folder; remote images and authored scripts/styles are blocked.
 - **View → Document theme:** choose one of Darin's 20 built-in palettes. The saved document palette is independent of the Windows shell theme; changing it retains the reading position.
+- **View → Edit document theme:** edit colors, code font/size and custom CSS. Keep its name to override a built-in, or enter a new name to create a custom theme. Invalid input keeps the editor open. **Restore built-in themes** removes built-in edits after confirmation and keeps separately named custom themes.
 - **View:** choose the light, dark, or system shell theme; turn the startup splash and the
   startup update check on or off. Choices are saved immediately.
 - **Help → Activity log:** a live view of the app's log, with an errors-only filter and a

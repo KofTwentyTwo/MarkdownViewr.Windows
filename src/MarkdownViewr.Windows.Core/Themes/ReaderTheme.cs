@@ -20,10 +20,11 @@ public sealed class ReaderTheme
 
 
    /// <summary>Retains only the validated display name and generated CSS.</summary>
-   private ReaderTheme(string name, string styles)
+   private ReaderTheme(string name, string styles, string json)
    {
       Name = name;
       Styles = styles;
+      Json = json;
    }
 
 
@@ -35,6 +36,11 @@ public sealed class ReaderTheme
 
    /// <summary>CSS safe for an inline style element; document resource policy still applies.</summary>
    public string Styles { get; }
+
+
+
+   /// <summary>The validated source retained for editing without losing palette fields.</summary>
+   public string Json { get; }
 
 
 
@@ -59,7 +65,7 @@ public sealed class ReaderTheme
          throw new JsonException("Theme names must contain 1–80 printable characters.");
       }
       string styles = BuildStyles(root);
-      return new ReaderTheme(name, styles);
+      return new ReaderTheme(name, styles, json);
    }
 
 

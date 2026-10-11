@@ -8,12 +8,14 @@
 - [x] Test physical image containment, including junction escapes, and input size limits.
 - [x] Update the threat model, renderer attributions and shipped library notices.
 - [x] Verify first-reader hosted browser acceptance: 13 native/UI tests passed on f1756d2.
-- [ ] Verify new live-reload/browser network scenarios on the exact next implementation head; capture UI screenshots.
+- [x] Verify live reload/browser network scenarios and retain actual theme screenshots on head 77dd04d.
 - [ ] Discuss the desired first release and Windows-specific behavior with the owner.
 - [x] Implement/test directory watching and validated relative viewport state for saves/replacements/deletion recovery.
-- [ ] Complete actual browser save/lock/replacement/deletion/scroll acceptance (issue #6).
+- [x] Complete actual browser save/lock/replacement/deletion/scroll acceptance (issue #6): hosted native/UI 26/26; published 26/26; installed stable/dev 25/25 each.
 - [x] Port Darin's 20 built-in themes and persistent document selection; validate schema, font escaping and invariant CSS.
-- [ ] Verify hosted theme selection/viewport acceptance; add editable user themes, custom CSS and code font settings.
+- [x] Verify hosted built-in theme selection and actual painted colors on 77dd04d.
+- [x] Implement persisted editable theme overrides/custom names, color/code-font/CSS controls and built-in restoration.
+- [ ] Complete hosted theme editor/validation/restoration acceptance (issue #7).
 - [ ] Add TOC, section collapse, source pane, synchronized navigation, find and vim keys.
 - [ ] Add YAML frontmatter modes, safe configured editor launch and printing options.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.

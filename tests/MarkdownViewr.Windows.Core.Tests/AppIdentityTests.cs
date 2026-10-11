@@ -66,8 +66,9 @@ public class AppSettingsTests
    {
       using var temp = new TempDirectory();
       var store = new KofTwentyTwo.AppKit.Settings.SettingsStore<AppSettings>(temp.File("settings.json"), AppSettingsContext.Default.AppSettings);
-      Assert.True(store.Save(new AppSettings { Theme = "Dark", DocumentTheme = "GitHub Light" }));
+      Assert.True(store.Save(new AppSettings { Theme = "Dark", DocumentTheme = "GitHub Light", UserThemes = [Themes.ThemeCatalog.Find("GitHub Light").Json] }));
       Assert.Equal("Dark", store.Load().Theme);
       Assert.Equal("GitHub Light", store.Load().DocumentTheme);
+      Assert.Equal(Themes.ThemeCatalog.Find("GitHub Light").Json, Assert.Single(store.Load().UserThemes));
    }
 }

@@ -2,7 +2,7 @@
 
 Build a Windows counterpart to [Darin Kelkhoff's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), using the KofTwentyTwo AppKit foundations and standards. The agreed display name is MarkdownViewr, repository MarkdownViewr.Windows, and permanent application ID markdownviewr-windows.
 
-The first reader implementation opens Markdown with a Windows picker or literal launch argument, renders sanitized GFM and supports bounded local images, manual reload and automatic saves with relative scroll preservation. The original 20 document themes and persistent palette selection are implemented. First-reader hosted UI acceptance passed; the new live-reload scenarios await hosted acceptance. The full feature list below remains the target; the first reader is not a completed port.
+The first reader implementation opens Markdown with a Windows picker or literal launch argument, renders sanitized GFM and supports bounded local images, manual reload and automatic saves with relative scroll preservation. The original 20 document themes and persistent palette selection are implemented. Hosted reader/live-reload/theme selection and both installed update channels passed on 77dd04d. Editable custom themes, color/code-font/CSS controls and restoration are implemented; their new dialog/browser acceptance is pending. The full feature list below remains the target; the first reader is not a completed port.
 
 ## Reference and feature scope
 

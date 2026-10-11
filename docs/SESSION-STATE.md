@@ -2,87 +2,56 @@
 
 Updated: 2026-10-10
 
-## Live reload milestone
+## Active work
 
-Active project: MarkdownViewr.Windows, feat/windows-viewer, draft PR #3.
-Owner approved MarkdownViewr / MarkdownViewr.Windows / markdownviewr-windows.
-The goal remains the full Windows counterpart to Darin's markdownViewr using AppKit.
+MarkdownViewr.Windows is the full Windows counterpart to Darin's markdownViewr,
+using published AppKit 0.1.0. Approved identity: MarkdownViewr / MarkdownViewr.Windows /
+markdownviewr-windows. Topic feat/windows-viewer, draft PR #3; do not shrink PRODUCT.md scope.
 
-First reader commit f1756d21ede53e95a7ff5ef8bd1490ef9495cb25 is published. Its hosted
-CI 38098965780 fully passed: build/test, format, 13 actual native/UI tests and both
-installed update channels. CodeQL 38098965738 and security 38098965817 also passed.
-Scripts 38098965365 failed inside PSScriptAnalyzer 1.25.0 with a null-reference engine
-exception, tracked in #5. No scripts/settings/workflow were changed; no retry or
-suppression. The initial scripts run 38097167189 is terminal cancelled, not live.
+Published head 77dd04da96b75938a1c1d38c8bebe4851c11a011 completed CI 38102249889 SUCCESS:
+build/test, format, 26 native/UI tests, published 26/26 and installed stable/dev 25/25
+each, with no skips. Four byte gates verified 536 files in both Velopack payloads;
+AppKit update probes applied/restarted within both channels. These are synthetic test
+packages, not signed production releases. CodeQL 38102249846/security 38102249838 passed.
+Scripts 38102249407 failed inside unchanged PSScriptAnalyzer 1.25.0; issue #5 remains open.
+No rules suppressed or failed runs restarted. Local baseline all 13 scripts passed;
+this demonstrates intermittent behavior, not an engine fix.
 
-Current next implementation adds a directory watcher with 350 ms debounce. It
-survives atomic replacement, rename-away and deletion/recreation. Missing files keep
-the last displayed snapshot; brief editor locks get bounded retries. Watchers dispose
-on close and ignore stale selected-document callbacks. A core load scheduler coalesces
-reloads while preserving picker selections and refreshes after a failed new open. Scroll capture/restore matches
-Darin's relative scroll behavior when document height changes. Authored scripts and
-native messaging stay disabled; fixed native queries check the current document URI,
-and results are validated finite fractions before numeric-only restoration.
+## Reader and theme evidence
 
-Local evidence: zero-warning solution build; 82 core tests, zero skipped, 100% core
-line coverage; 13 native filesystem/watcher tests passed, including loaded-file handle release and the
-actual FileNotFoundException after deletion. Browser replacement,
-deletion/recreation, editor lock, relative-scroll and remote-image denial tests have
-been added but not run locally. Desktop reservation remains unanswered; do not drive
-this desktop without availability. Reload head 09d14e6 hosted UI/published acceptance reproduced a deletion-status
-timeout in both builds: 23 of 24 tests passed, including replacement, editor-lock,
-scroll and remote-image denial. Diagnostics now preserve the exact assertion and
-record observed status, exception type/HRESULT/thread access and app logs; root cause
-is still unproven. Do not weaken or skip the deletion assertion. Issues #4 (reader boundary), #6 (reload) and #1 (full scope) remain open.
+Reader provides picker/Ctrl+O/launch paths, sanitized GFM, bounded passive local images,
+debounced saves/replacement/deletion recovery and guarded relative scroll. Directory
+callbacks dispatch only; bounded editor-lock retries and load scheduling preserve old
+snapshots and picker requests. Native status declared before WebView2 resolved the
+embedded-provider traversal issue. Initial window also fits DPI-scaled monitor work
+area. Exact initial/missing/recovery assertions were preserved throughout diagnosis.
+Hosted actual replacement/lock/deletion/relative-scroll/remote-image tests now pass.
 
-Diagnostic head 665ece7 is published. Hosted UI job 114356665681 in CI 38100976971
-finished with 24/25 passed; deletion raised FileNotFoundException (0x80070002) on
-the UI thread, but the status text was absent from automation. The next targeted
-change exposes StatusText with an explicit automation ID, text-bound accessible
-name and content view. The deletion assertion remains unchanged; it also requires
-the initial Opened status to be accessible. Build and formatting pass locally;
-hosted recovery proof is pending. Accessibility head 23928bc still failed the initial status lookup (24/25 UI tests passed); properties alone did not resolve it. The next diagnostic retains the native tree and fixture-window PNG in hosted installed evidence. No deletion assertion is weakened. Scripts 38100976565 reproduced the analyzer
-engine crash; no scripts/settings/workflow changed and issue #5 remains open.
+All 20 original JSON themes are embedded unchanged with Darin's MIT notice shipped.
+Built-in selection persists independently of the AppKit shell; actual dark/light paint
+and screenshots passed. Current local change adds saved user overrides/custom names,
+native color/code-font/size/CSS controls, invalid-input validation and built-in restoration
+that retains custom names. AppKit saves preferences atomically; corrupt saved themes are
+discarded before catalog loading. Core 119 tests/100% coverage and zero-warning build
+pass. New dialog/browser tests added but not run locally; next hosted acceptance pending.
 
-Hosted diagnostic CI 38101512710 is terminal failure. Its retained app screenshot
-shows the initial window extending off the hosted desktop, clipping the entire status
-line. The next change fits initial size/position and minimum dimensions to the current
-monitor work area using physical DPI-scaled pixels. Exact initial and deletion status
-assertions remain unchanged. Theme commit 0507ca5 is local until this follow-up push;
-117 core tests/100% coverage and zero-warning build/format passed. Real browser proof
-of display fitting and theme selection remains pending.
+## Authority and continuity
 
-Fitted head fa0df78 passed 25/26 hosted native/UI tests, including the document-theme
-choice, but still failed the initial status lookup. The retained fitted screenshot
-shows the status line visibly inside the window; fitting fixed clipping, not the
-remaining automation problem. Diagnostics encountered an unsupported IsOffscreen
-property on a browser peer; reads now use ValueOrDefault. The next change declares
-the native status peer before WebView2, retaining Grid.Row=2 and the same visual
-layout, to test the embedded-provider traversal boundary. The theme test also checks
-actual painted dark/light backgrounds and retains its fixture screenshot. No assertion
-is weakened or skipped; proof remains pending.
+Owner authorized signed/DCO commits, pushes, repository configuration and ticket updates.
+No merges, tags/releases or new Azure attempts. Existing AppKit/standards/starter drafts
+remain unmerged; current-SHA human acknowledgement and producer-bound checks enforced.
+Actual Azure signing/final signatures remain unverified. Desktop reservation is unanswered;
+do not run local GUI input without availability. Hosted fixtures use an isolated runner.
 
-## Repository and authorization
+Pinned reference: 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 at
+AppKit/artifacts/markdownviewr-reference. Preserve original MIT notices when adapting.
+Evidence: artifacts/verified-reader-38102249889 contains installed TRX/JSON and screenshots;
+artifacts/user-themes-final-core contains the current 100% coverage report.
 
-Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).
-Setup Validate verified 16 producer-bound contexts, protected main and release tags,
-selected Actions and the protected release environment. Signed/DCO topic commits,
-current-SHA human acknowledgement and required checks remain enforced.
+## Next
 
-Owner authorized commit/push/configuration, not merges, tags or releases. Existing
-AppKit/standards/starter drafts remain unmerged. Azure retries stay deferred; actual
-CI signing and final signed release artifacts remain unverified. Published AppKit
-0.1.0 is used; do not substitute unpublished 0.2.0 APIs.
-
-## Next work
-
-Verify reload/browser network acceptance and preserve its exact hosted handles.
-Built-in theme implementation now loads all 20 original resources, with persistent document selection, Windows font fallbacks and viewport retention. 117 core tests pass at 100% coverage; zero-warning build and formatting pass. User-theme editing and actual browser selection acceptance remain pending. Continue TOC/collapse, source/find/vim navigation,
-frontmatter, editor, print, multiple windows, recents and Windows associations.
-Original reference is pinned at 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 under
-AppKit/artifacts/markdownviewr-reference. The 20 original JSON themes are embedded unchanged in the core assembly; their full MIT notice ships with the app.
-retain Darin's MIT notices when adapting them. Full PRODUCT.md scope remains open.
-
-Reference preparation: all 20 original JSON themes have been downloaded into
-AppKit/artifacts/markdownviewr-reference/markdownViewr/Resources/themes and checked
-against their Git blob hashes at the pinned commit. They now match the embedded app resources by Git blob hash.
+Commit/push the verified editable-theme milestone; observe its exact hosted handles.
+Update #4/#6 with their completed scoped acceptance and keep #1 full port/#7 theme work
+and #5 analyzer investigation accurate. Continue TOC/collapse/source/find/vim navigation,
+frontmatter, editor launch, printing, multiple windows/recents and Windows associations.
+Finish standards inventory and exact final signed delivery before claiming completion.

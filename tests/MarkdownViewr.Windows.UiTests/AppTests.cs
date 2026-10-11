@@ -5,6 +5,7 @@
 
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Patterns;
 using Xunit.Abstractions;
@@ -105,6 +106,68 @@ public class AppTests
       WaitForDocumentColor(session, System.Drawing.Color.White);
       _output.WriteLine(session.DescribeDocumentStatus());
       Assert.DoesNotContain("\"Theme\": \"Light\"", session.ReadSettings(), StringComparison.Ordinal);
+   }
+
+
+   /// <summary>A named custom theme saves all editing controls and applies its CSS to the actual browser.</summary>
+   [Fact]
+   public void ThemeEditor_NewCustomTheme_SavesAndPaintsChanges()
+   {
+      using var session = new AppSession(document: "# Custom theme acceptance\n\n`sample code`");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Custom theme acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      session.EnterText("ThemeEditorName", "My reading theme");
+      session.EnterText("ThemeEditorCodeFont", "Consolas");
+      session.EnterText("ThemeEditorColor:background", "#112233");
+      session.EnterText("ThemeEditorCss", "html { background: #223344; }");
+      session.ClickButton("Save theme");
+      session.WaitForElementGone("ThemeEditorName");
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(34, 51, 68));
+      using var settings = JsonDocument.Parse(session.ReadSettings());
+      Assert.Equal("My reading theme", settings.RootElement.GetProperty("DocumentTheme").GetString());
+      using var theme = JsonDocument.Parse(Assert.Single(settings.RootElement.GetProperty("UserThemes").EnumerateArray()).GetString()!);
+      Assert.Equal("Consolas", theme.RootElement.GetProperty("fonts").GetProperty("code").GetString());
+      Assert.Equal("#112233", theme.RootElement.GetProperty("colors").GetProperty("background").GetString());
+      Assert.Equal("html { background: #223344; }", theme.RootElement.GetProperty("customCSS").GetString());
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Custom theme acceptance")));
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>Invalid colors keep the dialog open; cancellation cannot create a saved override.</summary>
+   [Fact]
+   public void ThemeEditor_InvalidColorAndCancel_DoesNotPersist()
+   {
+      using var session = new AppSession();
+      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      session.EnterText("ThemeEditorColor:background", "invalid");
+      session.ClickButton("Save theme");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme colors must use six-digit hexadecimal notation.")), "the color validation error");
+      Assert.NotNull(session.FindInApp(cf => cf.ByAutomationId("ThemeEditorName")));
+      session.ClickButton("Cancel");
+      session.WaitForElementGone("ThemeEditorName");
+      Assert.DoesNotContain("invalid", session.ReadSettings(), StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>Restoring built-ins removes an edited built-in palette after explicit confirmation.</summary>
+   [Fact]
+   public void ThemeEditor_BuiltInOverride_RestoresOriginalPalette()
+   {
+      using var session = new AppSession(document: "# Theme restore acceptance");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme restore acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      session.EnterText("ThemeEditorColor:background", "#112233");
+      session.ClickButton("Save theme");
+      session.WaitForElementGone("ThemeEditorName");
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(17, 34, 51));
+      session.InvokeMenuItem("View", "RestoreDocumentThemesMenu");
+      session.ClickButton("Restore themes");
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(30, 30, 46));
+      using var settings = JsonDocument.Parse(session.ReadSettings());
+      Assert.Equal(0, settings.RootElement.GetProperty("UserThemes").GetArrayLength());
    }
 
 

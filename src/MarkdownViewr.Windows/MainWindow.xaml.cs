@@ -28,6 +28,7 @@ public sealed partial class MainWindow : Window, IDisposable
    private bool _closed;
    private readonly Core.Documents.DocumentLoadScheduler _loads = new();
    private DocumentWatcher? _watcher;
+   private IReadOnlyList<Core.Themes.ReaderTheme> _themes = [];
 
 
 
@@ -35,7 +36,8 @@ public sealed partial class MainWindow : Window, IDisposable
    public MainWindow()
    {
       InitializeComponent();
-      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, Core.Themes.ThemeCatalog.Find(_settings.DocumentTheme));
+      _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
+      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme());
       CreateDocumentThemeMenu();
       Title = AppIdentity.Info.DisplayName;
       FitInitialWindow();
@@ -310,8 +312,9 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Builds the original document theme choices without mixing them with the AppKit shell theme.</summary>
    private void CreateDocumentThemeMenu()
    {
-      string selected = Core.Themes.ThemeCatalog.Find(_settings.DocumentTheme).Name;
-      foreach(Core.Themes.ReaderTheme theme in Core.Themes.ThemeCatalog.BuiltIn)
+      DocumentThemesMenu.Items.Clear();
+      string selected = ActiveDocumentTheme().Name;
+      foreach(Core.Themes.ReaderTheme theme in _themes)
       {
          var item = new RadioMenuFlyoutItem { Text = theme.Name, Tag = theme, GroupName = "DocumentTheme", IsChecked = string.Equals(selected, theme.Name, StringComparison.Ordinal) };
          Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "DocumentTheme:" + theme.Name);
@@ -328,6 +331,66 @@ public sealed partial class MainWindow : Window, IDisposable
       var theme = (Core.Themes.ReaderTheme)((FrameworkElement)sender).Tag;
       _settings.DocumentTheme = theme.Name;
       Save();
+      await ApplyDocumentThemeAsync(theme);
+   }
+
+
+
+   /// <summary>Resolves user overrides and safely falls back after a saved custom theme is removed.</summary>
+   private Core.Themes.ReaderTheme ActiveDocumentTheme()
+      => _themes.FirstOrDefault(theme => string.Equals(theme.Name, _settings.DocumentTheme, StringComparison.Ordinal))
+         ?? Core.Themes.ThemeCatalog.Find(null);
+
+
+
+   /// <summary>A same-name edit overrides the original; a new name creates a custom theme.</summary>
+   private async void EditDocumentTheme_Click(object sender, RoutedEventArgs e)
+   {
+      Core.Themes.ReaderTheme? edited = await ThemeEditor.ShowAsync(Content.XamlRoot, ActiveDocumentTheme());
+      if(edited is null || _closed)
+      {
+         return;
+      }
+      _settings.UserThemes = _settings.UserThemes
+         .Where(json => !string.Equals(Core.Themes.ReaderTheme.Parse(json).Name, edited.Name, StringComparison.Ordinal))
+         .Append(edited.Json).ToArray();
+      _settings.DocumentTheme = edited.Name;
+      Save();
+      RefreshDocumentThemes();
+      await ApplyDocumentThemeAsync(edited);
+   }
+
+
+
+   /// <summary>Restores original palettes and removes their overrides, retaining separately named custom themes.</summary>
+   private async void RestoreDocumentThemes_Click(object sender, RoutedEventArgs e)
+   {
+      var dialog = new ContentDialog { XamlRoot = Content.XamlRoot, Title = "Restore built-in themes?", Content = "Edits to the 20 built-in themes will be removed. Your separately named custom themes will be kept.", PrimaryButtonText = "Restore themes", CloseButtonText = "Cancel" };
+      if(await dialog.ShowAsync() != ContentDialogResult.Primary || _closed)
+      {
+         return;
+      }
+      var builtIn = Core.Themes.ThemeCatalog.BuiltIn.Select(theme => theme.Name).ToHashSet(StringComparer.Ordinal);
+      _settings.UserThemes = _settings.UserThemes.Where(json => !builtIn.Contains(Core.Themes.ReaderTheme.Parse(json).Name)).ToArray();
+      Save();
+      RefreshDocumentThemes();
+      await ApplyDocumentThemeAsync(ActiveDocumentTheme());
+   }
+
+
+
+   /// <summary>Rebuilds the visible catalog after a successful preference edit.</summary>
+   private void RefreshDocumentThemes()
+   {
+      _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
+      CreateDocumentThemeMenu();
+   }
+
+
+
+   /// <summary>Applies a theme without allowing browser errors to escape a native event handler.</summary>
+   private async Task ApplyDocumentThemeAsync(Core.Themes.ReaderTheme theme)
+   {
       try
       {
          _browserInitialization ??= _browser.InitializeAsync();
