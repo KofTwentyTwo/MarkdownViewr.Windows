@@ -26,7 +26,9 @@
 - [x] Implement all required vim reading/find/heading commands, timed prefixes and native focus/modifier guards (issue #10).
 - [x] Verify physical vim viewport, collapsed-heading and query-typing acceptance on 6bf125d: CI 38112298176, 44 native/published and 43 per installed channel, zero skips.
 - [x] Map sanitized surviving headings to original parser-derived source offsets (Setext/fences/raw HTML/frontmatter/duplicates); source UI synchronization remains pending.
-- [ ] Add synchronized source headings/scroll/collapse (issue #10); audit find/source collapse parity against the pinned reference.
+- [x] Implement literal nested source folding and bidirectional heading-based scroll synchronization (issue #10), preserving canonical find/reload snapshots.
+- [ ] Verify actual native/browser heading positions, physical source scrolling and fold/find/reload restoration in hosted and installed builds.
+- [ ] Audit find/source collapse parity against the pinned reference, including multiline and same-line raw HTML headings (issue #10).
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [x] Verify actual code-font size 17 editing in hosted UI runs.
 - [x] Verify actual hosted frontmatter mode switching on 4bf0b81 (including both installed channels).

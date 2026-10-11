@@ -289,8 +289,9 @@ public sealed partial class MainWindow : Window, IDisposable
       _findGeneration++;
       _documentKeyboard?.Reset();
       _sourceMarkdown = files.Markdown;
-      RefreshSource();
       _outline = outline;
+      _sourceDocument = new Core.Documents.DocumentSourceText(_sourceMarkdown, outline);
+      RefreshSource();
       RefreshOutline();
       _documentPath = Path.GetFullPath(path);
       RefreshEditorCommands();

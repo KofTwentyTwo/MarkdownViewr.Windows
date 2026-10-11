@@ -28,11 +28,16 @@ internal sealed class DocumentSourceMap
    {
       ArgumentNullException.ThrowIfNull(source);
       var ends = new List<int>();
-      int start = 0;
-      while(source.IndexOf('\n', start) is int end && end >= 0)
+      for(int index = 0; index < source.Length; index++)
       {
-         ends.Add(end);
-         start = end + 1;
+         if(source[index] is '\r' or '\n')
+         {
+            ends.Add(index);
+            if(source[index] == '\r' && index + 1 < source.Length && source[index + 1] == '\n')
+            {
+               index++;
+            }
+         }
       }
       ends.Add(source.Length);
       _lineEnds = ends.ToArray();

@@ -45,7 +45,7 @@ Bound documents to 16 Mi characters and individual images to 16 MiB.
 ## Consequences
 
 The reader supports a picker, literal launch arguments, manual reload and debounced save watching.
-The 20 original themes are embedded unchanged, with their MIT notice shipped in THIRD-PARTY-NOTICES.md. System/SF Mono defaults map to Windows font fallbacks. Document theme selection persists separately from the AppKit shell theme and retains the viewport. Editable themes and native heading/section controls are implemented and verified; full syntax-color parity and synchronized source navigation remain pending. Automatic save
+The 20 original themes are embedded unchanged, with their MIT notice shipped in THIRD-PARTY-NOTICES.md. System/SF Mono defaults map to Windows font fallbacks. Document theme selection persists separately from the AppKit shell theme and retains the viewport. Editable themes and native heading/section controls are implemented and verified; full syntax-color parity and new synchronized-source acceptance remain pending. Automatic save
 reload uses fixed native ExecuteScriptAsync queries on the checked current document;
 this API works while authored scripts remain disabled. Browser results must be exactly
 two finite numeric fractions, clamped to 0–1; only invariant numeric arguments enter the
@@ -68,8 +68,8 @@ Disable browser feature accelerators so the host owns find/print/reload commands
 Typing is debounced and native searches serialized. Check the current page/navigation
 before applying results; repeat the current term after reload/theme navigation. Search
 reveals sections temporarily and restores their saved choices on close, incorporating
-explicit native section commands during search. Source synchronization and mirrored collapse
-remain separate work. Authored scripts, messages and host objects remain disabled.
+explicit native section commands during search. The literal source projection mirrors browser folds while preserving the canonical
+snapshot and original query positions. Authored scripts, messages and host objects remain disabled.
 
 Reading keys use the current app UI thread's existing message hook, bounded native
 command enums and exact browser/read-only-source focus. Find/dialog controls retain
@@ -93,8 +93,28 @@ A fresh per-render private attribute carries this provenance through sanitation;
 its generated name is allowed only for the internal outline render, then removed
 from every element before presentation. The public renderer never admits it, and
 authored IDs/data attributes remain stripped. No source marker grants a browser
-capability. Full source scroll/heading/collapse UI synchronization remains pending;
-these parser tests do not prove browser behavior. ADR status remains proposed.
+capability. These parser tests do not prove browser behavior. ADR status remains proposed.
+
+## Literal source folding and scroll synchronization
+
+A pure source projection normalizes native CRLF display offsets, retains heading
+lines and replaces folded bodies with plain ellipses. Nested choices remain
+independent; search expands the projection without changing the original snapshot.
+Native selections map original UTF-16 query ranges into the visible literal text.
+
+A serial 150 ms owned-window timer captures only finite browser scroll coordinates,
+generated heading indices and collapsed bodies. Frames are bounded and validated,
+with current document/navigation/query/snapshot guards. Native TextBox character
+rectangles pair with actual generated browser heading tops for piecewise linear
+scroll mapping. Feedback holds protect native find selections and prevent reverse
+scroll oscillation. Hidden panes and closed windows do not synchronize.
+
+The native coordinate conversion uses the owned TextBoxView's content space; its
+scroll offset must not be added a second time. See the
+[Microsoft implementation](https://github.com/microsoft/microsoft-ui-xaml/blob/main/dxaml/xcp/core/native/text/Controls/TextBoxBase.cpp).
+Hosted tests must measure actual heading glyph/viewport positions, physical source
+scrolling and fold/find/reload restoration before this behavior is called verified.
+No authored script, message bridge, rich-text interpretation or dependency is added.
 
 ## Verification and follow-up
 
@@ -105,7 +125,8 @@ separate gate; these unit tests do not prove browser behavior or release signing
 
 - [ ] Review this decision and complete document UI acceptance.
 - [x] Complete hosted save/replacement/deletion/scroll, editable-theme, outline/frontmatter and literal-source acceptance.
-- [ ] Complete paired find, synchronized source/vim and print acceptance from PRODUCT.md.
+- [x] Complete paired find and physical vim acceptance in native, published and installed builds.
+- [ ] Complete synchronized source and print acceptance from PRODUCT.md.
 - [ ] Verify WebView2 runtime deployment and exact signed installed release artifacts.
 
 ## References

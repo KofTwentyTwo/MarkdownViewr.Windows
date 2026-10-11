@@ -1,6 +1,6 @@
 # Session State
 
-Updated: 2026-10-10
+Updated: 2026-10-11
 
 ## Active work and authority
 
@@ -10,6 +10,33 @@ Topic feat/windows-viewer, draft PR #3; PRODUCT.md remains the complete scope.
 Owner authorized signed/DCO commits, pushes, repository configuration and ticket updates.
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
+
+## Current source synchronization increment — 2026-10-11
+
+Previous pushed b0f3b8638f16d75e4dce5dc6f2cb585fb5214927 is fully verified:
+CI 38113042618, CodeQL 38113042570, scripts 38113041887, security 38113042545 and
+PR gates 38113042454 SUCCESS. Native job 114392386224 and installed job
+114392386003 succeeded; retained TRX proves published 44/44 and stable/dev 43/43,
+zero failures/skips, at artifacts/source-anchors-verified-installed-38113042618.
+Fixtures remain synthetic/unsigned; all prior producers are terminal.
+
+The current increment implements literal nested source folding and bidirectional
+heading-anchor scroll mapping. Canonical snapshots remain immutable; native CRLF
+and folded offsets retain exact find selections. Browser geometry is bounded,
+validated and current-page/query guarded; feedback holds preserve explicit find
+viewports. Microsoft TextBoxView content coordinates do not receive a duplicate
+scroll offset. No new dependency or authored scripts/messages/host objects.
+300 core tests/100% measured lines pass at artifacts/source-sync-core. Two new
+hosted tests assert actual native/browser heading bounds, physical source scrolling
+and nested fold/find/reload restoration: 46 native/published and 45 per installed
+channel expected, not yet verified. No local desktop input occurred.
+
+Next: commit/push this reviewed increment, observe its exact producer runs, retain
+actual TRX/logs and address failures. Keep #10 open until acceptance and raw-heading
+reference audit pass. Full PRODUCT scope remains: broader editor/theme/rendering/
+link parity, printing, windows/recents/activation, standards inventory/current-head
+human review and exact signed stable/dev artifacts. Published AppKit 0.1.0 remains;
+no Azure attempt, merge/tag/release or fabricated human acknowledgement.
 
 ## Verified reader and editable themes
 

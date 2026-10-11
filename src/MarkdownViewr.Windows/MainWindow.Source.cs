@@ -21,6 +21,7 @@ public sealed partial class MainWindow
    {
       SourceToggle.IsChecked = _settings.ShowSource;
       RefreshSource();
+      InitializeSourceSync();
    }
 
 
@@ -30,10 +31,11 @@ public sealed partial class MainWindow
    {
       ApplyReadingWidths();
       SourceText.Visibility = _settings.ShowSource ? Visibility.Visible : Visibility.Collapsed;
-      string text = _settings.ShowSource ? _sourceMarkdown : "";
+      string text = _settings.ShowSource ? _sourceDocument?.Text ?? _sourceMarkdown : "";
       if(!string.Equals(SourceText.Text, text, StringComparison.Ordinal))
       {
          SourceText.Text = text;
+         HoldSourceSync(preserveSelection: false);
       }
    }
 

@@ -117,7 +117,11 @@ public sealed partial class MainWindow
             _findQueued = false;
             int generation = _findGeneration;
             string snapshot = _sourceMarkdown;
-            var find = new Core.Documents.DocumentFind(_settings.ShowSource ? SourceText.Text : snapshot, FindText.Text);
+            if(FindText.Text.Length > 0)
+            {
+               ExpandSourceForFind();
+            }
+            var find = new Core.Documents.DocumentFind(snapshot, FindText.Text);
             if(find.Query.Length == 0)
             {
                await _browser.EndFindAsync();
@@ -160,9 +164,10 @@ public sealed partial class MainWindow
       FindCountText.Text = FormattableString.Invariant($"{current} of {total}");
       FindNextButton.IsEnabled = total > 0 && !_finding;
       FindPreviousButton.IsEnabled = total > 0 && !_finding;
-      if(_settings.ShowSource && _find?.SourceSelection is { } selection)
+      if(_settings.ShowSource && _find?.SourceSelection is { } original && _sourceDocument?.GetDisplayRange(original.Start, original.Length) is { } selection)
       {
          SourceText.Select(selection.Start, selection.Length);
+         HoldSourceSync();
       }
       else
       {

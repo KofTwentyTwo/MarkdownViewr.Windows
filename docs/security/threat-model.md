@@ -25,7 +25,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
 | Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
-| Source pane | Same bounded committed snapshot in a native read-only TextBox; literal HTML/CSS/script text never enters a renderer or command interpreter; hidden pane removed from accessibility surface |
+| Source pane | Bounded immutable snapshot plus literal native fold projection; original UTF-16 find positions map to visible CRLF text; HTML/CSS/script text never enters a renderer or command interpreter; hidden pane removed from accessibility surface |
 | Find | Bounded literal query; pure source positions and native WebView2 finder, with duplicate browser UI suppressed; no query enters executable code or activity logs. Serialized queries and page/navigation checks reject stale completions; existing numeric section operations reveal/restore content |
 | Fixture input diagnostics | Explicit opt-in environment switch; observes handled native pointer/drag events without changing routing; logs owned control names, coordinates and button state only, never document text or keystrokes |
 | Browser surface | Scripts, messages, host objects, permissions, downloads, frames and popups disabled; restrictive CSP |
@@ -52,11 +52,11 @@ physical directory. It does not authorize native commands or remote resource acc
 
 ## Remaining risks and work
 
-This is a first reader, not a completed port. Native frontmatter/outline/literal-source acceptance passed CI 38106991467 in loose, published and both installed builds. New find acceptance, synchronized source/collapse, external editor commands,
+This is a first reader, not a completed port. Native frontmatter/outline/literal-source acceptance passed CI 38106991467 in loose, published and both installed builds. Paired find and configured editor launch passed hosted and installed acceptance; new synchronized source/collapse, broader editor parity,
 print and any future browser bridge need their own controls and tests. Save watching is
 implemented; hosted real browser replacement/deletion/scroll and remote-image denial pass on 77dd04d.
 Local links to other documents and mailto links are currently blocked. WebView2 uses
-the installed evergreen runtime; published and both installed channels passed reader acceptance on 77dd04d and editable themes on 30ca094. New paired-find keyboard/source/viewport/hostile-query acceptance remains required.
+the installed evergreen runtime; published and both installed channels passed reader acceptance on 77dd04d and editable themes on 30ca094. Paired-find keyboard/source/viewport/hostile-query acceptance passed on 5a9af63. New source synchronization acceptance remains required.
 
 Historical EX-0002 does not authorize unsigned production publication. Azure setup
 and real final-artifact signature validation are deferred; an active profile alone
@@ -108,3 +108,19 @@ remain unchanged. Positions pair only with sanitized surviving headings and do
 not grant scripts, messages, native access or resources. The original snapshot is
 immutable. Core regressions cover nested raw markup, Setext, fences, Unicode,
 frontmatter and forged attributes; source scroll/folding UI acceptance is pending.
+
+## Source synchronization boundary
+
+Only fixed host operations capture numeric scroll positions, generated heading IDs
+and hidden generated bodies on the matching ready document. Exact JSON shape,
+bounded array lengths, unique in-range integer IDs and finite coordinates are
+required. No source text, heading label or query enters executable code. The native
+adapter serializes polling, rejects stale snapshot/query/page completions and
+suppresses feedback around find selections and its own viewport movements. Closing
+stops the timer; hidden panes do not synchronize. Literal ellipses only affect the
+presentation; canonical document bytes and independent nested fold choices remain.
+Opt-in fixture geometry logs contain numeric positions/counts only.
+
+300 core tests cover folding, original/native offsets and malformed numeric frames
+at 100% measured line coverage. Hosted actual glyph/viewport and fold/find/reload
+acceptance is pending; raw multiline/same-line heading parity still needs audit.

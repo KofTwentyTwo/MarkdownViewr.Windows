@@ -343,6 +343,135 @@ public class AppTests
    }
 
 
+   /// <summary>Actual reader jumps, native source text-range scrolling and physical source wheel input synchronize both viewports.</summary>
+   [Fact]
+   public void Source_BidirectionalScroll_AlignsActualHeadingViewports()
+   {
+      string body = string.Join("\n\n", Enumerable.Range(0, 80).Select(index => "Source sync paragraph " + index));
+      using var session = new AppSession(document: "# Source sync root\n\n" + body + "\n\n## Source sync middle\n\n" + body + "\n\n## Source sync last\n\n" + body);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source sync root")), "the source sync document", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:2");
+      WaitForSourceHeadingAlignment(session, source, "## Source sync last");
+      FlaUI.Core.ITextRange middle = source.Patterns.Text.Pattern.DocumentRange.FindText("## Source sync middle", backward: false, ignoreCase: false);
+      Assert.NotNull(middle);
+      middle.ScrollIntoView(alignToTop: true);
+      Wait.UntilInputIsProcessed();
+      WaitForBrowserHeadingAlignment(session, "mv-heading-1");
+      session.ClickElement("OutlineHeading:2");
+      WaitForSourceHeadingAlignment(session, source, "## Source sync last");
+      AutomationElement browserScroller = FindDocumentScroller(session);
+      double previous = browserScroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value;
+      session.MouseClickElement("SourceText");
+      Mouse.Scroll(-3);
+      Wait.UntilInputIsProcessed();
+      WaitForReaderScroll(session, browserScroller, value => value > previous + 0.2, "physical source-wheel scrolling mirrored in the reader");
+      Assert.Contains("## Source sync middle", source.Patterns.Value.Pattern.Value.Value, StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>Actual nested collapse mirrors source, search reveals original content and reload/expansion retains independent choices.</summary>
+   [Fact]
+   public void Source_CollapseFindReload_PreservesCanonicalSnapshot()
+   {
+      const string Markdown = "# Source fold root\n\nRoot body\n\n## Source fold child\n\nChild body\n\n### Source fold grandchild\n\nGrand body\n\n```md\n# Fence pseudo heading\n```\n\nSource fold peer\n----------------\nPeer body\n\n# Source fold last\nTail";
+      using var session = new AppSession(document: Markdown);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source fold root")), "the source folding document", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.WaitForElement("OutlineDepth").AsComboBox().Select(2);
+      session.ClickElement("OutlineHeading:2");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => !value.Contains("Grand body", StringComparison.Ordinal) && !value.Contains("# Fence pseudo", StringComparison.Ordinal) && value.Contains("### Source fold grandchild", StringComparison.Ordinal), "the folded native grandchild body and fence");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => !value.Contains("### Source fold grandchild", StringComparison.Ordinal) && value.Contains("Source fold peer\r\n----------------", StringComparison.Ordinal), "the folded parent and retained Setext peer");
+      session.InvokeMenuItem("Edit", "FindMenuItem");
+      session.EnterText("FindText", "Grand body");
+      WaitForFindCount(session, "1 of 1");
+      Assert.Equal("Grand body", ReadSourceSelection(source));
+      WaitForSourceValue(session, source, value => value.Contains("# Fence pseudo heading", StringComparison.Ordinal), "literal fenced source revealed for find");
+      session.ClickElement("FindCloseButton");
+      WaitForSourceValue(session, source, value => !value.Contains("Grand body", StringComparison.Ordinal) && !value.Contains("### Source fold grandchild", StringComparison.Ordinal), "pre-search source folds restored");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => value.Contains("Child body", StringComparison.Ordinal) && value.Contains("### Source fold grandchild", StringComparison.Ordinal) && !value.Contains("Grand body", StringComparison.Ordinal), "expanded parent with independently folded child");
+      string replacement = Markdown.Replace("Grand body", "Grand body reloaded", StringComparison.Ordinal);
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), replacement);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reloaded document.md")), "the committed source folding reload");
+      session.ClickElement("OutlineHeading:2");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => value.Contains("Grand body reloaded", StringComparison.Ordinal), "the reloaded canonical body after expansion");
+      Assert.Equal(replacement, source.Patterns.Value.Pattern.Value.Value.ReplaceLineEndings("\n"));
+   }
+
+
+
+   /// <summary>Checks actual source-provider glyph rectangles against the owned viewport, retaining exact geometry on failure.</summary>
+   private void WaitForSourceHeadingAlignment(AppSession session, AutomationElement source, string text)
+   {
+      try
+      {
+         session.WaitFor(() =>
+         {
+            FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+            System.Drawing.Rectangle[] rectangles = range.GetBoundingRectangles();
+            return rectangles.Length > 0 && rectangles[0].Top - source.BoundingRectangle.Top is >= -2 and <= 36 ? source : null;
+         }, "the actual native source heading aligned with its viewport");
+      }
+      catch(TimeoutException)
+      {
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
+   }
+
+
+
+   /// <summary>Checks the generated browser heading's actual viewport location, never a mirrored application property.</summary>
+   private void WaitForBrowserHeadingAlignment(AppSession session, string identity)
+   {
+      try
+      {
+         session.WaitFor(() =>
+         {
+            AutomationElement? heading = session.FindInApp(cf => cf.ByAutomationId(identity));
+            double top = session.WaitForElement("DocumentView").BoundingRectangle.Top;
+            return heading is not null && heading.BoundingRectangle.Top - top is >= -2 and <= 36 ? heading : null;
+         }, "the actual reader heading aligned after native source scrolling");
+      }
+      catch(TimeoutException)
+      {
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
+   }
+
+
+
+   /// <summary>Reads the native source value until the expected real presentation arrives, retaining owned fixture evidence.</summary>
+   private void WaitForSourceValue(AppSession session, AutomationElement source, Func<string, bool> matches, string description)
+   {
+      try
+      {
+         session.WaitFor(() => matches(source.Patterns.Value.Pattern.Value.Value) ? source : null, description);
+      }
+      catch(TimeoutException)
+      {
+         _output.WriteLine(session.ReadLogs());
+         _output.WriteLine(session.DescribeDocumentStatus());
+         throw;
+      }
+   }
+
+
+
    /// <summary>Ctrl+F accepts physical typing and pairs the actual source selection with wrapping browser occurrences.</summary>
    [Fact]
    public void Find_PairedMatches_UpdatesCounterAndSourceSelection()

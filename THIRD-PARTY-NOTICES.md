@@ -110,7 +110,7 @@ SOFTWARE.
 
 ## markdownViewr resources, frontmatter and navigation behavior
 
-Frontmatter delimiter/metadata display behavior is adapted from MarkdownDocument.swift at the same pinned commit. Vim sequence/navigation semantics are adapted from Resources/template.html there, with native Windows Ctrl+F and input focus controls. The 20 original JSON themes are copied unchanged from Darin Kelkhoff's markdownViewr at commit 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021.
+Frontmatter delimiter/metadata display behavior is adapted from MarkdownDocument.swift at the same pinned commit. Vim sequence/navigation, nested source folding and heading-anchor scroll interpolation semantics are adapted from Resources/template.html there, with native Windows Ctrl+F, literal source controls and input focus guards. The 20 original JSON themes are copied unchanged from Darin Kelkhoff's markdownViewr at commit 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021.
 
 Source: <https://github.com/darinkelkhoff/markdownViewr/tree/6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021/markdownViewr/Resources/themes>
 
