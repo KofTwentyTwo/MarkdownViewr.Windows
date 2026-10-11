@@ -245,3 +245,20 @@ not pushed while the existing producer is live. 195 core tests/100% line coverag
 zero-warning build/format/docs/hooks pass. Headless capture-fixture self-check
 preserves one literal Unicode/metacharacter argument; native launch/UI acceptance
 still requires the prepared three hosted tests. Full PRODUCT.md scope remains.
+
+## Same-document fragment event correction
+
+9edd982 native job 114383828733 in CI 38110140930 completed 40/41:
+all configured-editor launch/validation/missing-file tests and paired-find tests
+pass; physical fragment click does not reveal the hidden heading. Microsoft's
+navigation contract says same-document fragments do not raise NavigationStarting.
+Use SourceChanged for those events and a pure exact-document/query-free/in-range
+generated-heading policy. Core now passes 206 tests/100% lines. Authored scripts,
+messages and host objects stay disabled; fragments select only bounded heading reveals.
+
+After a valid reveal, remove only this document's fragment using guarded host
+history.replaceState so clicking the same link after recollapse can reveal again.
+The physical test repeats collapse/link/reveal and retains owned point/bounds checks
+and actual heading/body outcomes. Hosted acceptance remains required. Retained log:
+artifacts/editor-find-ui-38110140930.log. Existing installed producer is still
+being observed; no new push supersedes a live producer. Full product scope active.

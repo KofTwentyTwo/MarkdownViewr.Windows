@@ -534,6 +534,21 @@ public class AppTests
       session.ClickElement("ToggleSection");
       AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the heading inside its collapsed ancestor");
       AutomationElement link = session.WaitFor(() => session.MainWindow.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Hyperlink).And(cf.ByName("Jump to target"))), "the local fragment link");
+      ClickDocumentLink(session, link);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the fragment's revealed target heading");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target body")), "the revealed target body");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Fragment root")));
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1")), "the target collapsed a second time");
+      ClickDocumentLink(session, link);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the same fragment's revealed target after recollapse");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target body")), "the target body revealed by the repeated link click");
+   }
+
+
+   /// <summary>Clicks the exact link bounds through its owned composed provider, retaining physical input checks.</summary>
+   private void ClickDocumentLink(AppSession session, AutomationElement link)
+   {
       session.MainWindow.SetForeground();
       Assert.True(link.TryGetClickablePoint(out System.Drawing.Point point));
       Assert.True(session.MainWindow.BoundingRectangle.Contains(point));
@@ -554,10 +569,8 @@ public class AppTests
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Target heading"))), "the fragment's revealed target heading");
-      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target body")), "the revealed target body");
-      Assert.NotNull(session.FindInApp(cf => cf.ByName("Fragment root")));
    }
+
 
 
    /// <summary>A heading selection moves the actual browser viewport and all-section operations change displayed content.</summary>

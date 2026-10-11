@@ -38,6 +38,19 @@ public sealed class DocumentResourcePolicy
 
 
 
+   /// <summary>Allows only an in-range generated heading fragment on this exact document, without query/native arguments.</summary>
+   public int? GetHeadingIndex(Uri request, int headingCount)
+   {
+      ArgumentNullException.ThrowIfNull(request);
+      if(!request.IsAbsoluteUri || request.Query.Length != 0 || !string.Equals(request.GetLeftPart(UriPartial.Path), DocumentUri.AbsoluteUri, StringComparison.Ordinal))
+      {
+         return null;
+      }
+      return request.Fragment.StartsWith("#mv-heading-", StringComparison.Ordinal) &&
+         int.TryParse(request.Fragment.AsSpan(12), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int index) && index < headingCount ? index : null;
+   }
+
+
    /// <summary>Returns a decoded relative image path, or denies the request before filesystem access.</summary>
    public string? GetImageRelativePath(Uri request)
    {

@@ -11,6 +11,43 @@ namespace MarkdownViewr.Windows.Core.Tests;
 /// <summary>Verifies document image isolation and Windows path rejection before any native file access.</summary>
 public sealed class DocumentResourcePolicyTests
 {
+   /// <summary>Generated fragments address only bounded heading identities, never an arbitrary native command.</summary>
+   [Theory]
+   [InlineData("#mv-heading-0", 1, 0)]
+   [InlineData("#mv-heading-2", 3, 2)]
+   [InlineData("#mv-heading-3", 3, null)]
+   [InlineData("#mv-heading-0", 0, null)]
+   [InlineData("#mv-heading--1", 3, null)]
+   [InlineData("#mv-heading-+1", 3, null)]
+   [InlineData("#mv-heading-2147483648", 3, null)]
+   [InlineData("#mv-heading-", 3, null)]
+   [InlineData("#heading", 3, null)]
+   [InlineData("?command=edit#mv-heading-0", 3, null)]
+   public void GetHeadingIndex_Fragment_RequiresBoundedGeneratedIndex(string suffix, int count, int? expected)
+   {
+      var policy = new DocumentResourcePolicy();
+      Assert.Equal(expected, policy.GetHeadingIndex(new Uri(policy.DocumentUri.AbsoluteUri + suffix), count));
+   }
+
+
+
+   /// <summary>Relative requests, another namespace/path/authority, and missing input cannot impersonate this document.</summary>
+   [Fact]
+   public void GetHeadingIndex_OtherDocumentOrAuthority_RejectsTarget()
+   {
+      var policy = new DocumentResourcePolicy();
+      Assert.Null(policy.GetHeadingIndex(new Uri("#mv-heading-0", UriKind.Relative), 1));
+      Assert.Null(policy.GetHeadingIndex(new Uri(new DocumentResourcePolicy().DocumentUri.AbsoluteUri + "#mv-heading-0"), 1));
+      Assert.Null(policy.GetHeadingIndex(new Uri(policy.DocumentUri, "other.html#mv-heading-0"), 1));
+      var authority = new UriBuilder(policy.DocumentUri) { Host = "example.com", Fragment = "mv-heading-0" };
+      Assert.Null(policy.GetHeadingIndex(authority.Uri, 1));
+      authority.Host = policy.DocumentUri.Host;
+      authority.UserName = "attacker";
+      Assert.Null(policy.GetHeadingIndex(authority.Uri, 1));
+      Assert.Throws<ArgumentNullException>(() => policy.GetHeadingIndex(null!, 1));
+   }
+
+
    /// <summary>Each opened document has a distinct, inert HTTPS namespace.</summary>
    [Fact]
    public void Constructor_DifferentDocuments_UsesDistinctNamespaces()

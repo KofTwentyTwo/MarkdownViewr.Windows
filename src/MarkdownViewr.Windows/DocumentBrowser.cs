@@ -73,6 +73,7 @@ internal sealed partial class DocumentBrowser
       core.FrameNavigationStarting += (_, args) => args.Cancel = true;
       core.NavigationStarting += NavigationStarting;
       core.NavigationCompleted += NavigationCompleted;
+      core.SourceChanged += SourceChanged;
       core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
       core.WebResourceRequested += ResourceRequested;
       Show(null, "<h1>MarkdownViewr</h1><p>Choose File → Open to read a Markdown document.</p>", "MarkdownViewr");
@@ -260,6 +261,26 @@ internal sealed partial class DocumentBrowser
 
 
 
+   /// <summary>Same-document fragment changes do not raise NavigationStarting; reveal only a validated generated target.</summary>
+   private async void SourceChanged(CoreWebView2 sender, CoreWebView2SourceChangedEventArgs args)
+   {
+      if(_closed || args.IsNewDocument || !Uri.TryCreate(sender.Source, UriKind.Absolute, out Uri? uri))
+      {
+         return;
+      }
+      if(_policy.GetHeadingIndex(uri, _headings.Count) is { } heading)
+      {
+         Uri document = _policy.DocumentUri;
+         await JumpToHeadingAsync(heading);
+         if(document == _policy.DocumentUri)
+         {
+            // Rearm an identical link after the user collapses its target again; keep the displayed viewport.
+            await ExecuteDocumentScriptAsync($"if(location.href.split('#')[0] === '{document.AbsoluteUri}') history.replaceState(null,'','{document.AbsoluteUri}');");
+         }
+      }
+   }
+
+
    /// <summary>Allows only the current document and fragment navigation; external links require an actual user gesture.</summary>
    private async void NavigationStarting(CoreWebView2 sender, CoreWebView2NavigationStartingEventArgs args)
    {
@@ -272,8 +293,8 @@ internal sealed partial class DocumentBrowser
          string.Equals(uri.GetLeftPart(UriPartial.Path), _policy.DocumentUri.AbsoluteUri, StringComparison.Ordinal) &&
          uri.Query.Length == 0)
       {
-         if(args.IsUserInitiated && uri.Fragment.StartsWith("#mv-heading-", StringComparison.Ordinal) &&
-            int.TryParse(uri.Fragment.AsSpan(12), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int heading))
+         if(args.IsUserInitiated && _policy.GetHeadingIndex(uri, _headings.Count) is { } heading)
+
          {
             args.Cancel = true;
             await JumpToHeadingAsync(heading);
