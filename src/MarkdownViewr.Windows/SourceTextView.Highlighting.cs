@@ -85,7 +85,7 @@ public sealed partial class SourceTextView
 
 
 
-   /// <summary>Applies the current native palette and yields between batches, leaving ordinary source readable on failure.</summary>
+   /// <summary>Lets native inherited properties settle before semantic formatting, then yields between bounded paint batches.</summary>
    private async Task PaintPaletteAsync()
    {
       if(_disposed)
@@ -101,6 +101,16 @@ public sealed partial class SourceTextView
       global::Windows.UI.Color background = highContrast ? _systemColors.UIElementColor(global::Windows.UI.ViewManagement.UIElementType.Window) : Color(palette.Background);
       Background = new SolidColorBrush(background);
       Foreground = new SolidColorBrush(foreground);
+      var propertiesApplied = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+      if(!DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, propertiesApplied.SetResult))
+      {
+         return;
+      }
+      await propertiesApplied.Task;
+      if(_disposed || generation != _paintGeneration || snapshot != _generation)
+      {
+         return;
+      }
       NativeText.ITextCharacterFormat defaults = Document.GetDefaultCharacterFormat();
       defaults.ForegroundColor = foreground;
       defaults.Bold = NativeText.FormatEffect.Off;

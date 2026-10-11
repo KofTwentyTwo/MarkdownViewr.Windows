@@ -2,6 +2,33 @@
 
 Updated: 2026-10-11
 
+## Proven native foreground replacement - 2026-10-11
+
+Exact04c1da8 CI38172448726 is terminal:18/20 focused,96/98 native,
+94/98 published,zero skips. Published failures retain initial Light colors in
+both palette and hover fixtures, nested outline and source-focus alignment.
+Real color trace has snapshot1/paint3/tokens6 unchanged: paint complete
+#FF75628B at20:37:33.320, after native queue #FF1F1F1F at20:37:33.389.
+The hover fixture reproduces the same reset before its pointer step. This
+proves native property propagation replaces successfully painted ranges;
+classification and generation cancellation do not explain this variant.
+
+Signed91877f7 is now pushed. Its actual native caret/outline acceptance is
+running. Prepare the next source fix: after setting native Background/Foreground,
+await an owned low-priority dispatcher callback before applying default and
+semantic range formats; recheck snapshot/paint/disposal guards after the queue.
+This orders the real pending inherited-property work before character formatting,
+with no timer, repeated repaint, fake accessibility color or altered assertion.
+Local zero-warning Release passes; formatting/hosted exact-color proof remains
+required. Preserve the current91877f7 run before pushing the color correction.
+
+Evidence: artifacts/current-native-04c1da8.log and
+artifacts/current-installed-evidence-38172448726 retained actual published TRX.
+All temporary [DEBUG-...] probes still require removal after diagnosis before
+release. Installed stable/dev/Default Apps/Explorer, side-by-side, standards,
+Azure/signatures and genuine human current-head review remain open. No release
+publication or Azure login was attempted; owner preview55472 is untouched.
+
 ## Visible source caret and outline accessibility - 2026-10-11
 
 Signed04c1da8 CI38172448726 focused20 cases:18pass,2fail,zero skips.
