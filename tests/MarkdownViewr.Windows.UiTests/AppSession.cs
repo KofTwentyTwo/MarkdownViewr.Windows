@@ -236,11 +236,34 @@ public sealed class AppSession : IDisposable
             return hitProcess == App.ProcessId && element.IsEnabled && !element.IsOffscreen ? element : null;
          },
          $"an unobscured mouse target '{automationId}'");
-      element.Click();
+      // Move directly: an animated path across parent-menu rows can close the target submenu.
+      AssertMouseTarget(element);
+      Mouse.LeftClick();
       Wait.UntilInputIsProcessed();
       LastMouseInput += $" Mouse after={Mouse.Position}; hit PID={Automation.FromPoint(Mouse.Position).Properties.ProcessId.ValueOrDefault}.";
    }
 
+
+
+   /// <summary>Moves once to the current target and verifies the pointer is over it or one of its children.</summary>
+   private void AssertMouseTarget(AutomationElement element)
+   {
+      if(!element.TryGetClickablePoint(out System.Drawing.Point point))
+      {
+         throw new InvalidOperationException("The native mouse target no longer has a clickable point.");
+      }
+      Mouse.Position = point;
+      Wait.UntilInputIsProcessed();
+      AutomationElement? hit = Automation.FromPoint(Mouse.Position);
+      for(int depth = 0; hit is not null && depth < 8; depth++, hit = hit.Parent)
+      {
+         if(hit.Equals(element))
+         {
+            return;
+         }
+      }
+      throw new InvalidOperationException("The pointer is not over the requested native control. " + LastMouseInput);
+   }
 
 
    /// <summary>Invokes the element carrying <paramref name="automationId"/> (a button, for example).</summary>

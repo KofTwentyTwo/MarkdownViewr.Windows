@@ -86,7 +86,13 @@
                <Button x:Name="ExpandSections" Content="Expand all" HorizontalAlignment="Stretch" Click="ExpandSections_Click" />
             </StackPanel>
          </Grid>
-         <primitives:Thumb x:Name="OutlineDivider" Grid.Column="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" DragDelta="OutlineDivider_DragDelta" DragCompleted="OutlineDivider_DragCompleted" AutomationProperties.Name="Resize table of contents" />
+         <primitives:Thumb x:Name="OutlineDivider" Grid.Column="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" DragDelta="OutlineDivider_DragDelta" DragCompleted="OutlineDivider_DragCompleted" AutomationProperties.Name="Resize table of contents">
+            <primitives:Thumb.Template>
+               <ControlTemplate TargetType="primitives:Thumb">
+                  <Border Background="{TemplateBinding Background}" />
+               </ControlTemplate>
+            </primitives:Thumb.Template>
+         </primitives:Thumb>
          <WebView2 x:Name="DocumentView" Grid.Column="2" Loaded="DocumentView_Loaded" AutomationProperties.Name="Markdown document" />
       </Grid>
    </Grid>

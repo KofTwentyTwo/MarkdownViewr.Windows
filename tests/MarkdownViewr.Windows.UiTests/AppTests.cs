@@ -195,7 +195,7 @@ public class AppTests
       }
       catch(TimeoutException exception)
       {
-         throw new TimeoutException($"{exception.Message} Settings: {session.ReadSettings()} Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
+         throw new TimeoutException($"{exception.Message} Input: {session.LastInvocation} {session.LastMouseInput} Settings: {session.ReadSettings()} Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
       }
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the rendered frontmatter heading");
       session.InvokeMenuItem("View", "FrontmatterMenu");
@@ -219,10 +219,12 @@ public class AppTests
       session.WaitForElementGone("OutlineHeading:1");
       session.WaitForElement("OutlineDepth").AsComboBox().Select(3);
       session.WaitForElement("OutlineHeading:2");
+      session.WaitForElement("OutlineDepth").Patterns.ExpandCollapse.Pattern.Collapse();
       AutomationElement divider = session.WaitForElement("OutlineDivider");
       session.MainWindow.SetForeground();
       Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
       Assert.Equal(session.App.ProcessId, session.Automation.FromPoint(start).Properties.ProcessId.ValueOrDefault);
+      Assert.Equal("OutlineDivider", session.Automation.FromPoint(start).Properties.AutomationId.ValueOrDefault);
       FlaUI.Core.Input.Mouse.DragHorizontally(start, 70);
       session.WaitFor(
          () =>

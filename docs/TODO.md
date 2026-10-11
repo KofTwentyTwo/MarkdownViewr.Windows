@@ -17,7 +17,8 @@
 - [x] Implement persisted editable theme overrides/custom names, color/code-font/CSS controls and built-in restoration.
 - [x] Complete hosted theme editor/validation/restoration acceptance (issue #7): CI 38102867556 passed; size 17 edit also passes in 29/30 later UI tests.
 - [x] Implement persistent resizable TOC/depth, safe heading/local-fragment jumps and independent nested section collapse (issue #9).
-- [ ] Verify hosted outline depth/resize/scroll/collapse/theme/reload acceptance.
+- [x] Verify hosted heading jumps, independent nested collapse and theme/reload state on 5c3988e (31/33 UI pass).
+- [ ] Verify physical sidebar resize and frontmatter input follow-up; keep exact assertions.
 - [ ] Add source pane, synchronized navigation, find and vim keys.
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [ ] Verify actual hosted frontmatter mode switching and code-font size editing.

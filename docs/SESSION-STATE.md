@@ -49,13 +49,23 @@ exact failure in InstalledUpdates.Tests.ps1: CommandInfo.get_Parameters ->
 UseCorrectCasing.AnalyzeScript, matching upstream #1708. Locally verified workaround
 checks casing alone, then every other rule; all 13 files and both negative fixtures
 pass, plus a bounded 20-iteration offending-file probe. CI must verify this change;
-no suppression, retry or analyzer-version change. Recent successes alone are not a fix.
+no suppression, retry or analyzer-version change. Signed local ce9afc62378a1275dc723ee444066bd2c732cef5
+contains the workaround; push with the input follow-up after all prior producers ended.
 
 ## Outline milestone being prepared
 
 Pushed outline head: 5c3988e012b46aff2959eabd16c6de2b7381ab04. Authoritative CI
-38104585881 and CodeQL 38104585849 are live; security/pr-gates passed, scripts
-38104585530 failed with the captured race above. Do not restart or supersede live runs.
+38104585881 is terminal FAILURE: 31/33 native/UI pass, including actual heading jumps,
+independent nested collapse and retained theme/reload state. Depth choices pass; physical
+resize fails. Frontmatter still fails because Markdown click never dispatched: settings
+remain Metadata, only one reload logged, submenu remains open. CodeQL 38104585849,
+security and PR gates passed; scripts 38104585530 captured the race above.
+
+Follow-up adds an explicit Thumb hit-test template. Physical mouse helper moves directly
+to the requested control, verifies that exact target or its descendant, then clicks;
+an animated path across parent menu rows can close a submenu before the click. Depth
+popup is explicitly collapsed before real divider drag and hit identity checked.
+Settings/table/resize assertions remain; no local GUI input. Hosted verification needed.
 
 Issue #9: sanitized heading labels, GFM fragment mapping, generated numeric identities,
 stack-free section construction, duplicate/nested headings and passive markup.
