@@ -72,6 +72,10 @@ public sealed class ReaderKeyboard
       {
          return key.Character == '-' ? ReaderCommand.ZoomOut : ReaderCommand.ZoomReset;
       }
+      if(readingFocused && key.Shift && key.Character is '\u2193' or '\u2191')
+      {
+         return key.Character == '\u2193' ? ReaderCommand.NextTheme : ReaderCommand.PreviousTheme;
+      }
       if(key.Shift)
       {
          return ReaderCommand.None;

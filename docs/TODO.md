@@ -46,10 +46,74 @@
 - [x] Verify all5 print cases in full bf4fcdc / CI38128311242: native/published54, installed stable/dev53 each, zero failures/skips;24 actual PDFs/48 PNGs/TRXs retained, update apply/restart passes both channels.
 - [x] Implement native independent document windows, multiple-file picker/all reference extensions and bounded private recent files/clear; source-generated sibling-safe preference merging. Local376 core/100% lines and zero-warning build pass.
 - [ ] Verify actual hosted Ctrl+N/Ctrl+W, two-window zoom/watching, actual multiple-file picker/cancel, recent duplicate/missing/clear/stale-save and File/Exit acceptance.
-- [ ] Implement and verify Windows file associations/cross-process activation with stable/dev identity boundaries.
-- [ ] Complete reference theme order/enable/delete/restore/cycling, JSON import/export conflicts, body/heading typography, global CSS and content width.
-- [ ] Implement and verify configurable highlight/superscript/subscript/underline and remaining image/link/render fidelity.
+- [x] Implement Windows file registrations and cross-process activation with channel/install/profile identities, quoted commands and preserved defaults;9 actual isolated adapter tests pass.
+- [ ] Verify Explorer Open With, installed registration/update/uninstall and actual secondary-app/profile/duplicate/watcher behavior in all distributed builds (issue #14).
+- [x] #14: Implement Settings → Advanced → Choose default file types. Read-only install ownership checks target this exact registered application on Windows 11 23H2+; older versions open general Default Apps. Portable previews show installation guidance; `.txt` remains optional. Eleven isolated registration/activation tests pass.
+- [ ] #14: Verify the actual installed Settings action, Windows Default Apps selection and Explorer double-click for Markdown types; confirm optional `.txt` remains unchanged, stable/dev identities and older-Windows guidance. New native page case compiles, not yet run.
+- [x] Expose all body/heading/code typography controls, including heading levels1–6 and line height, with copied core edit validation.18 focused theme regressions; combined426 core tests/100% lines, zero-warning full build/format pass. Unsigned worktree only.
+- [ ] Verify real hosted complete typography save/heading-body-code glyph growth/cancel acceptance; new case compiles, not run.
+- [x] Implement shared global CSS and bounded persisted content width, copied cancel-safe drafts, sibling broadcasts and separate print styles.22 focused regressions; combined448 core/100% measured lines, zero-warning build/format pass. Unsigned worktree only.
+- [ ] Verify real hosted width wrapping/global CSS/theme changes/PDF isolation/cancel and two-reader broadcast/stale local save; two new cases compile, not run.
+- [x] Implement copied native theme order/enable/delete/restore and shared selection, saved menu order and guarded Ctrl+Shift+Up/Down cycling. Restoration preserves edits as collision-safe custom copies.23 focused cases; combined471 core tests/100% measured lines, zero-warning build/format pass; local worktree only.
+- [ ] Verify actual hosted menu order/disabled choices/physical cycle/focus/cancel, sibling deletion/restoration and updated retained-override restoration case. Two new cases compile, not run.
+- [x] Implement bounded multi-file JSON import, explicit overwrite/keep-both/skip/newer-schema choices, metadata/version-preserving disabled-theme export and native manager New/Copy/Edit/Use selected with copied cross-dialog drafts.46 focused regressions; combined517 core/100% measured lines and zero-warning full build pass; local worktree only.
+- [ ] Verify all six new hosted conflict/batch/future/disabled-export/new-copy-edit-cancel cases in native, published and installed builds; headless discovery finds69 total cases, runtime not executed.
+- [ ] Audit original global/per-theme CSS variable/DOM selector compatibility; retain full reference stylesheet behavior.
+- [x] Implement independent saved highlight/superscript/subscript/underline options and native controls; existing parser/sanitizer, exact source offsets, code/newline/whitespace guards and theme palette. Local408 core tests/100% lines and full build/format pass; unsigned worktree only.
+- [ ] Verify hosted native extension glyphs/paint/toggles/persistence/source/reload in all distributed builds; one real acceptance case is prepared, not run.
+- [ ] Audit remaining extension edge cases against raw authored HTML and complete local image/link/render fidelity.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
 - [ ] Verify hosted checks on each actual implementation head.
 - [ ] Finish standards inventory and reviewed/published AppKit/signing API adoption when available.
 - [ ] Verify actual signed stable/dev installers and exact shipped bytes before release publication.
+
+## Owner follow-ups - 2026-10-11
+
+- [ ] #22: Fix the system print handoff and widen print options.
+- [ ] #23: Diagnose PDF export and offer success-only open PDF/folder actions. Readable-output verification and options implemented locally; runtime acceptance pending.
+- [ ] #19: Credit Darin Kelkhoff's original Mac app in About and documentation, with repository/site links. Implemented locally; actual About acceptance pending.
+- [ ] #20: Match gclo Help commands and carry defaults into AppKit samples and the starter. Implemented locally; builds/generation/setup tests pass, native acceptance/signing/push pending.
+- [x] #21: Replace owner-rejected modal tabs with a standard resizable WinUI Settings window, left navigation, native controls, immediate checked width preferences and explicit CSS apply. Theme/editor dialogs and pickers belong to Settings.
+- [ ] #21: Verify native window resizing/navigation, immediate preferences, CSS apply/discard and owned theme/editor/picker dialogs in distributed builds.
+- [x] #16: Implement native passive source highlighting, document/shell colors, high contrast and exact plain copying.570 core tests and100% measured lines pass.
+- [ ] #16: Run real native color/mode/palette/selection/clipboard and existing find/fold/scroll/reload acceptance in distributed builds.
+- [x] #17: Implement50/50 source opening/reopening, proportional mouse resizing and focused Left/Right/Home controls;21 core layout regressions pass.
+- [ ] #17: Verify actual mouse/keyboard/outline/DPI/window-resize/reopening geometry in distributed builds.
+- [x] #18: Implement reference-order native toolbar with dynamic overflow, shared reading handlers, H1–H6, enabled themes, valid editor/direct/choices and primary Print; Theme uses the native Color icon. Broadcast saved editor choices to all readers; build/format pass.
+- [ ] #18: Verify four prepared actual toolbar reading/menu/editor/Print/narrow/sibling cases in native, published and both installed builds.
+- [ ] #6: Verify automatic external-save refresh or a clear stale/reload notification in the current build. Native watcher6/6 passes; explicit fallback/new locked-save UI case implemented, actual acceptance pending.
+
+- [x] #24: Move Darin attribution into About Contributions; link23 runtime/platform and29 development entries verified against restored package metadata; preserve11 distinct packaged license/notice texts.
+- [ ] #24: Verify actual About scrolling, keyboard-accessible project/license links and Contributions placement in distributed builds.
+
+- [x] #25: Add gclo-style native Advanced splash toggle/duration (500–30000 ms, 250 ms steps), startup update preference, checked saves and sibling broadcasts using the published AppKit splash.
+- [ ] #25: Verify actual startup duration/enabled/disabled and shared preference persistence in distributed acceptance.
+- [ ] #18: Review the tightened toolbar row, control alignment and grouped commands against the owner screenshot; geometry assertions are prepared.
+
+## Active 1.0 release queue - 2026-10-11
+
+Full stable1.0 and isolated development releases are authorized. Local implementation
+checks below do not substitute for current native/distributed acceptance.
+
+- [ ] #27: Reproduce and fix source token colors disappearing on pointer hover; verify focus/selection/scroll/reload/theme transitions in the actual native control.
+- [x] #18: Remove the duplicate toolbar depth selector and label Contents/Print; retain TOC depth.
+- [ ] #18: Verify current toolbar alignment, overflow and narrow-window behavior.
+- [x] #21: Add independent new-window Contents/Source defaults, both off; core merge/copy regressions pass.
+- [ ] #21: Verify persisted defaults and unchanged existing windows through actual Settings input.
+- [x] #21: Move long theme/editor forms into native Settings pages with Back/Save/Cancel; preserve copied drafts/import conflicts/native pickers.
+- [ ] #21: Verify the current Settings pages, draft cancellation/validation and imports at normal/narrow sizes.
+- [x] #26: Add loaded-handle modification time, stale/reload status and native Open folder; real metadata adapter regression passes.
+- [ ] #26: Verify actual footer changes during locked/replaced/missing files and independent windows.
+- [x] #28: Add accessible/native delayed disabled-editor explanation with the actual unavailable reason and Settings guidance.
+- [ ] #28: Verify actual disabled hover, mouse exit, state changes and keyboard accessibility.
+- [ ] #29: Design/review a distinct gclo-family MarkdownViewr icon and integrate the accepted artwork through existing Windows brand generation.
+- [x] #24: Limit Components to shipped open-source credits/project/license links; preserve full audit catalog and notices, with Darin in Contributions.
+- [ ] #24: Verify current native About layout, Contributions and all credit links.
+- [x] Port pinned document CSS/container/scroll/print semantics locally. Current combined582 core tests/100% lines,25 adapter tests,zero-warning Release/format/publish pass.
+- [ ] Audit complete CSS selector/raw-HTML/source/TOC parity and run current actual paint/native/distributed acceptance. Attribution/threat-model updated; local port is not full parity proof.
+
+- [ ] Pass hosted CI on the actual current implementation; retain native/published/installed TRXs, screenshots and real PDFs.
+- [ ] Implement gclo-style isolated stable/dev IDs, titles, data, installs and feeds; verify side-by-side behavior.
+- [ ] Adopt the reviewed/published owned-file signing builder; verify actual Azure resource/profile/publisher and repository-bound OIDC/profile-signer permission.
+- [ ] Obtain genuine current-head maintainer review acknowledgement, complete required checks and merge.
+- [ ] Publish signed stable1.0/dev releases with verification of exact distributed artifacts, timestamp/publisher/checksums and installed update acceptance.

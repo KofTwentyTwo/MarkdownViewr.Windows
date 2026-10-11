@@ -34,7 +34,7 @@ internal static class DocumentFrontmatter
    /// <summary>Metadata is display text: split only at the first colon and escape every value before creating table markup.</summary>
    public static string RenderMetadata(string metadata)
    {
-      var html = new StringBuilder("<table><caption>Document metadata</caption>");
+      var html = new StringBuilder("<div class=\"frontmatter\"><table><caption>Document metadata</caption>");
       foreach(string line in metadata.Split('\n'))
       {
          string text = line.Trim();
@@ -46,16 +46,16 @@ internal static class DocumentFrontmatter
          html.Append("<tr>");
          if(colon >= 0)
          {
-            html.Append("<th>").Append(WebUtility.HtmlEncode(PlainValue(text[..colon]))).Append("</th>");
-            html.Append("<td>").Append(WebUtility.HtmlEncode(PlainValue(text[(colon + 1)..]))).Append("</td>");
+            html.Append("<th class=\"fm-key\">").Append(WebUtility.HtmlEncode(PlainValue(text[..colon]))).Append("</th>");
+            html.Append("<td class=\"fm-value\">").Append(WebUtility.HtmlEncode(PlainValue(text[(colon + 1)..]))).Append("</td>");
          }
          else
          {
-            html.Append("<td colspan=\"2\">").Append(WebUtility.HtmlEncode(PlainValue(text))).Append("</td>");
+            html.Append("<td class=\"fm-value\" colspan=\"2\">").Append(WebUtility.HtmlEncode(PlainValue(text))).Append("</td>");
          }
          html.Append("</tr>");
       }
-      return html.Append("</table>").ToString();
+      return html.Append("</table></div>").ToString();
    }
 
 

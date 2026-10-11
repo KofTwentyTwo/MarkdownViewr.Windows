@@ -18,8 +18,10 @@ internal sealed partial class DocumentBrowser
    {
       if(!await PreparePrintAsync(options, themes))
       {
+         App.Log.Warning("System print preparation was rejected; the document may have changed or is not ready.");
          return false;
       }
+      App.Log.Info("Requesting the Windows system print dialog with WebView2 " + _view.CoreWebView2.Environment.BrowserVersionString + ".");
       _view.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.System);
       return true;
    }
@@ -43,7 +45,17 @@ internal sealed partial class DocumentBrowser
       CoreWebView2PrintSettings settings = CreatePdfSettings(options.Backgrounds);
       try
       {
-         return await _view.CoreWebView2.PrintToPdfAsync(path, settings);
+         bool saved = await _view.CoreWebView2.PrintToPdfAsync(path, settings);
+         if(!saved)
+         {
+            App.Log.Warning("The WebView2 PDF export returned failure.");
+            return false;
+         }
+         global::Windows.Storage.StorageFile file = await global::Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+         global::Windows.Data.Pdf.PdfDocument pdf = await global::Windows.Data.Pdf.PdfDocument.LoadFromFileAsync(file);
+         bool readable = pdf.PageCount > 0;
+         App.Log.Info(readable ? "The generated PDF was verified readable." : "The generated PDF contains no pages.");
+         return readable;
       }
       finally
       {

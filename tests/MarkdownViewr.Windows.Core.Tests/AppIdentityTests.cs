@@ -20,6 +20,12 @@ public class AppIdentityTests
       Assert.EndsWith("_DATA_DIR", AppIdentity.Info.DataDirectoryVariable, StringComparison.Ordinal);
       Assert.NotNull(AppIdentity.Info.RepositoryUrl);
       Assert.NotEmpty(AppIdentity.Info.Attributions);
+      Assert.DoesNotContain("Darin", AppIdentity.Info.Description, StringComparison.Ordinal);
+      Assert.Equal("https://github.com/darinkelkhoff/markdownViewr", AppIdentity.OriginalRepositoryUrl.AbsoluteUri);
+      Assert.Equal("https://kelkhoff.com/", AppIdentity.OriginalAuthorWebsite.AbsoluteUri);
+      Assert.DoesNotContain(AppIdentity.Info.Attributions, credit => credit.Name.Contains("Darin Kelkhoff", StringComparison.Ordinal));
+      Assert.Equal(AppIdentity.Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/issues/new/choose", AppIdentity.IssuesUrl.AbsoluteUri);
+      Assert.Equal(AppIdentity.Info.RepositoryUrl.AbsoluteUri.TrimEnd('/') + "/discussions", AppIdentity.SupportUrl.AbsoluteUri);
    }
 
 

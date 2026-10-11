@@ -19,11 +19,11 @@ public sealed class DocumentOutline
 
 
    /// <summary>Sanitizes first; authored identifiers cannot impersonate the generated navigation targets.</summary>
-   public DocumentOutline(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide)
+   public DocumentOutline(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide, MarkdownExtensions? extensions = null)
    {
       var sources = new DocumentSourceMap(markdown);
       var sourceHeadings = new List<DocumentSourceHeading>();
-      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer().RenderWithSources(markdown, frontmatter, sources));
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer(extensions).RenderWithSources(markdown, frontmatter, sources));
       IElement body = document.Body!;
       var fragments = new Dictionary<string, string>(StringComparer.Ordinal);
       foreach(IElement element in body.QuerySelectorAll("h1,h2,h3,h4,h5,h6"))

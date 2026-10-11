@@ -103,4 +103,55 @@ public sealed class DocumentSourceTextTests
       Assert.Throws<ArgumentException>(() => new DocumentSourceText(new string('x', MarkdownRenderer.MaximumCharacters + 1), outline));
       Assert.Throws<ArgumentException>(() => new DocumentSourceText("", outline));
    }
+
+
+   /// <summary>Native CR display does not change copied LF/CRLF/lone CR, Unicode or literal authored markup.</summary>
+   [Theory]
+   [InlineData("")]
+   [InlineData("😀  text\t\n<script>literal</script>\n")]
+   [InlineData("# H\r\n**text**\r\n")]
+   [InlineData("One\rTwo\nThree\r\n終 😀\r")]
+   public void GetCopyText_OriginalLineEndings_RetainsExactSource(string original)
+   {
+      var source = new DocumentSourceText(original, new DocumentOutline(original));
+      Assert.Equal(original, source.GetCopyText(0, source.Text.Length));
+      Assert.Equal("", source.GetCopyText(source.Text.Length, 0));
+      Assert.Throws<ArgumentOutOfRangeException>(() => source.GetCopyText(-1, 0));
+      Assert.Throws<ArgumentOutOfRangeException>(() => source.GetCopyText(0, -1));
+      Assert.Throws<ArgumentOutOfRangeException>(() => source.GetCopyText(source.Text.Length + 1, 0));
+      Assert.Throws<ArgumentOutOfRangeException>(() => source.GetCopyText(0, source.Text.Length + 1));
+   }
+
+
+
+   /// <summary>Selection boundaries include the LF only when the native CR is selected, preserving exact substrings.</summary>
+   [Fact]
+   public void GetCopyText_PartialNewlineAndUnicode_MapsActualSelection()
+   {
+      const string Original = "😀 A\r\nB\nC\rD\r\n終";
+      var source = new DocumentSourceText(Original, new DocumentOutline(Original));
+      Assert.Equal("😀", source.GetCopyText(0, 2));
+      Assert.Equal("\r\n", source.GetCopyText(4, 1));
+      Assert.Equal("B\nC\rD\r\n", source.GetCopyText(5, 6));
+      Assert.Equal("終", source.GetCopyText(source.Text.Length - 1, 1));
+      Assert.Equal("", source.GetCopyText(5, 0));
+   }
+
+
+
+   /// <summary>Folds copy only visible original chunks and a literal ellipsis; reopening restores the exact original.</summary>
+   [Fact]
+   public void GetCopyText_MergedAndIndependentFolds_OmitsHiddenBodies()
+   {
+      const string Original = "# First\r\nHidden\r\n## Nested\nMore\n# Second\nKeep 😀\r\n# Last\rTail";
+      var source = new DocumentSourceText(Original, new DocumentOutline(Original));
+      source.SetCollapsed([0, 1]);
+      Assert.Equal("# First\r\n⋯\r# Second\nKeep 😀\r\n# Last\rTail", source.GetCopyText(0, source.Text.Length));
+      int visible = source.Text.IndexOf("Keep", StringComparison.Ordinal);
+      Assert.Equal("Keep 😀\r\n", source.GetCopyText(visible, 8));
+      source.SetCollapsed([1, 2]);
+      Assert.Equal("# First\r\nHidden\r\n## Nested\n⋯\r# Second\n⋯\r# Last\rTail", source.GetCopyText(0, source.Text.Length));
+      source.SetCollapsed([]);
+      Assert.Equal(Original, source.GetCopyText(0, source.Text.Length));
+   }
 }

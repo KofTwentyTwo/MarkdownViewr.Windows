@@ -16,11 +16,11 @@ internal sealed partial class DocumentBrowser
       string? json = await ExecuteDocumentScriptAsync(FormattableString.Invariant($$"""
          (()=>{
             if(window.matchMedia('print').matches)return null;
-            const s=document.scrollingElement;if(!s)return null;
+            const s=document.getElementById('content');if(!s)return null;
             const y=s.scrollTop;const headings=[];const collapsed=[];
             for(let i=0;i<{{_headings.Count}};i++){
                const h=document.getElementById('mv-heading-'+i);
-               if(h&&h.offsetParent!==null)headings.push([i,h.getBoundingClientRect().top+y]);
+               if(h&&h.offsetParent!==null)headings.push([i,h.getBoundingClientRect().top-s.getBoundingClientRect().top+y]);
                const b=document.querySelector('[data-mv-body="'+i+'"]');
                if(b&&b.hidden)collapsed.push(i);
             }
@@ -39,6 +39,6 @@ internal sealed partial class DocumentBrowser
       {
          return Task.CompletedTask;
       }
-      return ExecuteDocumentScriptAsync(FormattableString.Invariant($"window.scrollTo({{top:{top:R},behavior:'instant'}});"));
+      return ExecuteDocumentScriptAsync(FormattableString.Invariant($"document.getElementById('content')?.scrollTo({{top:{top:R},behavior:'instant'}});"));
    }
 }

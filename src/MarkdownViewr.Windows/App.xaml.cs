@@ -32,17 +32,8 @@ public partial class App : Application
    protected override void OnLaunched(LaunchActivatedEventArgs args)
    {
       Log.Info($"{AppIdentity.Info.DisplayName} started.");
-      string[] paths = Environment.GetCommandLineArgs().Skip(1).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-      if(paths.Length == 0)
-      {
-         NewDocumentWindow();
-      }
-      else
-      {
-         foreach(string path in paths)
-         {
-            NewDocumentWindow(path);
-         }
-      }
+      OpenActivation(Program.InitialRequest);
+      var dispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+      Program.Inbox?.Attach(request => dispatcher.TryEnqueue(() => OpenActivation(request)));
    }
 }

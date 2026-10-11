@@ -38,10 +38,11 @@ public partial class AppTests
       using var session = new AppSession(document: "# Editor fixture", editorProbe: true, documentFileName: "notes & café $HOME.md");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor fixture")), "the editor fixture heading", TimeSpan.FromSeconds(30));
       string editor = ResolveEditorProbe();
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.EnterText("EditorPath", editor);
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using(var settings = JsonDocument.Parse(session.ReadSettings()))
       {
          Assert.Equal(editor, settings.RootElement.GetProperty("ExternalEditor").GetString());
@@ -63,13 +64,14 @@ public partial class AppTests
    public void Editor_InvalidExecutableAndCancel_DoesNotPersist()
    {
       using var session = new AppSession();
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.EnterText("EditorPath", Path.Combine(session.DataDirectory, "missing.exe"));
       session.ClickButton("Save");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Enter the full path of an existing .exe file.")), "the editor validation error");
       Assert.NotNull(session.FindInApp(cf => cf.ByAutomationId("EditorPath")));
       session.ClickButton("Cancel");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       Assert.DoesNotContain("missing.exe", session.ReadSettings(), StringComparison.Ordinal);
    }
 
@@ -83,13 +85,14 @@ public partial class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Missing editor fixture")), "the fixture heading", TimeSpan.FromSeconds(30));
       string editor = Path.Combine(session.DataDirectory, "removed-editor.exe");
       File.WriteAllText(editor, "Never executed; presence-only configuration fixture.");
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.EnterText("EditorPath", editor);
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       File.Delete(editor);
       session.InvokeMenuItem("File", "OpenEditorMenuItem");
-      session.WaitFor(() => session.FindInApp(cf => cf.ByName("The configured editor is missing. Use File → Configure editor to choose an installed executable.")), "the missing editor status");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("The configured editor is missing. Use File → Settings → Editors to choose an installed executable.")), "the missing editor status");
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Missing editor fixture")));
    }
 
@@ -102,7 +105,7 @@ public partial class AppTests
       using var session = new AppSession(document: "# Editor list fixture", editorProbe: true, documentFileName: "notes & café $HOME.md");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor list fixture")), "the editor list document", TimeSpan.FromSeconds(30));
       string executable = ResolveEditorProbe();
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.EnterText("EditorName", "File editor");
       session.EnterText("EditorPath", executable);
       session.ClickElement("EditorAdd");
@@ -111,17 +114,19 @@ public partial class AppTests
       session.WaitForElement("EditorFolder").Patterns.Toggle.Pattern.Toggle();
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using var initial = JsonDocument.Parse(session.ReadSettings());
       JsonElement initialChoices = initial.RootElement.GetProperty("ConfiguredEditors");
       Assert.Equal(2, initialChoices.GetArrayLength());
       string fileId = initialChoices[0].GetProperty("Id").GetString()!;
       string folderId = initialChoices[1].GetProperty("Id").GetString()!;
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.WaitForElement("EditorChoice:" + folderId).Patterns.SelectionItem.Pattern.Select();
       Wait.UntilInputIsProcessed();
       session.ClickElement("EditorUp");
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using var reordered = JsonDocument.Parse(session.ReadSettings());
       JsonElement choices = reordered.RootElement.GetProperty("ConfiguredEditors");
       Assert.Equal(folderId, choices[0].GetProperty("Id").GetString());
@@ -146,14 +151,15 @@ public partial class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor removal fixture")), "the removal fixture document", TimeSpan.FromSeconds(30));
       string executable = Path.Combine(session.DataDirectory, "presence-only-editor.exe");
       File.WriteAllText(executable, "Never executed; configuration presence fixture.");
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.EnterText("EditorName", "Original editor");
       session.EnterText("EditorPath", executable);
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using var original = JsonDocument.Parse(session.ReadSettings());
       string identity = Assert.Single(original.RootElement.GetProperty("ConfiguredEditors").EnumerateArray()).GetProperty("Id").GetString()!;
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.ClickElement("EditorAdd");
       session.EnterText("EditorName", "Cancelled editor");
       session.EnterText("EditorPath", executable);
@@ -163,13 +169,15 @@ public partial class AppTests
       session.ClickElement("EditorRemove");
       session.ClickButton("Cancel");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using var cancelled = JsonDocument.Parse(session.ReadSettings());
       Assert.Equal(identity, Assert.Single(cancelled.RootElement.GetProperty("ConfiguredEditors").EnumerateArray()).GetProperty("Id").GetString());
       Assert.DoesNotContain("Cancelled editor", session.ReadSettings(), StringComparison.Ordinal);
-      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      OpenSettingsAction(session, "ConfigureEditorMenuItem", "SettingsEditorsTab");
       session.ClickElement("EditorRemove");
       session.ClickButton("Save");
       session.WaitForElementGone("EditorPath");
+      CloseSettings(session);
       using var removed = JsonDocument.Parse(session.ReadSettings());
       Assert.Empty(removed.RootElement.GetProperty("ConfiguredEditors").EnumerateArray());
       Assert.Equal("", removed.RootElement.GetProperty("ExternalEditor").GetString());
@@ -226,6 +234,24 @@ public partial class AppTests
       session.InvokeMenuItem("Help", "AboutMenuItem");
       AutomationElement version = session.WaitForElement("AboutVersionText");
       Assert.StartsWith("Version ", version.Name, StringComparison.Ordinal);
+      Assert.Contains("Darin Kelkhoff", session.WaitForElement("AboutOriginalRepository").Name, StringComparison.Ordinal);
+      Assert.Contains("kelkhoff.com", session.WaitForElement("AboutOriginalAuthorWebsite").Name, StringComparison.Ordinal);
+      Assert.True(session.WaitForElement("AboutOriginalRepository").Patterns.Invoke.IsSupported);
+      Assert.True(session.WaitForElement("AboutOriginalAuthorWebsite").Patterns.Invoke.IsSupported);
+      AutomationElement contributions = session.WaitForElement("AboutContributions");
+      Assert.NotNull(contributions.FindFirstDescendant(cf => cf.ByAutomationId("AboutOriginalRepository")));
+      Assert.NotNull(contributions.FindFirstDescendant(cf => cf.ByAutomationId("AboutOriginalAuthorWebsite")));
+      foreach(AboutComponent component in AboutComponents.OpenSource)
+      {
+         AutomationElement project = session.WaitForElement("AboutProject:" + component.Name);
+         AutomationElement license = session.WaitForElement("AboutLicense:" + component.Name);
+         Assert.True(project.Patterns.Invoke.IsSupported);
+         Assert.True(license.Patterns.Invoke.IsSupported);
+         Assert.Contains(component.Version, project.Name, StringComparison.Ordinal);
+         Assert.Contains(component.License, license.Name, StringComparison.Ordinal);
+      }
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("AboutDevelopmentTools")));
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("AboutProject:FlaUI.Core")));
       session.ClickButton("Close");
       session.WaitForElementGone("AboutVersionText");
    }
@@ -293,7 +319,7 @@ public partial class AppTests
    {
       using var session = new AppSession(document: "# Custom theme acceptance\n\n`sample code`");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Custom theme acceptance")), "the document heading", TimeSpan.FromSeconds(30));
-      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      OpenSettingsAction(session, "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorName", "My reading theme");
       session.EnterText("ThemeEditorCodeFont", "Consolas");
       session.WaitForElement("ThemeEditorCodeSize").Patterns.RangeValue.Pattern.SetValue(17);
@@ -301,6 +327,7 @@ public partial class AppTests
       session.EnterText("ThemeEditorCss", "html { background: #223344; }");
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
+      CloseSettings(session);
       WaitForDocumentColor(session, System.Drawing.Color.FromArgb(34, 51, 68));
       using var settings = JsonDocument.Parse(session.ReadSettings());
       Assert.Equal("My reading theme", settings.RootElement.GetProperty("DocumentTheme").GetString());
@@ -320,34 +347,45 @@ public partial class AppTests
    public void ThemeEditor_InvalidColorAndCancel_DoesNotPersist()
    {
       using var session = new AppSession();
-      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      OpenSettingsAction(session, "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorColor:background", "invalid");
       session.ClickButton("Save theme");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme colors must use six-digit hexadecimal notation.")), "the color validation error");
       Assert.NotNull(session.FindInApp(cf => cf.ByAutomationId("ThemeEditorName")));
       session.ClickButton("Cancel");
       session.WaitForElementGone("ThemeEditorName");
+      CloseSettings(session);
       Assert.DoesNotContain("invalid", session.ReadSettings(), StringComparison.Ordinal);
    }
 
 
 
-   /// <summary>Restoring built-ins removes an edited built-in palette after explicit confirmation.</summary>
+   /// <summary>Restoring built-ins preserves the edited palette as a renamed custom copy and makes the original available.</summary>
    [Fact]
    public void ThemeEditor_BuiltInOverride_RestoresOriginalPalette()
    {
       using var session = new AppSession(document: "# Theme restore acceptance");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme restore acceptance")), "the document heading", TimeSpan.FromSeconds(30));
-      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      OpenSettingsAction(session, "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorColor:background", "#112233");
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
+      CloseSettings(session);
       WaitForDocumentColor(session, System.Drawing.Color.FromArgb(17, 34, 51));
-      session.InvokeMenuItem("View", "RestoreDocumentThemesMenu");
+      OpenSettingsAction(session, "RestoreDocumentThemesMenu");
       session.ClickButton("Restore themes");
-      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(30, 30, 46));
+      CloseSettings(session);
+      WaitForSavedDocumentTheme(session, "Catppuccin Mocha (2)");
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(17, 34, 51));
       using var settings = JsonDocument.Parse(session.ReadSettings());
-      Assert.Equal(0, settings.RootElement.GetProperty("UserThemes").GetArrayLength());
+      Assert.Equal("Catppuccin Mocha (2)", settings.RootElement.GetProperty("DocumentTheme").GetString());
+      string json = Assert.Single(settings.RootElement.GetProperty("UserThemes").EnumerateArray()).GetString()!;
+      using var copy = JsonDocument.Parse(json);
+      Assert.Equal("Catppuccin Mocha (2)", copy.RootElement.GetProperty("name").GetString());
+      Assert.Equal("#112233", copy.RootElement.GetProperty("colors").GetProperty("background").GetString());
+      session.InvokeMenuItem("View", "DocumentThemesMenu");
+      session.ClickElement("DocumentTheme:Catppuccin Mocha");
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(30, 30, 46));
    }
 
 
@@ -408,34 +446,27 @@ public partial class AppTests
       using(var settings = JsonDocument.Parse(session.ReadSettings()))
       {
          Assert.True(settings.RootElement.GetProperty("ShowSource").GetBoolean());
-         Assert.Equal(320, settings.RootElement.GetProperty("SourceWidth").GetDouble());
+         AssertEqualSourcePanes(session);
       }
       File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Source replacement\n\n**New literal text**");
       session.WaitFor(() => source.Patterns.Value.Pattern.Value.Value.Contains("**New literal text**", StringComparison.Ordinal) ? source : null, "the source snapshot after reload");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Source replacement")), "the rendered replacement heading");
+      double initialWidth = source.BoundingRectangle.Width;
       AutomationElement divider = session.WaitForElement("SourceDivider");
-      session.MainWindow.SetForeground();
-      Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
-      Assert.Equal("SourceDivider", session.Automation.FromPoint(start).Properties.AutomationId.ValueOrDefault);
-      NativeMouse.MoveTo(start);
-      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
-      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      NativeMouse.MoveTo(new System.Drawing.Point(start.X - 70, start.Y));
-      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);
-      FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-      session.WaitFor(
-         () =>
-         {
-            using var settings = JsonDocument.Parse(session.ReadSettings());
-            return settings.RootElement.GetProperty("SourceWidth").GetDouble() > 360 ? session.MainWindow : null;
-         },
-         "the physically resized source width to be saved");
+      DragSourceDivider(session, divider, -70);
+      session.WaitFor(() => source.BoundingRectangle.Width > initialWidth + 50 ? source : null, "the actual source pane growing after a70px physical drag");
+      divider.Focus();
+      SendReadingKey(VirtualKeyShort.HOME);
+      AssertEqualSourcePanes(session);
+      double equalWidth = source.BoundingRectangle.Width;
+      SendReadingKey(VirtualKeyShort.LEFT);
+      session.WaitFor(() => source.BoundingRectangle.Width > equalWidth + 15 ? source : null, "the focused divider growing source through the Left arrow key");
       session.InvokeMenuItem("View", "SourceToggle");
       session.WaitForElementGone("SourceText");
       using var hidden = JsonDocument.Parse(session.ReadSettings());
       Assert.False(hidden.RootElement.GetProperty("ShowSource").GetBoolean());
+      session.InvokeMenuItem("View", "SourceToggle");
+      AssertEqualSourcePanes(session);
       _output.WriteLine(session.DescribeDocumentStatus());
    }
 
@@ -1244,6 +1275,31 @@ public partial class AppTests
          Thread.Sleep(800);
       }
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("After editor lock")), "the unlocked save");
+   }
+
+
+
+   /// <summary>A prolonged external save lock reports the stale view and offers Reload until another save succeeds.</summary>
+   [Fact]
+   public void LiveReload_LockedSave_ShowsStaleSnapshotAndRecovers()
+   {
+      using var session = new AppSession(document: "# Previous readable snapshot");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Previous readable snapshot")), "the original readable snapshot", TimeSpan.FromSeconds(30));
+      string path = Path.Combine(session.DataDirectory, "document.md");
+      using(var locked = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+      {
+         byte[] bytes = System.Text.Encoding.UTF8.GetBytes("# Locked external replacement");
+         locked.SetLength(0);
+         locked.Write(bytes);
+         locked.Flush(flushToDisk: true);
+         session.WaitFor(() => session.FindInApp(cf => cf.ByName("The document could not be reloaded. Showing the previous version; use File → Reload.")), "the visible stale-snapshot/manual-reload instruction");
+         Assert.NotNull(session.FindInApp(cf => cf.ByName("Previous readable snapshot")));
+         Assert.Null(session.FindInApp(cf => cf.ByName("Locked external replacement")));
+      }
+      File.WriteAllText(path, "# Recovered automatic snapshot");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Recovered automatic snapshot")), "automatic recovery after a later readable save");
+      Assert.Null(session.FindInApp(cf => cf.ByName("Previous readable snapshot")));
+      Assert.Contains("Reloaded a Markdown document.", session.ReadLogs(), StringComparison.Ordinal);
    }
 
 

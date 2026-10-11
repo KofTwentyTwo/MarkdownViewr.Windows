@@ -16,12 +16,11 @@ namespace MarkdownViewr.Windows;
 internal sealed class EditorConfigurationDialog
 {
    private readonly List<EditorConfiguration> _editors;
-   private readonly ListBox _list = new() { Name = "EditorList", Height = 100 };
+   private readonly ListBox _list = new() { Name = "EditorList", Height = 220 };
    private readonly TextBox _name = new() { Name = "EditorName", Header = "Editor name", MaxLength = 80 };
    private readonly TextBox _path = new() { Name = "EditorPath", Header = "Editor executable path", MaxLength = 32767, MinWidth = 320 };
    private readonly CheckBox _folder = new() { Name = "EditorFolder", Content = "Open the document's folder" };
    private readonly TextBlock _error = new() { Name = "EditorError", TextWrapping = TextWrapping.Wrap };
-   private readonly ContentDialog _dialog;
    private int _selected = -1;
    private Guid _identity = Guid.NewGuid();
    private bool _loading;
@@ -33,15 +32,6 @@ internal sealed class EditorConfigurationDialog
    public EditorConfigurationDialog(IEnumerable<EditorConfiguration> editors)
    {
       _editors = editors.ToList();
-      _dialog = new ContentDialog
-      {
-         Title = "Configure editors",
-         Content = BuildContent(),
-         PrimaryButtonText = "Save",
-         CloseButtonText = "Cancel",
-         DefaultButton = ContentDialogButton.Primary,
-      };
-      _dialog.PrimaryButtonClick += (_, args) => args.Cancel = !ApplyCurrent();
       _list.SelectionChanged += (_, _) => ChangeSelection();
       _name.TextChanged += (_, _) => _dirty |= !_loading;
       _path.TextChanged += (_, _) => _dirty |= !_loading;
@@ -53,10 +43,9 @@ internal sealed class EditorConfigurationDialog
 
 
    /// <summary>Shows the editor manager on the owning window and returns only explicitly committed choices.</summary>
-   public async Task<EditorConfiguration[]?> ShowAsync(XamlRoot root)
+   public async Task<EditorConfiguration[]?> ShowAsync(SettingsWindow host)
    {
-      _dialog.XamlRoot = root;
-      return await _dialog.ShowAsync() == ContentDialogResult.Primary ? _editors.ToArray() : null;
+      return await host.ShowEditorAsync("Configure editors", BuildContent(), "Save", ApplyCurrent) == ContentDialogResult.Primary ? _editors.ToArray() : null;
    }
 
 

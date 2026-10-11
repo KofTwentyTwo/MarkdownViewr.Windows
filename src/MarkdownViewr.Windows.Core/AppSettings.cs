@@ -22,6 +22,21 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>Visible theme order, including disabled choices managed separately from their JSON data.</summary>
+   public string[] ThemeOrder { get; set; } = [];
+
+
+
+   /// <summary>Disabled choices remain editable but are omitted from reading menus and cycling.</summary>
+   public string[] DisabledThemes { get; set; } = [];
+
+
+
+   /// <summary>Hidden bundled themes can be restored without damaging shipped resources.</summary>
+   public string[] DeletedBuiltInThemes { get; set; } = [];
+
+
+
    /// <summary>The frontmatter display mode, saved independently of document contents.</summary>
    public string Frontmatter { get; set; } = "Hide";
 
@@ -32,7 +47,64 @@ public sealed class AppSettings : ShellSettings
    public Documents.FrontmatterMode FrontmatterKind => Enum.TryParse(Frontmatter, out Documents.FrontmatterMode mode) && Enum.IsDefined(mode) ? mode : Documents.FrontmatterMode.Hide;
 
 
-   /// <summary>Shows the native heading sidebar when requested.</summary>
+   /// <summary>Renders double-equals highlights; disabled syntax remains literal.</summary>
+   public bool RenderHighlight { get; set; } = true;
+
+
+
+   /// <summary>Renders single-caret superscripts independently of other Markdown extensions.</summary>
+   public bool RenderSuperscript { get; set; } = true;
+
+
+
+   /// <summary>Renders single-tilde subscripts while double-tilde GFM strikethrough remains enabled.</summary>
+   public bool RenderSubscript { get; set; } = true;
+
+
+
+   /// <summary>Renders double-plus inserted/underlined content.</summary>
+   public bool RenderUnderline { get; set; } = true;
+
+
+
+   /// <summary>An immutable snapshot captures this window's options before asynchronous parsing begins.</summary>
+   [JsonIgnore]
+   public Documents.MarkdownExtensions MarkdownExtensions => new(RenderHighlight, RenderSuperscript, RenderSubscript, RenderUnderline);
+
+
+
+   /// <summary>Limits reader content width, independently of print layout.</summary>
+   public bool ContentWidthEnabled { get; set; } = true;
+
+
+
+   /// <summary>The reference's 1000-pixel default scales with reading zoom.</summary>
+   public double ContentWidthPx { get; set; } = 1000;
+
+
+
+   /// <summary>Native user CSS shared across themes; saved separately from each theme's own CSS.</summary>
+   public string GlobalCss { get; set; } = "";
+
+
+
+   /// <summary>An immutable window snapshot keeps asynchronous style changes independent of saved theme data.</summary>
+   [JsonIgnore]
+   public Themes.ReadingAppearance ReadingAppearance => new(ContentWidthEnabled, ContentWidthPx, GlobalCss);
+
+
+
+   /// <summary>New document windows start with Contents hidden unless explicitly enabled in Settings.</summary>
+   public bool ShowOutlineByDefault { get; set; }
+
+
+
+   /// <summary>New document windows start with Source hidden unless explicitly enabled in Settings.</summary>
+   public bool ShowSourceByDefault { get; set; }
+
+
+
+   /// <summary>Shows the native heading sidebar in this window without changing the selected startup default.</summary>
    public bool ShowOutline { get; set; }
 
 
@@ -51,7 +123,7 @@ public sealed class AppSettings : ShellSettings
 
 
 
-   /// <summary>Last source pane width in device-independent pixels.</summary>
+   /// <summary>Legacy fixed-width preference retained for older settings; current source opens at50/50 and resizes within each window.</summary>
    public double SourceWidth { get; set; } = 320;
 
 
@@ -80,6 +152,9 @@ public sealed class AppSettings : ShellSettings
    public override void Sanitize()
    {
       base.Sanitize();
+      Themes.ReadingAppearance appearance = ReadingAppearance.Sanitize();
+      ContentWidthPx = appearance.WidthPixels;
+      GlobalCss = appearance.GlobalCss;
       RecentFiles = Documents.RecentDocuments.Sanitize(RecentFiles);
       Print = (Print ?? new Printing.PrintOptions()).Sanitize();
       ExternalEditor = Editors.EditorLaunch.IsExecutablePath(ExternalEditor) ? ExternalEditor : "";
@@ -98,6 +173,9 @@ public sealed class AppSettings : ShellSettings
          DocumentTheme = "Catppuccin Mocha";
       }
       UserThemes = (UserThemes ?? []).Where(IsValidTheme).ToArray();
+      ThemeOrder = Themes.ThemeManagement.SanitizeNames(ThemeOrder);
+      DisabledThemes = Themes.ThemeManagement.SanitizeNames(DisabledThemes);
+      DeletedBuiltInThemes = Themes.ThemeManagement.SanitizeNames(DeletedBuiltInThemes);
    }
 
 
@@ -111,7 +189,7 @@ public sealed class AppSettings : ShellSettings
       }
       try
       {
-         _ = Themes.ReaderTheme.Parse(json);
+         _ = Themes.ReaderTheme.ParseCompatible(json);
          return true;
       }
       catch(JsonException)

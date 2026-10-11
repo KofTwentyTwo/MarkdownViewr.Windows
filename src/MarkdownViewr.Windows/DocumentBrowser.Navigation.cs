@@ -32,7 +32,7 @@ internal sealed partial class DocumentBrowser
          return Task.CompletedTask;
       }
       string operation = command is Core.Navigation.ReaderCommand.Top or Core.Navigation.ReaderCommand.Bottom ? "scrollTo" : "scrollBy";
-      return ExecuteDocumentScriptAsync("(()=>{const s=document.scrollingElement;if(!s)return;const c=getComputedStyle(document.body);let line=parseFloat(c.lineHeight);if(!Number.isFinite(line))line=parseFloat(c.fontSize)*1.5;if(!Number.isFinite(line)||line<=0)line=24;s." + operation + "({top:" + amount + ",behavior:'instant'});})()");
+      return ExecuteDocumentScriptAsync("(()=>{const s=document.getElementById('content');if(!s)return;const c=getComputedStyle(document.body);let line=parseFloat(c.lineHeight);if(!Number.isFinite(line))line=parseFloat(c.fontSize)*1.5;if(!Number.isFinite(line)||line<=0)line=24;s." + operation + "({top:" + amount + ",behavior:'instant'});})()");
    }
 
 
@@ -44,12 +44,12 @@ internal sealed partial class DocumentBrowser
       string update = forward ? "target=h;break;" : "target=h;";
       return ExecuteDocumentScriptAsync(FormattableString.Invariant($$"""
          (()=>{
-            const s=document.scrollingElement;if(!s)return;
+            const s=document.getElementById('content');if(!s)return;
             const y=s.scrollTop;let target=null;
             for(let i=0;i<{{_headings.Count}};i++){
                const h=document.getElementById('mv-heading-'+i);
                if(h&&h.offsetParent!==null){
-                  const top=h.getBoundingClientRect().top+y;
+                  const top=h.getBoundingClientRect().top-s.getBoundingClientRect().top+y;
                   if({{direction}}){ {{update}} }
                }
             }

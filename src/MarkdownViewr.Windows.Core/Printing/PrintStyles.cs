@@ -45,9 +45,11 @@ public static class PrintStyles
          "Clean Printing" => s_clean,
          _ => themes.FirstOrDefault(candidate => string.Equals(candidate.Name, options.Theme, StringComparison.Ordinal)) ?? s_clean,
       };
-      var css = new StringBuilder(theme?.GetStyles(options.MatchScreenZoom ? readingZoom : 1) ?? "");
+      var css = new StringBuilder("#content-inner{max-width:900px;margin:0 auto;}" + (theme?.GetStyles(options.MatchScreenZoom ? readingZoom : 1) ?? ""));
       css.Append("""
-         html,body{height:auto!important;overflow:visible!important;display:block!important;}
+         html,body,#content{height:auto!important;overflow:visible!important;display:block!important;}
+         #content{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;}
+         #content-inner{padding:0!important;}
          [data-mv-body][hidden]{display:block!important;}
          *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
          h1,h2,h3,h4,h5,h6{break-after:avoid!important;}
@@ -59,7 +61,7 @@ public static class PrintStyles
       css.Append("body{padding:").Append(options.PaddingPixels.ToString("R", CultureInfo.InvariantCulture)).Append("px!important;}");
       if(options.FullPage)
       {
-         css.Append("body{max-width:none!important;margin:0!important;}");
+         css.Append("#content-inner{max-width:none!important;margin:0!important;}");
       }
       if(!options.Backgrounds)
       {

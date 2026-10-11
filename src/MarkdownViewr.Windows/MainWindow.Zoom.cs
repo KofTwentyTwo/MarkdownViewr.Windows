@@ -78,7 +78,7 @@ public sealed partial class MainWindow
          control.IsEnabled = enabled;
       }
       string percent = Math.Round(_readerZoom.Scale * 100).ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
-      ZoomResetButton.Content = percent;
+      ZoomResetButton.Label = percent;
       Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(ZoomResetButton, "Actual size (" + percent + ")");
    }
 }

@@ -23,6 +23,8 @@ public sealed class DocumentSourceText
    private (int Start, int End)[] _ranges = [];
    private int[] _rangeStarts = [];
    private int[] _removed = [0];
+   private string _copyText = "";
+   private int[] _copyBreaks = [];
 
 
 
@@ -124,6 +126,7 @@ public sealed class DocumentSourceText
       }
       text.Append(_native, cursor, _native.Length - cursor);
       Text = text.ToString();
+      BuildCopyText(ranges);
       var headings = new List<DocumentSourceHeading>();
       foreach(DocumentSourceHeading heading in _originalHeadings)
       {
@@ -156,6 +159,56 @@ public sealed class DocumentSourceText
          return null;
       }
       return (nativeStart - _removed[index + 1], nativeEnd - nativeStart);
+   }
+
+
+
+   /// <summary>Indexes copied visible original chunks separately from native paragraph coordinates.</summary>
+   private void BuildCopyText(List<(int Start, int End)> ranges)
+   {
+      var copy = new StringBuilder();
+      int cursor = 0;
+      foreach((int start, int end) in ranges)
+      {
+         copy.Append(_source, cursor, start - cursor).Append(Ellipsis);
+         cursor = end;
+      }
+      copy.Append(_source, cursor, _source.Length - cursor);
+      _copyText = copy.ToString();
+      var copyBreaks = new List<int>();
+      for(int index = 0; index + 1 < _copyText.Length; index++)
+      {
+         if(_copyText[index] == '\r' && _copyText[index + 1] == '\n')
+         {
+            copyBreaks.Add(index + 1 - copyBreaks.Count);
+            index++;
+         }
+      }
+      _copyBreaks = copyBreaks.ToArray();
+   }
+
+
+
+   /// <summary>Copies visible literal source with its original newline spelling; folded bodies remain omitted.</summary>
+   public string GetCopyText(int start, int length)
+   {
+      ArgumentOutOfRangeException.ThrowIfNegative(start);
+      ArgumentOutOfRangeException.ThrowIfNegative(length);
+      if(start > Text.Length || length > Text.Length - start)
+      {
+         throw new ArgumentOutOfRangeException(nameof(length));
+      }
+      int copyStart = ToCopy(start);
+      return _copyText.Substring(copyStart, ToCopy(start + length) - copyStart);
+   }
+
+
+
+   /// <summary>A native boundary after a CR includes the original LF of that CRLF, without altering lone line breaks.</summary>
+   private int ToCopy(int position)
+   {
+      int index = Array.BinarySearch(_copyBreaks, position);
+      return position + (index >= 0 ? index + 1 : ~index);
    }
 
 

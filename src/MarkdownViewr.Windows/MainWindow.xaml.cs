@@ -36,11 +36,13 @@ public sealed partial class MainWindow : Window, IDisposable
    public MainWindow(string? documentPath = null, bool initialWindow = true)
    {
       _initialDocumentPath = documentPath;
+      _settings.ShowOutline = _settings.ShowOutlineByDefault;
+      _settings.ShowSource = _settings.ShowSourceByDefault;
       _lastSavedSettings = Core.SettingsChanges.Copy(_settings);
       InitializeComponent();
       RefreshRecentDocuments();
-      _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
-      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme());
+      _themes = Core.Themes.ThemeManagement.Enabled(_settings);
+      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme(), _settings.ReadingAppearance);
       CreateDocumentThemeMenu();
       InitializeOutline();
       InitializeSource();
@@ -48,8 +50,11 @@ public sealed partial class MainWindow : Window, IDisposable
       InitializeKeyboard();
       InitializeZoom();
       InitializePrinting();
+      InitializeMarkdownExtensions();
       RefreshEditorCommands();
+      InitializeToolbar();
       InitializeInputDiagnostics();
+      InitializeDocumentFooter();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
       Title = AppIdentity.Info.DisplayName;
       FitInitialWindow();
@@ -61,8 +66,6 @@ public sealed partial class MainWindow : Window, IDisposable
          AppIdentity.Info.DisplayName,
          App.Log);
 
-      SplashToggle.IsChecked = _settings.ShowSplashScreen;
-      UpdateCheckToggle.IsChecked = _settings.CheckForUpdatesOnStartup;
       (_settings.ThemeKind switch { AppTheme.Light => ThemeLight, AppTheme.Dark => ThemeDark, _ => ThemeSystem }).IsChecked = true;
 
       if(initialWindow)
@@ -130,7 +133,7 @@ public sealed partial class MainWindow : Window, IDisposable
          {
             return;
          }
-         StatusText.Text = "Choose File → Open to read a Markdown document.";
+         StatusText.Text = _activationError ? "One or more startup file paths could not be opened." : "Choose File → Open to read a Markdown document.";
          if(_initialDocumentPath is { } path)
          {
             await OpenDocumentAsync(path);
@@ -208,7 +211,7 @@ public sealed partial class MainWindow : Window, IDisposable
          _browserInitialization ??= _browser.InitializeAsync();
          await _browserInitialization;
          Core.Documents.DocumentViewport viewport = reload ? await _browser.CaptureViewportAsync() : default;
-         (DocumentFiles files, Core.Documents.DocumentOutline outline) = await ReadDocumentAsync(path, _settings.FrontmatterKind);
+         (DocumentFiles files, Core.Documents.DocumentOutline outline) = await ReadDocumentAsync(path, _settings.FrontmatterKind, _settings.MarkdownExtensions);
          if(_closed)
          {
             return;
@@ -220,9 +223,15 @@ public sealed partial class MainWindow : Window, IDisposable
          App.Log.Warning(FormattableString.Invariant($"Could not open a Markdown document. Reload={reload}; exception={exception.GetType().Name}; HRESULT=0x{exception.HResult:X8}; UIThread={DispatcherQueue.HasThreadAccess}."));
          if(!_closed)
          {
+            if(reload)
+            {
+               MarkDocumentStale();
+            }
             StatusText.Text = reload && exception is FileNotFoundException
                ? "The document is missing. Showing the last version; it will reload when restored."
-               : "Could not open this document: " + exception.Message;
+               : reload
+                  ? "The document could not be reloaded. Showing the previous version; use File → Reload."
+                  : "Could not open this document: " + exception.Message;
          }
 
       }
@@ -261,6 +270,7 @@ public sealed partial class MainWindow : Window, IDisposable
             {
                if(string.Equals(_documentPath, watchedPath, StringComparison.Ordinal))
                {
+                  MarkDocumentStale();
                   _ = OpenDocumentAsync(watchedPath, reload: true);
                }
             }),
@@ -269,6 +279,7 @@ public sealed partial class MainWindow : Window, IDisposable
                if(!_closed)
                {
                   StatusText.Text = "Live reload encountered a filesystem error. Use File → Reload if changes stop appearing.";
+                  MarkDocumentStale();
                   App.Log.Warning("The document watcher reported a filesystem error.");
                }
             }));
@@ -276,6 +287,7 @@ public sealed partial class MainWindow : Window, IDisposable
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException)
       {
          StatusText.Text = "Live reload is unavailable for this folder. Use File → Reload.";
+         MarkDocumentStale();
          App.Log.Warning("Could not start the document watcher.");
       }
    }
@@ -283,7 +295,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Retries only transient missing/sharing violations from an editor's replace/save operation.</summary>
-   private static async Task<(DocumentFiles Files, Core.Documents.DocumentOutline Outline)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter)
+   private static async Task<(DocumentFiles Files, Core.Documents.DocumentOutline Outline)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter, Core.Documents.MarkdownExtensions extensions)
    {
       for(int attempt = 0; ; attempt++)
       {
@@ -292,7 +304,7 @@ public sealed partial class MainWindow : Window, IDisposable
             return await Task.Run(() =>
             {
                var document = DocumentFiles.Open(path);
-               return (document, new Core.Documents.DocumentOutline(document.Markdown, frontmatter));
+               return (document, new Core.Documents.DocumentOutline(document.Markdown, frontmatter, extensions));
             });
          }
          catch(IOException exception) when(attempt < 3 && (exception.HResult & 0xFFFF) is 2 or 3 or 32 or 33)
@@ -317,6 +329,7 @@ public sealed partial class MainWindow : Window, IDisposable
       RefreshSource();
       RefreshOutline();
       _documentPath = Path.GetFullPath(path);
+      CommitDocumentFooter(files);
       RefreshEditorCommands();
       Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;
       StatusText.Text = (reload ? "Reloaded " : "Opened ") + Path.GetFileName(path);
@@ -343,6 +356,10 @@ public sealed partial class MainWindow : Window, IDisposable
          _findDelay?.Stop();
          _watcher?.Dispose();
          _watcher = null;
+         _footerPoll.Stop();
+         CloseEditorExplanation();
+         _settingsWindow?.Close();
+         SourceText.Dispose();
          _browser.Close();
       }
       GC.SuppressFinalize(this);
@@ -360,6 +377,7 @@ public sealed partial class MainWindow : Window, IDisposable
    {
       DocumentThemesMenu.Items.Clear();
       string selected = ActiveDocumentTheme().Name;
+      NextDocumentThemeMenu.IsEnabled = PreviousDocumentThemeMenu.IsEnabled = _themes.Count > 0;
       foreach(Core.Themes.ReaderTheme theme in _themes)
       {
          var item = new RadioMenuFlyoutItem { Text = theme.Name, Tag = theme, GroupName = "DocumentTheme", IsChecked = string.Equals(selected, theme.Name, StringComparison.Ordinal) };
@@ -367,6 +385,7 @@ public sealed partial class MainWindow : Window, IDisposable
          item.Click += DocumentTheme_Click;
          DocumentThemesMenu.Items.Add(item);
       }
+      RefreshToolbarThemes();
    }
 
 
@@ -375,9 +394,10 @@ public sealed partial class MainWindow : Window, IDisposable
    private async void DocumentTheme_Click(object sender, RoutedEventArgs e)
    {
       var theme = (Core.Themes.ReaderTheme)((FrameworkElement)sender).Tag;
-      _settings.DocumentTheme = theme.Name;
-      Save();
-      await ApplyDocumentThemeAsync(theme);
+      Core.AppSettings before = Core.SettingsChanges.Copy(_settings);
+      Core.AppSettings draft = Core.SettingsChanges.Copy(before);
+      draft.DocumentTheme = theme.Name;
+      await CommitThemeDraftAsync(before, draft);
    }
 
 
@@ -396,44 +416,36 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Resolves user overrides and safely falls back after a saved custom theme is removed.</summary>
-   private Core.Themes.ReaderTheme ActiveDocumentTheme()
-      => _themes.FirstOrDefault(theme => string.Equals(theme.Name, _settings.DocumentTheme, StringComparison.Ordinal))
-         ?? Core.Themes.ThemeCatalog.Find(null);
+   private Core.Themes.ReaderTheme ActiveDocumentTheme() => Core.Themes.ThemeManagement.Active(_settings);
 
 
 
    /// <summary>A same-name edit overrides the original; a new name creates a custom theme.</summary>
-   private async void EditDocumentTheme_Click(object sender, RoutedEventArgs e)
+   private async Task EditDocumentThemeAsync()
    {
-      Core.Themes.ReaderTheme? edited = await ThemeEditor.ShowAsync(Content.XamlRoot, ActiveDocumentTheme());
+      Core.AppSettings before = Core.SettingsChanges.Copy(_settings);
+      Core.Themes.ReaderTheme original = ActiveDocumentTheme();
+      Core.Themes.ReaderTheme? edited = await ThemeEditor.ShowAsync(ConfigurationPage, original, Core.Themes.ThemeManagement.All(before).Select(theme => theme.Name));
       if(edited is null || _closed)
       {
          return;
       }
-      _settings.UserThemes = _settings.UserThemes
-         .Where(json => !string.Equals(Core.Themes.ReaderTheme.Parse(json).Name, edited.Name, StringComparison.Ordinal))
-         .Append(edited.Json).ToArray();
-      _settings.DocumentTheme = edited.Name;
-      Save();
-      RefreshDocumentThemes();
-      await ApplyDocumentThemeAsync(edited);
+      Core.AppSettings draft = Core.Themes.ThemeManagement.SaveEdited(before, original, edited);
+      await CommitThemeDraftAsync(before, draft);
    }
 
 
 
    /// <summary>Restores original palettes and removes their overrides, retaining separately named custom themes.</summary>
-   private async void RestoreDocumentThemes_Click(object sender, RoutedEventArgs e)
+   private async Task RestoreDocumentThemesAsync()
    {
-      var dialog = new ContentDialog { XamlRoot = Content.XamlRoot, Title = "Restore built-in themes?", Content = "Edits to the 20 built-in themes will be removed. Your separately named custom themes will be kept.", PrimaryButtonText = "Restore themes", CloseButtonText = "Cancel" };
+      var dialog = new ContentDialog { XamlRoot = ConfigurationRoot, Title = "Restore built-in themes?", Content = "Original built-ins will be restored and enabled. Edited built-ins will be kept as uniquely named custom themes.", PrimaryButtonText = "Restore themes", CloseButtonText = "Cancel" };
       if(await dialog.ShowAsync() != ContentDialogResult.Primary || _closed)
       {
          return;
       }
-      var builtIn = Core.Themes.ThemeCatalog.BuiltIn.Select(theme => theme.Name).ToHashSet(StringComparer.Ordinal);
-      _settings.UserThemes = _settings.UserThemes.Where(json => !builtIn.Contains(Core.Themes.ReaderTheme.Parse(json).Name)).ToArray();
-      Save();
-      RefreshDocumentThemes();
-      await ApplyDocumentThemeAsync(ActiveDocumentTheme());
+      Core.AppSettings before = Core.SettingsChanges.Copy(_settings);
+      await CommitThemeDraftAsync(before, Core.Themes.ThemeManagement.RestoreBuiltIns(before));
    }
 
 
@@ -441,7 +453,7 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Rebuilds the visible catalog after a successful preference edit.</summary>
    private void RefreshDocumentThemes()
    {
-      _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
+      _themes = Core.Themes.ThemeManagement.Enabled(_settings);
       CreateDocumentThemeMenu();
    }
 
@@ -450,6 +462,7 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Applies a theme without allowing browser errors to escape a native event handler.</summary>
    private async Task ApplyDocumentThemeAsync(Core.Themes.ReaderTheme theme)
    {
+      SourceText.SetTheme(theme);
       try
       {
          _browserInitialization ??= _browser.InitializeAsync();
@@ -472,24 +485,10 @@ public sealed partial class MainWindow : Window, IDisposable
    {
       _settings.Theme = (string)((FrameworkElement)sender).Tag;
       WinUIShell.ApplyTheme(RootGrid, _settings.ThemeKind);
-      Save();
-   }
-
-
-
-   /// <summary>View, Show splash at startup: saves the preference.</summary>
-   private void Splash_Click(object sender, RoutedEventArgs e)
-   {
-      _settings.ShowSplashScreen = SplashToggle.IsChecked;
-      Save();
-   }
-
-
-
-   /// <summary>View, Check for updates at startup: saves the preference.</summary>
-   private void UpdateCheck_Click(object sender, RoutedEventArgs e)
-   {
-      _settings.CheckForUpdatesOnStartup = UpdateCheckToggle.IsChecked;
+      if(_settingsWindow is not null)
+      {
+         WinUIShell.ApplyTheme((FrameworkElement)_settingsWindow.Content, _settings.ThemeKind);
+      }
       Save();
    }
 
@@ -506,7 +505,11 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Help, About: shows the About dialog.</summary>
-   private async void About_Click(object sender, RoutedEventArgs e) => await AboutDialog.ShowAsync(AppIdentity.Info, Content.XamlRoot);
+   private async void About_Click(object sender, RoutedEventArgs e)
+   {
+      AboutDialog dialog = AppAbout.Create(Content.XamlRoot);
+      await DialogGuard.ShowAsync(dialog);
+   }
 
 
 

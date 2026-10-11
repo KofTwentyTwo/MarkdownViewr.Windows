@@ -7,6 +7,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 
 namespace MarkdownViewr.Windows.Core.Themes;
@@ -14,18 +15,21 @@ namespace MarkdownViewr.Windows.Core.Themes;
 /// <summary>Validates Darin's version-one theme format before generating passive document CSS.</summary>
 public sealed class ReaderTheme
 {
-   private const int MaximumCharacters = 128 * 1024;
+   /// <summary>Bounds schema input before a native file read allocates the complete JSON text.</summary>
+   public const int MaximumCharacters = 128 * 1024;
    private static readonly string[] s_colors = ["background", "text", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "link", "codeBackground", "codeText", "blockquoteBorder", "blockquoteBackground", "highlightBackground", "highlightText"];
    private static readonly string[] s_sizes = ["baseFontSize", "h1Size", "h2Size", "h3Size", "h4Size", "h5Size", "h6Size", "codeFontSize", "lineHeight"];
+   private static readonly string s_baseStyles = LoadBaseStyles();
 
 
 
    /// <summary>Retains only the validated display name and generated CSS.</summary>
-   private ReaderTheme(string name, string styles, string json)
+   private ReaderTheme(string name, string styles, string json, int schemaVersion)
    {
       Name = name;
       Styles = styles;
       Json = json;
+      SchemaVersion = schemaVersion;
    }
 
 
@@ -45,6 +49,65 @@ public sealed class ReaderTheme
 
 
 
+   /// <summary>A compatible newer schema requires deliberate native confirmation before import, while its version is retained on export.</summary>
+   public int SchemaVersion { get; }
+
+
+
+   /// <summary>Copies a validated theme under another display name without dropping metadata or changing its schema version.</summary>
+   public ReaderTheme Rename(string name)
+   {
+      JsonNode source = JsonNode.Parse(Json)!;
+      source["name"] = name;
+      return ParseCompatible(source.ToJsonString());
+   }
+
+
+
+   /// <summary>Edits a copy of the original schema, preserving unrelated metadata and rejecting invalid controls before persistence.</summary>
+   public ReaderTheme Edit(string name, IReadOnlyDictionary<string, string> fonts, IReadOnlyDictionary<string, double> sizes, IReadOnlyDictionary<string, string> colors, string customCss)
+   {
+      ArgumentNullException.ThrowIfNull(name);
+      ArgumentNullException.ThrowIfNull(fonts);
+      ArgumentNullException.ThrowIfNull(sizes);
+      ArgumentNullException.ThrowIfNull(colors);
+      ArgumentNullException.ThrowIfNull(customCss);
+      JsonNode source = JsonNode.Parse(Json)!;
+      source["name"] = name.Trim();
+      source["customCSS"] = customCss;
+      foreach((string key, string value) in fonts)
+      {
+         if(key is not ("body" or "heading" or "code"))
+         {
+            throw new ArgumentException("Unknown theme font field.", nameof(fonts));
+         }
+         source["fonts"]![key] = value?.Trim();
+      }
+      foreach((string key, double value) in sizes)
+      {
+         if(!s_sizes.Contains(key, StringComparer.Ordinal))
+         {
+            throw new ArgumentException("Unknown theme size field.", nameof(sizes));
+         }
+         if(!double.IsFinite(value))
+         {
+            throw new JsonException("Enter finite font sizes between 6 and 96, and line height between 0.5 and 4.");
+         }
+         source["sizes"]![key] = value;
+      }
+      foreach((string key, string value) in colors)
+      {
+         if(!s_colors.Contains(key, StringComparer.Ordinal))
+         {
+            throw new ArgumentException("Unknown theme color field.", nameof(colors));
+         }
+         source["colors"]![key] = value?.Trim();
+      }
+      return ParseCompatible(source.ToJsonString());
+   }
+
+
+
    /// <summary>Scales only validated font sizes; colors, fonts, line height and custom CSS retain their original semantics.</summary>
    public string GetStyles(double zoomScale)
    {
@@ -58,8 +121,33 @@ public sealed class ReaderTheme
 
 
 
+   /// <summary>Applies reference global/theme/width precedence only to reading styles, leaving print styles and theme JSON independent.</summary>
+   public string GetReadingStyles(ReadingAppearance appearance, double zoomScale)
+   {
+      ArgumentNullException.ThrowIfNull(appearance);
+      appearance.Validate();
+      if(!double.IsFinite(zoomScale) || zoomScale is < 0.3 or > 5)
+      {
+         throw new ArgumentOutOfRangeException(nameof(zoomScale));
+      }
+      using var document = JsonDocument.Parse(Json);
+      return BuildStyles(document.RootElement, zoomScale, appearance);
+   }
+
+
+
    /// <summary>Accepts the original schema, including themes without an explicit version number.</summary>
-   public static ReaderTheme Parse(string json)
+   public static ReaderTheme Parse(string json) => ParseSchema(json, allowNewer: false);
+
+
+
+   /// <summary>Validates every known field of saved themes or pending imports; native import still requires explicit newer-version confirmation.</summary>
+   public static ReaderTheme ParseCompatible(string json) => ParseSchema(json, allowNewer: true);
+
+
+
+   /// <summary>Compatibility never bypasses JSON depth, field, font, color, size or CSS checks.</summary>
+   private static ReaderTheme ParseSchema(string json, bool allowNewer)
    {
       ArgumentNullException.ThrowIfNull(json);
       if(json.Length > MaximumCharacters)
@@ -69,9 +157,10 @@ public sealed class ReaderTheme
       using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
       JsonElement root = document.RootElement;
       RequireObject(root);
-      if(root.TryGetProperty("schemaVersion", out JsonElement version) && (version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out int number) || number != 1))
+      int schemaVersion = 1;
+      if(root.TryGetProperty("schemaVersion", out JsonElement version) && (version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out schemaVersion) || schemaVersion < 1 || !allowNewer && schemaVersion != 1))
       {
-         throw new JsonException("Only theme schema version 1 is supported.");
+         throw new JsonException("The theme schema version is invalid or unsupported.");
       }
       string name = ReadString(root, "name");
       if(string.IsNullOrWhiteSpace(name) || name.Length > 80 || name.Any(char.IsControl))
@@ -79,13 +168,13 @@ public sealed class ReaderTheme
          throw new JsonException("Theme names must contain 1–80 printable characters.");
       }
       string styles = BuildStyles(root);
-      return new ReaderTheme(name, styles, json);
+      return new ReaderTheme(name, styles, json, schemaVersion);
    }
 
 
 
    /// <summary>Constructs variables only from validated colors, finite sizes and escaped font families.</summary>
-   private static string BuildStyles(JsonElement root, double zoomScale = 1)
+   private static string BuildStyles(JsonElement root, double zoomScale = 1, ReadingAppearance? appearance = null)
    {
       var styles = new StringBuilder(":root {");
       JsonElement colors = ReadObject(root, "colors");
@@ -104,11 +193,24 @@ public sealed class ReaderTheme
       {
          styles.Append("--").Append(field).Append("Font:").Append(FontFamily(ReadString(fonts, field))).Append(';');
       }
-      styles.Append('}').Append(BaseStyles);
+      styles.Append("--bg:var(--background);--h1:var(--heading1);--h2:var(--heading2);--h3:var(--heading3);--h4:var(--heading4);--h5:var(--heading5);--h6:var(--heading6);");
+      styles.Append("--code-bg:var(--codeBackground);--code-text:var(--codeText);--blockquote-border:var(--blockquoteBorder);--blockquote-bg:var(--blockquoteBackground);");
+      styles.Append("--highlight-bg:var(--highlightBackground);--highlight-text:var(--highlightText);--body-font:var(--bodyFont);--heading-font:var(--headingFont);--code-font:var(--codeFont);");
+      styles.Append("--base-font-size:var(--baseFontSize);--h1-size:var(--h1Size);--h2-size:var(--h2Size);--h3-size:var(--h3Size);--h4-size:var(--h4Size);--h5-size:var(--h5Size);--h6-size:var(--h6Size);");
+      styles.Append("--code-font-size:var(--codeFontSize);--line-height:var(--lineHeight);--zoom:").Append(zoomScale.ToString("R", CultureInfo.InvariantCulture));
+      styles.Append(";}").Append(s_baseStyles);
+      if(appearance is not null)
+      {
+         styles.Append(appearance.GlobalCss.Replace("<", "\\3c ", StringComparison.Ordinal));
+      }
       if(root.TryGetProperty("customCSS", out _))
       {
          // CSS can style the page, but it cannot close the HTML style element.
          styles.Append(ReadString(root, "customCSS").Replace("<", "\\3c ", StringComparison.Ordinal));
+      }
+      if(appearance?.LimitWidth == true)
+      {
+         styles.Append("#content-inner{max-width:calc(").Append(appearance.WidthPixels.ToString("R", CultureInfo.InvariantCulture)).Append("px * var(--zoom));margin:auto;}");
       }
       return styles.ToString();
    }
@@ -187,22 +289,11 @@ public sealed class ReaderTheme
 
 
 
-   private const string BaseStyles = """
-      html { background: var(--background); color: var(--text); }
-      body { max-width: 900px; margin: 0 auto; padding: 32px; overflow-wrap: anywhere;
-             font: var(--baseFontSize)/var(--lineHeight) var(--bodyFont); }
-      h1,h2,h3,h4,h5,h6 { font-family: var(--headingFont); line-height: 1.25; margin-top: 1.5em; }
-      h1 { color: var(--heading1); font-size: var(--h1Size); }
-      h2 { color: var(--heading2); font-size: var(--h2Size); }
-      h3 { color: var(--heading3); font-size: var(--h3Size); }
-      h4 { color: var(--heading4); font-size: var(--h4Size); }
-      h5 { color: var(--heading5); font-size: var(--h5Size); }
-      h6 { color: var(--heading6); font-size: var(--h6Size); }
-      pre { padding: 16px; overflow: auto; background: var(--codeBackground); border-radius: 6px; }
-      code,kbd { color: var(--codeText); font: var(--codeFontSize)/var(--lineHeight) var(--codeFont); }
-      table { border-collapse: collapse; } th,td { border: 1px solid var(--blockquoteBorder); padding: 6px 12px; }
-      blockquote { margin-left: 0; padding: 8px 20px; border-left: 4px solid var(--blockquoteBorder); background: var(--blockquoteBackground); }
-      img { max-width: 100%; height: auto; } a { color: var(--link); }
-      ::selection { background: var(--highlightBackground); color: var(--highlightText); }
-      """;
+   /// <summary>Embeds the pinned reference document rules without network access or a runtime asset-path dependency.</summary>
+   private static string LoadBaseStyles()
+   {
+      using Stream stream = typeof(ReaderTheme).Assembly.GetManifestResourceStream("MarkdownViewr.Windows.Core.Themes.Document.css")!;
+      using var reader = new StreamReader(stream);
+      return reader.ReadToEnd();
+   }
 }

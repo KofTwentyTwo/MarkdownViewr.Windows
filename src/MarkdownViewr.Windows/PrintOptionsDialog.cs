@@ -23,6 +23,8 @@ internal sealed class PrintOptionsDialog
    private readonly ComboBox _width = new() { Name = "PrintWidth", Header = "Content width", HorizontalAlignment = HorizontalAlignment.Stretch };
    private readonly CheckBox _borders = new() { Name = "PrintBorders", Content = "Add borders to code and content blocks" };
    private readonly NumberBox _padding = new() { Name = "PrintPadding", Header = "Page padding (px)", Minimum = 0, Maximum = 96, SmallChange = 8, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+   private readonly CheckBox _openPdf = new() { Name = "PrintOpenPdf", Content = "Open PDF after saving" };
+   private readonly CheckBox _openFolder = new() { Name = "PrintOpenPdfFolder", Content = "Open containing folder after saving" };
    private readonly TextBlock _error = new() { Name = "PrintError", TextWrapping = TextWrapping.Wrap };
    private readonly ContentDialog _dialog;
 
@@ -48,7 +50,7 @@ internal sealed class PrintOptionsDialog
       _borders.IsChecked = options.Borders;
       _padding.Value = options.PaddingPixels;
       var panel = new StackPanel { Spacing = 8, MinWidth = 300 };
-      foreach(FrameworkElement control in new FrameworkElement[] { _theme, _backgrounds, _images, _zoom, _width, _borders, _padding, _error })
+      foreach(FrameworkElement control in new FrameworkElement[] { _theme, _backgrounds, _images, _zoom, _width, _borders, _padding, _openPdf, _openFolder, _error })
       {
          AutomationProperties.SetAutomationId(control, control.Name);
          panel.Children.Add(control);
@@ -62,6 +64,8 @@ internal sealed class PrintOptionsDialog
          CloseButtonText = "Cancel",
          DefaultButton = ContentDialogButton.Primary,
       };
+      AutomationProperties.SetAutomationId(_dialog, "PrintOptionsDialog");
+      _dialog.Resources["ContentDialogMaxWidth"] = 640d;
       _dialog.PrimaryButtonClick += (_, args) => args.Cancel = !ValidatePadding();
       _dialog.SecondaryButtonClick += (_, args) => args.Cancel = !ValidatePadding();
    }
@@ -71,6 +75,9 @@ internal sealed class PrintOptionsDialog
    /// <summary>Only committed print/PDF actions return preferences; closing the draft leaves saved choices untouched.</summary>
    public async Task<PrintOptions?> ShowAsync(XamlRoot root)
    {
+      double width = Math.Max(0, Math.Min(520, root.Size.Width - 96));
+      ((FrameworkElement)((ScrollViewer)_dialog.Content).Content).MinWidth = width;
+      _dialog.Resources["ContentDialogMinWidth"] = width + 48;
       _dialog.XamlRoot = root;
       ContentDialogResult result = await _dialog.ShowAsync();
       SaveAsPdf = result == ContentDialogResult.Secondary;
@@ -83,6 +90,16 @@ internal sealed class PrintOptionsDialog
 
    /// <summary>The selected destination is an action, not a persisted output path.</summary>
    public bool SaveAsPdf { get; private set; }
+
+
+
+   /// <summary>A deliberate post-export action, never run after cancellation or failed generation.</summary>
+   public bool OpenPdfAfterSave => _openPdf.IsChecked == true;
+
+
+
+   /// <summary>The folder may be opened independently or together with the generated PDF.</summary>
+   public bool OpenFolderAfterSave => _openFolder.IsChecked == true;
 
 
 

@@ -15,13 +15,10 @@ namespace MarkdownViewr.Windows;
 internal static class ThemeEditor
 {
    /// <summary>Returns a validated edited theme, or null after cancellation.</summary>
-   public static async Task<Core.Themes.ReaderTheme?> ShowAsync(XamlRoot xamlRoot, Core.Themes.ReaderTheme theme)
+   public static async Task<Core.Themes.ReaderTheme?> ShowAsync(SettingsWindow host, Core.Themes.ReaderTheme theme, IEnumerable<string>? existingNames = null)
    {
       JsonNode source = JsonNode.Parse(theme.Json)!;
       TextBox name = Field("Name (a new name creates a custom theme)", theme.Name, "ThemeEditorName", 80);
-      TextBox font = Field("Code font", source["fonts"]!["code"]!.GetValue<string>(), "ThemeEditorCodeFont", 80);
-      var size = new NumberBox { Header = "Code font size", Minimum = 6, Maximum = 96, Value = source["sizes"]!["codeFontSize"]!.GetValue<double>() };
-      Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(size, "ThemeEditorCodeSize");
       TextBox css = Field("Custom CSS", source["customCSS"]?.GetValue<string>() ?? "", "ThemeEditorCss", 128 * 1024);
       css.AcceptsReturn = true;
       css.Height = 160;
@@ -31,56 +28,88 @@ internal static class ThemeEditor
       Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(error, "ThemeEditorError");
       var fields = new StackPanel { Spacing = 12 };
       fields.Children.Add(name);
-      fields.Children.Add(font);
-      fields.Children.Add(size);
+      Dictionary<string, TextBox> fonts = AddFonts(fields, source["fonts"]!.AsObject());
+      Dictionary<string, NumberBox> sizes = AddSizes(fields, source["sizes"]!.AsObject());
       Dictionary<string, TextBox> colors = AddColors(fields, source["colors"]!.AsObject());
       fields.Children.Add(css);
       fields.Children.Add(error);
-      var dialog = new ContentDialog
-      {
-         XamlRoot = xamlRoot,
-         Title = "Edit document theme",
-         PrimaryButtonText = "Save theme",
-         CloseButtonText = "Cancel",
-         DefaultButton = ContentDialogButton.Primary,
-         Content = new ScrollViewer { Content = fields, Height = Math.Clamp(xamlRoot.Size.Height - 220, 120, 440), Width = 480, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled },
-      };
       Core.Themes.ReaderTheme? edited = null;
-      dialog.PrimaryButtonClick += (_, args) =>
+      bool Validate()
       {
          try
          {
-            edited = ReadEdited(source, name.Text, font.Text, size.Value, css.Text, colors);
+            Core.Themes.ReaderTheme candidate = theme.Edit(name.Text, fonts.ToDictionary(pair => pair.Key, pair => pair.Value.Text, StringComparer.Ordinal),
+               sizes.ToDictionary(pair => pair.Key, pair => pair.Value.Value, StringComparer.Ordinal),
+               colors.ToDictionary(pair => pair.Key, pair => pair.Value.Text, StringComparer.Ordinal), css.Text);
+            Core.Themes.ThemeManagement.ValidateEditName(theme.Name, candidate.Name, existingNames ?? []);
+            edited = candidate;
+            return true;
          }
          catch(Exception exception) when(exception is JsonException or ArgumentException)
          {
             error.Text = exception.Message;
-            args.Cancel = true;
             error.StartBringIntoView();
+            return false;
          }
-      };
-      _ = await dialog.ShowAsync();
-      return edited;
+      }
+      ContentDialogResult result = await host.ShowEditorAsync("Edit document theme", fields, "Save theme", Validate);
+      return result == ContentDialogResult.Primary ? edited : null;
    }
 
 
 
-   /// <summary>Updates only the edited fields and runs the same schema/CSS validation as imported themes.</summary>
-   private static Core.Themes.ReaderTheme ReadEdited(JsonNode source, string name, string font, double size, string css, Dictionary<string, TextBox> colors)
+   /// <summary>All three reference font families remain editable through stable native controls.</summary>
+   private static Dictionary<string, TextBox> AddFonts(StackPanel fields, JsonObject source)
    {
-      if(!double.IsFinite(size))
+      var fonts = new Dictionary<string, TextBox>(StringComparer.Ordinal);
+      foreach((string key, string label, string id) in new[]
       {
-         throw new JsonException("Enter a code font size between 6 and 96.");
-      }
-      source["name"] = name.Trim();
-      source["fonts"]!["code"] = font.Trim();
-      source["sizes"]!["codeFontSize"] = size;
-      source["customCSS"] = css;
-      foreach((string key, TextBox value) in colors)
+         ("body", "Body font", "ThemeEditorBodyFont"),
+         ("heading", "Heading font", "ThemeEditorHeadingFont"),
+         ("code", "Code font", "ThemeEditorCodeFont"),
+      })
       {
-         source["colors"]![key] = value.Text.Trim();
+         TextBox input = Field(label, source[key]!.GetValue<string>(), id, 80);
+         fonts.Add(key, input);
+         fields.Children.Add(input);
       }
-      return Core.Themes.ReaderTheme.Parse(source.ToJsonString());
+      return fonts;
+   }
+
+
+
+   /// <summary>Font-size and line-height controls use the same finite bounds as the saved schema.</summary>
+   private static Dictionary<string, NumberBox> AddSizes(StackPanel fields, JsonObject source)
+   {
+      var sizes = new Dictionary<string, NumberBox>(StringComparer.Ordinal);
+      foreach((string key, string label, string id) in new[]
+      {
+         ("baseFontSize", "Body font size", "ThemeEditorBodySize"),
+         ("h1Size", "Heading 1 size", "ThemeEditorHeading1Size"),
+         ("h2Size", "Heading 2 size", "ThemeEditorHeading2Size"),
+         ("h3Size", "Heading 3 size", "ThemeEditorHeading3Size"),
+         ("h4Size", "Heading 4 size", "ThemeEditorHeading4Size"),
+         ("h5Size", "Heading 5 size", "ThemeEditorHeading5Size"),
+         ("h6Size", "Heading 6 size", "ThemeEditorHeading6Size"),
+         ("codeFontSize", "Code font size", "ThemeEditorCodeSize"),
+         ("lineHeight", "Line height", "ThemeEditorLineHeight"),
+      })
+      {
+         bool lineHeight = string.Equals(key, "lineHeight", StringComparison.Ordinal);
+         var input = new NumberBox
+         {
+            Header = label,
+            Minimum = lineHeight ? 0.5 : 6,
+            Maximum = lineHeight ? 4 : 96,
+            SmallChange = lineHeight ? 0.1 : 1,
+            LargeChange = lineHeight ? 0.5 : 5,
+            Value = source[key]!.GetValue<double>(),
+         };
+         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(input, id);
+         sizes.Add(key, input);
+         fields.Children.Add(input);
+      }
+      return sizes;
    }
 
 
@@ -106,8 +135,8 @@ internal static class ThemeEditor
             "codeText" => "Code text",
             "blockquoteBorder" => "Quote border",
             "blockquoteBackground" => "Quote background",
-            "highlightBackground" => "Selection background",
-            "highlightText" => "Selection text",
+            "highlightBackground" => "Highlight/selection background",
+            "highlightText" => "Highlight/selection text",
             _ => null,
          };
          if(label is null)

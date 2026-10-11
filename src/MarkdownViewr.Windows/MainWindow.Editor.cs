@@ -30,24 +30,47 @@ public sealed partial class MainWindow
          item.Click += OpenEditor_Click;
          OpenEditorChoices.Items.Add(item);
       }
+      RefreshToolbarEditors();
    }
 
 
 
    /// <summary>Changes remain in the dialog's copied list until the user's validated Save.</summary>
-   private async void ConfigureEditor_Click(object sender, RoutedEventArgs e)
+   private async Task ConfigureEditorAsync()
    {
-      var editor = new EditorConfigurationDialog(_settings.ConfiguredEditors);
-      Core.Editors.EditorConfiguration[]? choices = await editor.ShowAsync(Content.XamlRoot);
+      Core.AppSettings before = Core.SettingsChanges.Copy(_settings);
+      var editor = new EditorConfigurationDialog(before.ConfiguredEditors);
+      Core.Editors.EditorConfiguration[]? choices = await editor.ShowAsync(ConfigurationPage);
       if(choices is null || _closed)
       {
          return;
       }
-      _settings.ConfiguredEditors = choices;
-      _settings.ExternalEditor = choices.FirstOrDefault()?.Executable ?? "";
-      Save();
-      RefreshEditorCommands();
+      Core.AppSettings draft = Core.SettingsChanges.Copy(before);
+      draft.ConfiguredEditors = choices;
+      draft.ExternalEditor = choices.FirstOrDefault()?.Executable ?? "";
+      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), before, draft);
+      if(!AppIdentity.SettingsStore.Save(merged))
+      {
+         StatusText.Text = "Could not save editor configuration.";
+         return;
+      }
+      ((App)Application.Current).ApplyEditorSettings(merged.ConfiguredEditors);
       StatusText.Text = "Editors configured.";
+   }
+
+
+
+   /// <summary>A shared editor save updates both this reader and its save baseline before any later local preference change.</summary>
+   internal void ApplyEditorSettings(Core.Editors.EditorConfiguration[] choices)
+   {
+      if(_closed)
+      {
+         return;
+      }
+      _settings.ConfiguredEditors = choices.ToArray();
+      _lastSavedSettings.ConfiguredEditors = choices.ToArray();
+      _settings.ExternalEditor = _lastSavedSettings.ExternalEditor = choices.FirstOrDefault()?.Executable ?? "";
+      RefreshEditorCommands();
    }
 
 
@@ -59,7 +82,7 @@ public sealed partial class MainWindow
       {
          return;
       }
-      Core.Editors.EditorConfiguration? editor = sender is MenuFlyoutItem { Tag: Guid identity }
+      Core.Editors.EditorConfiguration? editor = sender is FrameworkElement { Tag: Guid identity }
          ? _settings.ConfiguredEditors.FirstOrDefault(choice => choice.Id == identity)
          : _settings.ConfiguredEditors.FirstOrDefault();
       if(!Core.Editors.EditorConfiguration.IsValid(editor))
@@ -68,7 +91,7 @@ public sealed partial class MainWindow
       }
       if(!File.Exists(editor!.Executable))
       {
-         StatusText.Text = "The configured editor is missing. Use File → Configure editor to choose an installed executable.";
+         StatusText.Text = "The configured editor is missing. Use File → Settings → Editors to choose an installed executable.";
          return;
       }
       if(!File.Exists(_documentPath))
@@ -84,7 +107,7 @@ public sealed partial class MainWindow
       }
       catch(Exception exception) when(exception is System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
       {
-         StatusText.Text = "Could not start the configured editor. Use File → Configure editor to check its executable.";
+         StatusText.Text = "Could not start the configured editor. Use File → Settings → Editors to check its executable.";
          App.Log.Warning("The configured editor could not be started.");
       }
    }

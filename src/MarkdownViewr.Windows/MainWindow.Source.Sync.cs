@@ -54,10 +54,10 @@ public sealed partial class MainWindow
          return;
       }
       double position = scroller.VerticalOffset;
-      if(SourceText.SelectionLength == 0 && SourceText.Text.Length > 0)
+      if(SourceText.SelectionLength == 0 && SourceText.TextLength > 0)
       {
          int first = 0;
-         int last = SourceText.Text.Length - 1;
+         int last = SourceText.TextLength - 1;
          while(first < last)
          {
             int middle = first + (last - first) / 2;
@@ -218,7 +218,7 @@ public sealed partial class MainWindow
       var anchors = new List<(double Source, double Reader)>();
       foreach(Core.Documents.DocumentSourceHeading heading in source.Headings)
       {
-         if(heading.Start < SourceText.Text.Length && frame.Headings.TryGetValue(heading.Index, out double readerTop))
+         if(heading.Start < SourceText.TextLength && frame.Headings.TryGetValue(heading.Index, out double readerTop))
          {
             global::Windows.Foundation.Rect rectangle = SourceText.GetRectFromCharacterIndex(heading.Start, trailingEdge: false);
             double sourceTop = rectangle.Y;

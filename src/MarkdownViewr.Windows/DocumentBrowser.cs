@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -29,6 +28,9 @@ internal sealed partial class DocumentBrowser
    private bool _restoreViewport;
    private bool _closed;
    private Core.Themes.ReaderTheme _theme;
+   private Core.Themes.ReadingAppearance _appearance;
+   private ulong _themeRevision;
+   private ulong _appearanceRevision;
    private string _sanitizedHtml = "";
    private string _title = "MarkdownViewr";
    private double _zoomScale = 1;
@@ -38,11 +40,12 @@ internal sealed partial class DocumentBrowser
 
 
    /// <summary>Attaches a native status callback; the document itself cannot invoke host commands.</summary>
-   public DocumentBrowser(WebView2 view, Action<string> status, Core.Themes.ReaderTheme theme)
+   public DocumentBrowser(WebView2 view, Action<string> status, Core.Themes.ReaderTheme theme, Core.Themes.ReadingAppearance? appearance = null)
    {
       _view = view;
       _status = status;
       _theme = theme;
+      _appearance = (appearance ?? new Core.Themes.ReadingAppearance()).Sanitize();
    }
 
 
@@ -99,7 +102,7 @@ internal sealed partial class DocumentBrowser
       _pageReady = false;
       _restoreViewport = true;
       _policy = new Core.Documents.DocumentResourcePolicy();
-      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style media="screen">{_theme.GetStyles(_zoomScale)}</style></head><body>{sanitizedHtml}</body></html>""");
+      _html = Encoding.UTF8.GetBytes(Core.Documents.DocumentPage.Build(sanitizedHtml, title, _theme, _appearance, _zoomScale));
       _view.CoreWebView2.Navigate(_policy.DocumentUri.AbsoluteUri);
    }
 
@@ -125,13 +128,30 @@ internal sealed partial class DocumentBrowser
    /// <summary>Changes only the document appearance and preserves its current relative viewport.</summary>
    public async Task ApplyThemeAsync(Core.Themes.ReaderTheme theme)
    {
+      ulong revision = ++_themeRevision;
       Core.Documents.DocumentViewport viewport = await CaptureViewportAsync();
-      _theme = theme;
-      if(!_closed)
+      if(!_closed && revision == _themeRevision)
       {
+         _theme = theme;
          Show(_files, _sanitizedHtml, _title, viewport, _headings);
       }
    }
+
+
+   /// <summary>Applies only native reader-wide preferences using the guarded viewport/collapse/find navigation path.</summary>
+   public async Task ApplyAppearanceAsync(Core.Themes.ReadingAppearance appearance)
+   {
+      ArgumentNullException.ThrowIfNull(appearance);
+      appearance.Validate();
+      ulong revision = ++_appearanceRevision;
+      Core.Documents.DocumentViewport viewport = await CaptureViewportAsync();
+      if(!_closed && revision == _appearanceRevision)
+      {
+         _appearance = appearance;
+         Show(_files, _sanitizedHtml, _title, viewport, _headings);
+      }
+   }
+
 
 
    /// <summary>Reveals a heading's hidden ancestors before moving the actual reading viewport to it.</summary>
@@ -213,7 +233,7 @@ internal sealed partial class DocumentBrowser
       ulong navigation = _navigationId;
       if(!_closed && _pageReady && IsCurrentDocument())
       {
-         string result = await _view.CoreWebView2.ExecuteScriptAsync("[window.scrollX/Math.max(1,document.documentElement.scrollWidth-innerWidth),window.scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)]");
+         string result = await _view.CoreWebView2.ExecuteScriptAsync("(()=>{const s=document.getElementById('content');return s?[s.scrollLeft/Math.max(1,s.scrollWidth-s.clientWidth),s.scrollTop/Math.max(1,s.scrollHeight-s.clientHeight)]:[0,0];})()");
          if(!_closed && document == _policy.DocumentUri && navigation == _navigationId && IsCurrentDocument())
          {
             _viewport = Core.Documents.DocumentViewport.FromBrowserResult(result);
@@ -250,7 +270,7 @@ internal sealed partial class DocumentBrowser
       {
          string collapsed = JsonSerializer.Serialize(_collapsedSections);
          await sender.ExecuteScriptAsync("for(const e of document.querySelectorAll('[data-mv-body]')) e.hidden=" + collapsed + ".includes(Number(e.dataset.mvBody));");
-         string script = FormattableString.Invariant($"if(location.href.split('#')[0] === '{_policy.DocumentUri.AbsoluteUri}') window.scrollTo({_viewport.HorizontalFraction:R}*Math.max(0,document.documentElement.scrollWidth-innerWidth),{_viewport.VerticalFraction:R}*Math.max(0,document.documentElement.scrollHeight-innerHeight));");
+         string script = FormattableString.Invariant($"if(location.href.split('#')[0] === '{_policy.DocumentUri.AbsoluteUri}') {{ const s=document.getElementById('content'); if(s) s.scrollTo({_viewport.HorizontalFraction:R}*Math.max(0,s.scrollWidth-s.clientWidth),{_viewport.VerticalFraction:R}*Math.max(0,s.scrollHeight-s.clientHeight)); }}");
          await sender.ExecuteScriptAsync(script);
          if(!_closed && args.NavigationId == _navigationId && IsCurrentDocument())
          {

@@ -25,8 +25,10 @@ Use the current App SDK FileOpenPicker(AppWindow.Id) and PickMultipleFilesAsync,
 including all five reference extensions. Reuse a blank window, focus an already
 open canonical path within this process, or create a new document window.
 Cancellation leaves readers intact; failed opens retain any existing reader.
-Windows registration and cross-process activation redirection remain separate
-required work; launching an executable with literal paths is not association proof.
+Windows registration and cross-process activation now have local implementation
+and isolated boundary evidence in ADR-0005. Explorer and installed lifecycle
+acceptance remain required; literal process arguments alone are not association
+proof.
 
 Store at most20 successful absolute paths in the private AppKit settings file,
 deduplicated with Windows path comparison. Update only after a parsed snapshot
@@ -41,7 +43,8 @@ Separate tracked XAML windows reuse existing document adapters and native lifeti
 handling. Tabs would require additional detach/reattach state and do not supply the
 reference's independent windows. Creating AppWindow directly does not attach XAML
 content. Current duplication detection covers one process; OS activation and
-stable/dev identity boundaries still need implementation and separate acceptance.
+stable/dev identity boundaries have local implementation/isolated tests in
+ADR-0005; actual application and installed acceptance remains pending.
 
 376 core tests pass with100% measured lines, including bounded/corrupt history,
 case deduplication and sibling-safe settings merging. Require hosted real two-window

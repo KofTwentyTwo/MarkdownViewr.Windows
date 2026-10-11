@@ -74,7 +74,7 @@ internal sealed partial class DocumentKeyboard : IDisposable
          _keys.Reset();
          return false;
       }
-      char character = nativeFind ? 'f' : message.WParam == 0x1B ? '\u001B' : control && !shift && message.WParam is 0x44 or 0x55 or 0x42
+      char character = control && shift && message.WParam is 0x26 or 0x28 ? message.WParam == 0x26 ? '\u2191' : '\u2193' : nativeFind ? 'f' : message.WParam == 0x1B ? '\u001B' : control && !shift && message.WParam is 0x44 or 0x55 or 0x42
          ? char.ToLowerInvariant((char)message.WParam)
          : TranslateKey((uint)message.WParam, (uint)(((nuint)message.LParam >> 16) & 0xFF));
       var key = new Core.Navigation.ReaderKey(character, control, shift, alt, windows, ((nuint)message.LParam & 0x40000000) != 0);

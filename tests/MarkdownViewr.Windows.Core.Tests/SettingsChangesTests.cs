@@ -12,6 +12,43 @@ namespace MarkdownViewr.Windows.Core.Tests;
 /// <summary>Independent document windows cannot overwrite sibling changes by saving an older preference snapshot.</summary>
 public sealed class SettingsChangesTests
 {
+   /// <summary>Legacy remembered panel visibility does not opt new windows into showing panels, while explicit defaults survive source-generated persistence.</summary>
+   [Fact]
+   public void Copy_NewWindowDefaults_AreIndependentOfRememberedPanels()
+   {
+      var legacy = new AppSettings { ShowOutline = true, ShowSource = true };
+      AppSettings restored = SettingsChanges.Copy(legacy);
+      Assert.False(restored.ShowOutlineByDefault);
+      Assert.False(restored.ShowSourceByDefault);
+      restored.ShowOutlineByDefault = true;
+      restored.ShowSourceByDefault = true;
+      AppSettings selected = SettingsChanges.Copy(restored);
+      Assert.True(selected.ShowOutlineByDefault);
+      Assert.True(selected.ShowSourceByDefault);
+      Assert.False(legacy.ShowOutlineByDefault);
+      Assert.False(legacy.ShowSourceByDefault);
+   }
+
+
+
+   /// <summary>A local panel toggle cannot overwrite newer startup defaults chosen in another Settings window.</summary>
+   [Fact]
+   public void Merge_LocalPanelToggle_PreservesNewerStartupDefaults()
+   {
+      var baseline = new AppSettings();
+      AppSettings local = SettingsChanges.Copy(baseline);
+      local.ShowSource = true;
+      local.ShowOutline = true;
+      var saved = new AppSettings { ShowOutlineByDefault = true, ShowSourceByDefault = true };
+      AppSettings merged = SettingsChanges.Merge(saved, baseline, local);
+      Assert.True(merged.ShowOutline);
+      Assert.True(merged.ShowSource);
+      Assert.True(merged.ShowOutlineByDefault);
+      Assert.True(merged.ShowSourceByDefault);
+   }
+
+
+
    /// <summary>A window's source change preserves newer history, theme, editor and print choices from its sibling.</summary>
    [Fact]
    public void Merge_StaleWindow_PreservesUnchangedSiblingPreferences()

@@ -34,6 +34,7 @@ public sealed partial class MainWindow
    private void ApplyOutlineVisibility()
    {
       OutlinePanel.Visibility = _settings.ShowOutline ? Visibility.Visible : Visibility.Collapsed;
+      RefreshToolbarReadingState();
       ApplyReadingWidths();
    }
 
@@ -57,6 +58,7 @@ public sealed partial class MainWindow
          return;
       }
       _settings.OutlineDepth = OutlineDepth.SelectedIndex + 1;
+      RefreshToolbarReadingState();
       Save();
       RefreshOutline();
    }

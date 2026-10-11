@@ -14,6 +14,16 @@ public sealed partial class MainWindow
 {
    private string? _initialDocumentPath;
    private Core.AppSettings _lastSavedSettings;
+   private bool _activationError;
+
+
+
+   /// <summary>Rejected startup payloads produce a fixed native message without disclosing a path in logs.</summary>
+   internal void ReportActivationFailure()
+   {
+      _activationError = true;
+      StatusText.Text = "One or more startup file paths could not be opened.";
+   }
 
 
 

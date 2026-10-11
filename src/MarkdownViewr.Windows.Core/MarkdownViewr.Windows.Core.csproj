@@ -25,6 +25,7 @@
 
    <ItemGroup>
       <EmbeddedResource Include="Themes/BuiltIn/*.json" />
+      <EmbeddedResource Include="Themes/Document.css" LogicalName="MarkdownViewr.Windows.Core.Themes.Document.css" />
    </ItemGroup>
 
 </Project>

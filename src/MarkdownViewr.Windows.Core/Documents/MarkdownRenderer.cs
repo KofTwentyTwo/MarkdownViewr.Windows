@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 
+using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using Ganss.Xss;
 using Markdig;
-using Markdig.Extensions.EmphasisExtras;
 using Markdig.Extensions.Tables;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 
 
 namespace MarkdownViewr.Windows.Core.Documents;
@@ -18,31 +20,34 @@ public sealed class MarkdownRenderer
    /// <summary>Bounds parser work before an opened document can consume unbounded memory.</summary>
    public const int MaximumCharacters = 16 * 1024 * 1024;
 
-   private static readonly MarkdownPipeline s_pipeline = new MarkdownPipelineBuilder()
-      .UsePipeTables(new PipeTableOptions { UseGfmRules = true })
-      .UseTaskLists()
-      .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
-      .UseAutoLinks()
-      .UsePreciseSourceLocation()
-      .Build();
+   private readonly MarkdownPipeline _pipeline;
 
    private readonly HtmlSanitizer _sanitizer;
 
 
 
    /// <summary>Allows document formatting without scripts, CSS, forms or native host capabilities.</summary>
-   public MarkdownRenderer()
+   public MarkdownRenderer(MarkdownExtensions? extensions = null)
    {
+      MarkdownPipelineBuilder pipeline = new MarkdownPipelineBuilder()
+         .UsePipeTables(new PipeTableOptions { UseGfmRules = true })
+         .UseTaskLists()
+         .UseEmphasisExtras((extensions ?? new MarkdownExtensions()).EmphasisOptions)
+         .UseAutoLinks()
+         .UsePreciseSourceLocation();
+      pipeline.DocumentProcessed += PreserveLiteralExtensionBoundaries;
+      _pipeline = pipeline.Build();
       _sanitizer = new HtmlSanitizer();
       _sanitizer.AllowedTags.Clear();
-      _sanitizer.AllowedTags.UnionWith(["a", "abbr", "b", "blockquote", "br", "caption", "code", "dd", "del", "details", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "img", "input", "kbd", "li", "ol", "p", "pre", "s", "small", "span", "strong", "sub", "summary", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul"]);
+      _sanitizer.AllowedTags.UnionWith(["a", "abbr", "b", "blockquote", "br", "caption", "code", "dd", "del", "details", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "img", "input", "ins", "kbd", "li", "mark", "ol", "p", "pre", "s", "small", "span", "strong", "sub", "summary", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul"]);
       _sanitizer.AllowedAttributes.Clear();
-      _sanitizer.AllowedAttributes.UnionWith(["href", "src", "alt", "title", "align", "colspan", "rowspan", "width", "height", "type", "checked", "disabled"]);
+      _sanitizer.AllowedAttributes.UnionWith(["href", "src", "alt", "title", "align", "colspan", "rowspan", "width", "height", "type", "checked", "disabled", "class"]);
       _sanitizer.AllowedSchemes.Clear();
       _sanitizer.AllowedSchemes.UnionWith(["http", "https", "mailto"]);
       _sanitizer.AllowedCssProperties.Clear();
       _sanitizer.AllowedAtRules.Clear();
       _sanitizer.PostProcessNode += MakeInputsPassive;
+      _sanitizer.PostProcessNode += FilterStylingClasses;
    }
 
 
@@ -84,11 +89,54 @@ public sealed class MarkdownRenderer
       string prefix = !string.IsNullOrEmpty(metadata) ? frontmatter switch
       {
          FrontmatterMode.Metadata => DocumentFrontmatter.RenderMetadata(metadata),
-         FrontmatterMode.Markdown => sources is null ? Markdown.ToHtml("---\n" + metadata + "\n---", s_pipeline) : sources.Render("---\n" + metadata + "\n---", s_pipeline, markdown.IndexOf('\n') + 1 - 4),
+         FrontmatterMode.Markdown => sources is null ? Markdown.ToHtml("---\n" + metadata + "\n---", _pipeline) : sources.Render("---\n" + metadata + "\n---", _pipeline, markdown.IndexOf('\n') + 1 - 4),
          _ => "",
       } : "";
-      string html = sources is null ? Markdown.ToHtml(body, s_pipeline) : sources.Render(body, s_pipeline, markdown.Length - body.Length);
+      string html = sources is null ? Markdown.ToHtml(body, _pipeline) : sources.Render(body, _pipeline, markdown.Length - body.Length);
       return _sanitizer.Sanitize(prefix + html);
+   }
+
+
+
+   /// <summary>Reference delimiters cannot span code/newlines; single caret/tilde pairs also cannot contain whitespace.</summary>
+   private static void PreserveLiteralExtensionBoundaries(MarkdownDocument document)
+   {
+      foreach(EmphasisInline emphasis in document.Descendants().OfType<EmphasisInline>().ToArray())
+      {
+         if(emphasis.DelimiterChar is not ('=' or '+' or '^' or '~') || (emphasis.DelimiterChar == '~' && emphasis.DelimiterCount == 2))
+         {
+            continue;
+         }
+         bool single = emphasis.DelimiterChar is '^' or '~';
+         if(emphasis.Descendants().Any(node => node is CodeInline or LineBreakInline || (single && node is LiteralInline literal && literal.Content.ToString().Any(char.IsWhiteSpace))))
+         {
+            string delimiter = new(emphasis.DelimiterChar, emphasis.DelimiterCount);
+            Inline last = emphasis.ReplaceBy(new LiteralInline(delimiter));
+            last.InsertAfter(new LiteralInline(delimiter));
+         }
+      }
+   }
+
+
+
+   /// <summary>Retains only passive reference styling classes; native identifiers, handlers and arbitrary document classes remain unavailable.</summary>
+   private static void FilterStylingClasses(object? sender, PostProcessNodeEventArgs args)
+   {
+      if(args.Node is IElement element && element.GetAttribute("class") is { } classes)
+      {
+         string[] allowed = classes.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Where(value =>
+            value is "task-list" or "task-list-item" or "frontmatter" or "fm-key" or "fm-value" ||
+            value.StartsWith("language-", StringComparison.Ordinal) && value.Length is > 9 and <= 80 &&
+            value[9..].All(character => char.IsAsciiLetterOrDigit(character) || character is '_' or '-' or '+' or '#')).Distinct(StringComparer.Ordinal).ToArray();
+         if(allowed.Length == 0)
+         {
+            element.RemoveAttribute("class");
+         }
+         else
+         {
+            element.SetAttribute("class", string.Join(' ', allowed));
+         }
+      }
    }
 
 

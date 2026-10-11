@@ -90,6 +90,10 @@ public sealed partial class MainWindow
             case Core.Navigation.ReaderCommand.Print:
                await PrintDocumentAsync();
                break;
+            case Core.Navigation.ReaderCommand.NextTheme:
+            case Core.Navigation.ReaderCommand.PreviousTheme:
+               await CycleDocumentThemeAsync(command == Core.Navigation.ReaderCommand.NextTheme);
+               break;
             case Core.Navigation.ReaderCommand.FocusFind:
                OpenFind();
                break;

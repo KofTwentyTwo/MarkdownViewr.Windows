@@ -5,6 +5,7 @@
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
 
 
 namespace MarkdownViewr.Windows;
@@ -13,12 +14,21 @@ namespace MarkdownViewr.Windows;
 public sealed partial class MainWindow
 {
    private string _sourceMarkdown = "";
+   private double _sourceFraction = 0.5;
 
 
 
    /// <summary>Restores the independent source preference after XAML initialization.</summary>
    private void InitializeSource()
    {
+      SourceText.SetTheme(ActiveDocumentTheme());
+      SourceText.CopyFailed += (_, _) =>
+      {
+         if(!_closed)
+         {
+            StatusText.Text = "The source could not be copied. Please try again.";
+         }
+      };
       SourceToggle.IsChecked = _settings.ShowSource;
       RefreshSource();
       InitializeSourceSync();
@@ -30,27 +40,32 @@ public sealed partial class MainWindow
    private void RefreshSource()
    {
       ApplyReadingWidths();
+      RefreshToolbarReadingState();
       SourceText.Visibility = _settings.ShowSource ? Visibility.Visible : Visibility.Collapsed;
       string text = _settings.ShowSource ? _sourceDocument?.Text ?? _sourceMarkdown : "";
-      if(!string.Equals(SourceText.Text, text, StringComparison.Ordinal))
+      bool changed = !string.Equals(SourceText.Text, text, StringComparison.Ordinal);
+      SourceText.SetSource(text, _sourceDocument);
+      if(changed)
       {
-         SourceText.Text = text;
          HoldSourceSync(preserveSelection: false);
       }
    }
 
 
 
-   /// <summary>Constrains displayed pane widths while retaining the user's preferred widths for larger windows.</summary>
+   /// <summary>Splits the document/source space proportionally, excluding the outline and its divider.</summary>
    private void ApplyReadingWidths()
    {
       double available = Math.Max(0, RootGrid.ActualWidth - 200);
       double outline = _settings.ShowOutline ? Math.Min(_settings.OutlineWidth, Math.Max(0, available - 6 - (_settings.ShowSource ? 166 : 0))) : 0;
-      double source = _settings.ShowSource ? Math.Min(_settings.SourceWidth, Math.Max(0, available - outline - (_settings.ShowOutline ? 6 : 0) - 6)) : 0;
+      double shared = Math.Max(0, RootGrid.ActualWidth - outline - (_settings.ShowOutline ? 6 : 0) - 6);
+      double fraction = Core.Layout.SourcePaneLayout.Fraction(shared, _sourceFraction);
       OutlineColumn.Width = new GridLength(outline);
       OutlineDividerColumn.Width = new GridLength(_settings.ShowOutline ? 6 : 0);
-      SourceColumn.Width = new GridLength(source);
+      DocumentColumn.Width = new GridLength(_settings.ShowSource ? 1 - fraction : 1, GridUnitType.Star);
+      SourceColumn.Width = _settings.ShowSource ? new GridLength(fraction, GridUnitType.Star) : new GridLength(0);
       SourceDividerColumn.Width = new GridLength(_settings.ShowSource ? 6 : 0);
+      SourceDivider.IsTabStop = _settings.ShowSource;
    }
 
 
@@ -63,6 +78,10 @@ public sealed partial class MainWindow
    private void Source_Click(object sender, RoutedEventArgs e)
    {
       _settings.ShowSource = SourceToggle.IsChecked;
+      if(_settings.ShowSource)
+      {
+         _sourceFraction = 0.5;
+      }
       Save();
       RefreshSource();
       QueueFind();
@@ -70,15 +89,43 @@ public sealed partial class MainWindow
 
 
 
-   /// <summary>The source pane grows toward the left and stays within its validated width range.</summary>
-   private void SourceDivider_DragDelta(object sender, DragDeltaEventArgs e)
+   /// <summary>The source pane grows toward the left within the available shared reading area.</summary>
+   private void SourceDivider_DragDelta(object sender, DragDeltaEventArgs e) => ResizeSource(e.HorizontalChange);
+
+
+
+   /// <summary>Keyboard users resize with Left/Right or restore equal panes with Home.</summary>
+   private void SourceDivider_KeyDown(object sender, KeyRoutedEventArgs e)
    {
-      _settings.SourceWidth = Math.Clamp(SourceColumn.ActualWidth - e.HorizontalChange, 160, 600);
-      ApplyReadingWidths();
+      if(!_settings.ShowSource)
+      {
+         return;
+      }
+      switch(e.Key)
+      {
+         case global::Windows.System.VirtualKey.Left:
+            ResizeSource(-24);
+            break;
+         case global::Windows.System.VirtualKey.Right:
+            ResizeSource(24);
+            break;
+         case global::Windows.System.VirtualKey.Home:
+            _sourceFraction = 0.5;
+            ApplyReadingWidths();
+            break;
+         default:
+            return;
+      }
+      e.Handled = true;
    }
 
 
 
-   /// <summary>Writes the completed resize through AppKit's atomic settings store.</summary>
-   private void SourceDivider_DragCompleted(object sender, DragCompletedEventArgs e) => Save();
+   /// <summary>The ratio belongs to this window; reopening source intentionally starts again at50/50.</summary>
+   private void ResizeSource(double horizontalChange)
+   {
+      double shared = DocumentColumn.ActualWidth + SourceColumn.ActualWidth;
+      _sourceFraction = Core.Layout.SourcePaneLayout.Resize(shared, SourceColumn.ActualWidth, horizontalChange);
+      ApplyReadingWidths();
+   }
 }

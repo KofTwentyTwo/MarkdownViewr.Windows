@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using MarkdownViewr.Windows.Core.Documents;
 
 
@@ -55,7 +57,9 @@ public sealed class DocumentFrontmatterTests
       Assert.Contains("<h1>Body heading</h1>", hidden, StringComparison.Ordinal);
       Assert.DoesNotContain("Visible value", hidden, StringComparison.Ordinal);
       string metadata = renderer.Render(Markdown, FrontmatterMode.Metadata);
-      Assert.Contains("<th>title</th><td>Visible value</td>", metadata, StringComparison.Ordinal);
+      using IHtmlDocument parsed = new HtmlParser().ParseDocument(metadata);
+      Assert.Equal("title", parsed.QuerySelector(".frontmatter .fm-key")!.TextContent);
+      Assert.Equal("Visible value", parsed.QuerySelector(".frontmatter .fm-value")!.TextContent);
       Assert.Contains("https://example.com/a:b", metadata, StringComparison.Ordinal);
       Assert.Contains("&lt;script&gt;bad()&lt;/script&gt;", metadata, StringComparison.Ordinal);
       Assert.DoesNotContain("<script", metadata, StringComparison.Ordinal);
@@ -93,7 +97,9 @@ public sealed class DocumentFrontmatterTests
    [InlineData("O'Reilly", "O'Reilly")]
    public void RenderMetadata_FormattingMarkers_ProducesPlainText(string value, string expected)
    {
-      Assert.Equal("<table><caption>Document metadata</caption><tr><th>key</th><td>" + System.Net.WebUtility.HtmlEncode(expected) + "</td></tr></table>", DocumentFrontmatter.RenderMetadata("key: " + value));
+      using IHtmlDocument parsed = new HtmlParser().ParseDocument(DocumentFrontmatter.RenderMetadata("key: " + value));
+      Assert.Equal("key", parsed.QuerySelector(".frontmatter .fm-key")!.TextContent);
+      Assert.Equal(expected, parsed.QuerySelector(".frontmatter .fm-value")!.TextContent);
    }
 
 
@@ -102,7 +108,9 @@ public sealed class DocumentFrontmatterTests
    [Fact]
    public void RenderMetadata_UnstructuredRows_EscapesText()
    {
-      Assert.Equal("<table><caption>Document metadata</caption><tr><td colspan=\"2\">A &amp; B</td></tr></table>", DocumentFrontmatter.RenderMetadata(" \nA & B\n\t"));
+      using IHtmlDocument parsed = new HtmlParser().ParseDocument(DocumentFrontmatter.RenderMetadata(" \nA & B\n\t"));
+      Assert.Equal("A & B", parsed.QuerySelector(".frontmatter .fm-value")!.TextContent);
+      Assert.Equal("2", parsed.QuerySelector("td")!.GetAttribute("colspan"));
    }
 
 

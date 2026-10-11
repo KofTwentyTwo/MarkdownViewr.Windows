@@ -34,6 +34,9 @@ public partial class AppTests
       FocusBrowser(session);
       SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_P);
       session.WaitForElement("PrintImages").AsCheckBox().IsChecked = false;
+      Assert.True(session.WaitForElement("PrintTheme").BoundingRectangle.Width >= 440, "The native print options must provide a readable wide layout.");
+      Assert.NotNull(session.WaitForElement("PrintOpenPdf"));
+      Assert.NotNull(session.WaitForElement("PrintOpenPdfFolder"));
       session.ClickButton("Cancel");
       session.WaitForElementGone("PrintTheme");
       Assert.Equal(settings, session.ReadSettings());

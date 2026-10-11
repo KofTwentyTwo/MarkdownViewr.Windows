@@ -20,17 +20,29 @@ internal sealed partial class DocumentFiles
 
 
    /// <summary>Retains the selected directory and the physical root of the document actually opened.</summary>
-   private DocumentFiles(string path, string physicalPath, string markdown)
+   private DocumentFiles(string path, string physicalPath, string markdown, DateTime modifiedUtc, long byteLength)
    {
       _directory = Path.GetDirectoryName(path)!;
       _physicalRoot = Path.GetDirectoryName(physicalPath)! + Path.DirectorySeparatorChar;
       Markdown = markdown;
+      ModifiedUtc = modifiedUtc;
+      ByteLength = byteLength;
    }
 
 
 
    /// <summary>The bounded snapshot parsed into the document surface.</summary>
    public string Markdown { get; }
+
+
+
+   /// <summary>The modification timestamp of the opened file handle retained with this loaded snapshot.</summary>
+   public DateTime ModifiedUtc { get; }
+
+
+
+   /// <summary>The opened snapshot's byte length helps detect changes missed by directory notifications.</summary>
+   public long ByteLength { get; }
 
 
 
@@ -48,7 +60,7 @@ internal sealed partial class DocumentFiles
       {
          throw new IOException("This document exceeds the 16 Mi-character limit.");
       }
-      return new DocumentFiles(fullPath, physicalPath, new string(buffer, 0, count));
+      return new DocumentFiles(fullPath, physicalPath, new string(buffer, 0, count), File.GetLastWriteTimeUtc(handle), RandomAccess.GetLength(handle));
    }
 
 

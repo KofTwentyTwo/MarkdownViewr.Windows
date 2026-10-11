@@ -28,4 +28,6 @@ public enum ReaderCommand
    ZoomOut,
    ZoomReset,
    Print,
+   NextTheme,
+   PreviousTheme,
 }

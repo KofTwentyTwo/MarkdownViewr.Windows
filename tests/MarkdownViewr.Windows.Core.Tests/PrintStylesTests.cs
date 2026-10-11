@@ -48,7 +48,8 @@ public sealed class PrintStylesTests
       ReaderTheme active = ThemeCatalog.Find("Catppuccin Mocha");
       string css = PrintStyles.Build(new PrintOptions(Theme: choice, Backgrounds: true, MatchScreenZoom: true, FullPage: false, Images: false, Borders: true, PaddingPixels: 16.5), active, ThemeCatalog.BuiltIn, 1.1);
       Assert.Contains("--background:" + background + ";", css, StringComparison.Ordinal);
-      Assert.DoesNotContain("max-width:none!important", css, StringComparison.Ordinal);
+      Assert.DoesNotContain("#content-inner{max-width:none!important", css, StringComparison.Ordinal);
+      Assert.Contains("#content-inner{max-width:900px;margin:0 auto;}", css, StringComparison.Ordinal);
       Assert.DoesNotContain("background:#ffffff!important", css, StringComparison.Ordinal);
       Assert.Contains("img{display:none!important;}", css, StringComparison.Ordinal);
       Assert.Contains("pre,blockquote,code,details{border:1px solid currentColor!important;}", css, StringComparison.Ordinal);
@@ -86,7 +87,8 @@ public sealed class PrintStylesTests
       var custom = ReaderTheme.Parse(original.Json.Replace("Catppuccin Mocha", "Print custom", StringComparison.Ordinal));
       string expected = custom.GetStyles(1.1);
       string css = PrintStyles.Build(new PrintOptions(Theme: "Print custom", MatchScreenZoom: true), original, [custom], 1.1);
-      Assert.StartsWith(expected, css, StringComparison.Ordinal);
+      Assert.Contains(expected, css, StringComparison.Ordinal);
+      Assert.True(css.IndexOf("#content-inner{max-width:900px;", StringComparison.Ordinal) < css.IndexOf(expected, StringComparison.Ordinal));
       Assert.Equal(original.GetStyles(1), original.Styles);
       Assert.Equal(ReaderTheme.Parse(custom.Json).Styles, custom.Styles);
    }

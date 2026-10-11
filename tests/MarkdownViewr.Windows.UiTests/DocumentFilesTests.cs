@@ -25,6 +25,29 @@ public sealed class DocumentFilesTests : IDisposable
 
 
 
+   /// <summary>Timestamp and byte length belong to the loaded handle, and remain unchanged when the file is replaced later.</summary>
+   [Fact]
+   public void Open_ModifiedDocument_RetainsLoadedSnapshotMetadata()
+   {
+      string path = Path.Combine(_root, "document", "timestamp.md");
+      File.WriteAllText(path, "# Original", Encoding.UTF8);
+      DateTime timestamp = new(2026, 1, 2, 3, 4, 6, DateTimeKind.Utc);
+      File.SetLastWriteTimeUtc(path, timestamp);
+      var before = new FileInfo(path);
+      var snapshot = DocumentFiles.Open(path);
+      Assert.Equal(before.LastWriteTimeUtc, snapshot.ModifiedUtc);
+      Assert.Equal(before.Length, snapshot.ByteLength);
+      File.WriteAllText(path, "# A different longer snapshot", Encoding.UTF8);
+      File.SetLastWriteTimeUtc(path, timestamp.AddMinutes(2));
+      var current = DocumentFiles.Open(path);
+      Assert.Equal("# Original", snapshot.Markdown);
+      Assert.Equal(timestamp, snapshot.ModifiedUtc);
+      Assert.NotEqual(snapshot.ModifiedUtc, current.ModifiedUtc);
+      Assert.NotEqual(snapshot.ByteLength, current.ByteLength);
+   }
+
+
+
    /// <summary>File loading honors the BOM and reads the selected document snapshot.</summary>
    [Fact]
    public void Open_UnicodeDocument_ReadsTheSnapshot()

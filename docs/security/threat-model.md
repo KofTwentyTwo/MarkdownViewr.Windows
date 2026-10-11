@@ -24,7 +24,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Markdown / raw HTML | Explicit tag/attribute/scheme allowlist; disabled checkbox inputs; no authored scripts, CSS, IDs or classes |
 | Native print/PDF | Deliberate File/Print/Ctrl+P; ready passive document only; copied bounded settings; Windows destination picker; JSON-serialized CSS text in host-owned print stylesheet; same navigation checked after preparation; no authored command/output path; no document/path logs |
 | File change notifications | Directory subscription scoped to selected path; 350 ms quiet-period debounce; replacement/deletion recovery; bounded transient retries; subscriptions released on window close |
-| Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded schema-version-one parser; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
+| Theme JSON / CSS | Native editor and saved user overrides use the same bounded validation; corrupt theme settings are discarded before startup; restoration keeps separately named custom themes; embedded original palettes; bounded strict version-one parsing and validated compatible saved/import schemas with explicit newer-import consent; validated hex colors and finite sizes; code-point escaped font names; less-than signs escaped before style embedding; no network capability |
 | Browser viewport | Fixed origin-checked native query; validate two finite fractions; invariant numeric restore only; authored scripts/messages stay disabled |
 | Source pane | Bounded immutable snapshot plus literal native fold projection; original UTF-16 find positions map to visible native CR text; HTML/CSS/script text never enters a renderer or command interpreter; hidden pane removed from accessibility surface |
 | Find | Bounded literal query; pure source positions and native WebView2 finder, with duplicate browser UI suppressed; no query enters executable code or activity logs. Serialized queries and page/navigation checks reject stale completions; existing numeric section operations reveal/restore content |
@@ -180,3 +180,191 @@ and prevents an older window snapshot from restoring cleared paths. Core tests
 cover corruption, bounds, ordering, independent arrays and stale-window merging.
 Actual hosted lifecycle/clear/reload tests are pending; association/activation
 registration has not been implemented or represented as verified. See ADR-0004.
+
+## Configurable Markdown extensions
+
+Only deliberate native menu commands change the four saved rendering preferences;
+document content cannot modify them. Each asynchronous read captures immutable
+options. Existing Markdig parsing generates passive mark/sup/sub/ins nodes and
+preserves original source offsets. Reference caret/tilde whitespace and protected
+code/newline boundaries remain literal. The sanitizer still removes authored
+styles, identity/event attributes and unsafe links; mark/ins grant no native or
+network access. Host-generated theme CSS uses validated palette variables.
+
+Separate saved fields preserve sibling preference edits. Core tests cover all16
+option combinations, code/escapes, hostile attributes, original source provenance
+and old JSON defaults. Actual native repaint/toggle/reload acceptance is prepared
+for hosted runners and remains unverified. Raw authored-HTML extension edge cases
+remain part of the reference audit; no broader renderer-parity claim is made.
+
+## Complete native typography editing
+
+All font families/sizes and line height use native controls backed by a copied
+core theme edit. Known field names, finite/ranged numbers, bounded escaped font
+strings and hex colors pass the existing renderer validation before saving.
+Unknown fields and invalid drafts are rejected; unrelated schema metadata is
+preserved. No document content can invoke these edits. Custom CSS still cannot
+close its style element, and existing CSP/resource limits apply. Core tests prove
+invalid input leaves originals intact, successful edits retain all fields, and
+hostile font/CSS strings preserve the HTML boundary. Actual glyph/save/cancel
+acceptance compiles for hosted runners and is not yet verified.
+
+## Shared reading appearance
+
+Only deliberate native settings commands save global CSS and content width.
+Copied drafts validate finite200–4000px widths and a128Ki-character CSS bound;
+corrupt persisted values fall back safely. Settings are merged against the latest
+store before broadcasting to open readers. Revision checks reject obsolete
+asynchronous application; updating sibling baselines prevents later local saves
+from restoring an older global preference.
+
+Global CSS is escaped for HTML style embedding and remains in screen-only media.
+Per-theme CSS retains precedence; an enabled width limit is applied last, scaled
+with reading zoom. Print CSS uses its existing independent theme/layout path.
+No new script, host object, message bridge or remote-resource permission is enabled;
+existing CSP and denied network requests still apply.448 core tests/100% measured
+lines pass. Two new hosted cases compile but have not run; actual sibling paint,
+wrapping and PDF isolation are not yet declared verified.
+
+## Shared theme management
+
+Only owned native manager/menu/cycling commands change saved theme lists or the
+active palette. Copied drafts retain cancellation; names are bounded, deduplicated
+and reject control characters. Disabled themes remain editable while disappearing
+from reading menus. Built-in deletion only removes settings overrides and records
+a restorable name; shipped resources and document files are untouched. Restoring
+originals preserves edited JSON/metadata as uniquely named custom copies.
+
+Latest-store field merging and reader save baselines preserve unrelated sibling
+preferences. Catalog/selection broadcasts and browser revision checks discard
+obsolete asynchronous theme applications. Cycling uses only enabled saved order
+and exact Ctrl+Shift arrows with owned reading focus; text controls retain input.
+Existing schema/font/CSS validation, screen/print separation, CSP and resource
+denial remain enforced.471 core tests/100% measured lines pass. Native menu/paint/
+keyboard/sibling and revised restoration acceptance compile but remain unexecuted.
+
+## Native theme transfer and copied manager dialogs
+
+Theme JSON enters only through deliberate owned native file pickers. Serial reads
+allocate at most the128Ki-character bound plus one before schema/depth validation;
+UTF-8 and recognized BOM encodings retain Unicode. Invalid files fail independently
+within a batch. Compatible newer schemas still validate all known colors/fonts/
+sizes/CSS and require explicit native consent before import persistence. Strict
+version-one parsing remains available. Saved approved versions and unknown metadata
+survive rename/edit/restoration/export without enabling new rendering privileges.
+
+Overwrite replaces only the named user override; keep-both reserves unique names
+across the batch; skip/cancel leaves saved data intact. Native new/copy/edit/default
+and transfer actions use copied settings across successive dialogs, with manager
+Save required for persistence. A renamed editor cannot silently overwrite another
+existing palette. Export writes exact validated JSON only to the user's chosen
+native destination, including disabled choices. Suggested names exclude Windows
+path characters and ordinary reserved device names. Errors log exception kind/
+HRESULT only, never selected paths or JSON. Closing the owner stops reopening.
+
+517 core tests/100% measured lines and zero-warning build pass.69 desktop cases
+are discovered headlessly; six new actual picker/choice/export/draft/cancel cases compile
+but have not run. Runtime proof remains pending. Existing CSP, resource denial and
+screen/print separation remain in force; original CSS-selector compatibility is
+still a required audit.
+
+## Public Help links and post-export actions
+
+Help destinations are fixed application metadata: the Windows repository, its issue
+chooser and Discussions. Original Mac/author links appear separately in About; no
+authored document path, content or credential enters these URLs. Native browser
+launches require deliberate menu/link actions; the renderer capability boundary
+is unchanged. Starter setup now requires/readbacks Discussions for support.
+
+Optional PDF/folder opening uses only the destination deliberately chosen in the
+owned save picker. The native exporter must succeed and Windows' PDF loader must
+read pages before success/actions. Cancellation/failure cannot launch them. The
+PDF and folder actions are independent; missing native handlers report an action
+failure while retaining the completed export status. Logs retain phase/runtime
+or exception kind/HRESULT, never private PDF/document paths or content. New actual
+print/PDF/credit acceptance is still pending; the owner's handoff report remains
+unresolved despite earlier hosted PDF proof.
+
+## Native highlighted source and linked component credits
+
+Source is committed as literal text in a read-only RichEditBox; only native
+character formats are applied. No RTF/HTML source loading or authored URL
+attributes are used. Explicit Default input scope disables auto-URL detection.
+Parser classification runs off-thread with snapshot/cancellation guards; native
+paint batches discard stale snapshot/palette generations. Selected document
+accents are contrast-adjusted for shell mode; high contrast uses system colors.
+Copy is a deliberate native action and emits only visible original plain text,
+including Unicode and original line breaks. Folding never copies hidden bodies.
+Clipboard failures report a content-free status; closing cancels background work.
+Core spans/copy/contrast are verified; native accessibility/colors/clipboard and
+scroll/find/fold/reload acceptance remain pending.
+
+About project/license links are curated from restored package metadata, never
+from authored documents. Microsoft binary-package license terms are identified
+separately from MIT libraries. Verbatim SDK/WebView/tensor notices are copied as
+ordinary application data, independent of the XAML resource index. Native Settings
+owns its theme/editor dialogs and pickers; routine checked layout saves preserve
+unsubmitted CSS drafts and update reader/save baselines. UI acceptance remains
+required for the new settings window and exact distributed artifacts.
+
+## Windows file registration and process activation
+
+Installed Velopack callbacks advertise five fixed file extensions under HKCU.
+Commands quote the stable current executable and literal `%1`; no shell script
+is involved. Channel/executable-specific identities and command ownership checks
+bound uninstall cleanup. REG_NONE `AllowSilentDefaultTakeOver` prevents silent
+selection as a default. Extension defaults, UserChoice, HKLM, other registrations
+and portable/development-build registration are outside these operations.
+
+The App SDK chooses a primary per executable/profile directory. The activation
+pipe permits only the current Windows user; it is an additional native ingress
+for literal file paths, never browser content or native command execution. Paths
+are canonicalized at the sender. The generated schema rejects unknown fields,
+relative/control-containing/null/overlong paths and more than128 paths; frames
+are bounded to1MiB, connection/read waits to10seconds and pre-XAML queuing to16
+requests. Normal document size/resource/sanitizer boundaries still apply.
+
+Malformed/disconnected requests are rejected and the listener continues; owned
+shutdown cancels the pipe. Fixed notifications and failure kind/HRESULT logging
+do not expose paths or payloads. UI-dispatched duplicate activation preserves
+existing readers, including pending initial loads. Nine actual isolated adapter
+tests pass; native app, Explorer and installed lifecycle acceptance is pending.
+See ADR-0005 and issue #14. Same-user processes can deliberately request document
+opening; this is not an authorization boundary against an already compromised
+account. No IPC operation executes arbitrary commands, loads plug-ins or changes
+settings, credentials or updater feeds.
+
+The default-file Settings button is a deliberate native user action. It reads the
+owned installed registration again before launching a fixed `ms-settings` URI;
+the query contains only the fixed channel/executable-derived registered value
+name. No document path/content can select the target or invoke this action.
+Portable/unregistered previews cannot initiate it. Selection remains in Windows,
+with no writes to UserChoice/defaults and `.txt` explicitly optional. Eleven
+isolated adapter tests now pass; OS chooser behavior still needs acceptance.
+
+
+## Reference CSS, Settings drafts and document status
+
+The attributed reference stylesheet is an embedded application resource. Rendered
+Markdown remains sanitized before DocumentPage inserts it into #content-inner;
+titles are HTML-encoded. Only fixed document classes and bounded code-language
+classes survive sanitization. Theme/global CSS uses existing validation and
+blocked-resource policies; it cannot close the style element, add native commands
+or fetch unauthorized remote/local resources. Reading/print container changes do
+not extend renderer message capabilities. Native TOC/source remain separate
+controls; full reference selector parity still requires actual acceptance.
+
+Long theme/editor drafts live inside the native Settings window. Back, Cancel and
+window closure discard them. Validation gates explicit Save, manager child edits
+remain inside its copied draft, and native file pickers/short confirmations retain
+Settings ownership. A display-state change never grants document content access
+to these native operations.
+
+Footer metadata belongs to the same open handle used for the loaded snapshot.
+Watcher notices, failed reloads and bounded metadata polling mark stale content;
+only a successful new snapshot clears that indicator. The explicit Open folder
+button uses StorageFolder and Launcher.LaunchFolderAsync with a literal document
+parent directory; it does not construct shell commands. Diagnostics omit authored
+content/paths. The disabled-editor tooltip reports native configuration state,
+and its timer and footer polling stop on window closure. Native status/hover/
+Explorer acceptance remains pending; passing pure or adapter tests is insufficient.

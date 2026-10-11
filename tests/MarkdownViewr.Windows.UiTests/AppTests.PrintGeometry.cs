@@ -66,11 +66,12 @@ public partial class AppTests
    {
       using var session = new AppSession(document: "# WIDTH\n\n## Borders\n\n```text\nx\n```");
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the print width heading", TimeSpan.FromSeconds(30));
-      session.InvokeMenuItem("View", "EditDocumentThemeMenu");
+      OpenSettingsAction(session, "EditDocumentThemeMenu");
       session.EnterText("ThemeEditorName", "Print geometry");
       session.EnterText("ThemeEditorCss", "body { max-width: 240px; } pre { border: none; border-radius: 0; }");
       session.ClickButton("Save theme");
       session.WaitForElementGone("ThemeEditorName");
+      CloseSettings(session);
       session.InvokeMenuItem("View", "SourceToggle");
       (Rectangle Glyph, Rectangle View) reading = WaitForStablePrintViewport(session);
       string source = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
@@ -133,8 +134,9 @@ public partial class AppTests
 
 
    /// <summary>Measures the first contiguous dark glyph band, excluding light rules and later body text.</summary>
-   private static Rectangle FirstPrintedInkBand(Bitmap bitmap)
+   private static Rectangle FirstPrintedInkBand(Bitmap bitmap, Func<Color, bool>? isInk = null)
    {
+      isInk ??= IsPrintedInk;
       int top = -1;
       int bottom = -1;
       int left = bitmap.Width;
@@ -144,7 +146,7 @@ public partial class AppTests
          bool ink = false;
          for(int x = 0; x < bitmap.Width; x++)
          {
-            if(IsPrintedInk(bitmap.GetPixel(x, y)))
+            if(isInk(bitmap.GetPixel(x, y)))
             {
                ink = true;
                left = Math.Min(left, x);
