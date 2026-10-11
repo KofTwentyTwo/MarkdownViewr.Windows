@@ -13,8 +13,11 @@ Describe 'Installed update smoke boundaries' `
       $script:SmokeArtifacts = Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts'
       $script:SmokeAppId = [regex]::Match((Get-Content -LiteralPath (Join-Path (Split-Path -Parent $PSScriptRoot) 'src/MarkdownViewr.Windows.Core/AppIdentity.cs') -Raw), '(?m)^\s*Id\s*=\s*"([a-z0-9][a-z0-9-]*)"').Groups[1].Value
       $ast = [Management.Automation.Language.Parser]::ParseFile($script:SmokeHarness, [ref]$null, [ref]$null)
-      $versionCheck = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Assert-SmokeCliVersion' }, $true)
-      . ([scriptblock]::Create($versionCheck.Extent.Text))
+      foreach($name in @('Assert-SmokeCliVersion', 'Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved'))
+      {
+         $function = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name }, $true)
+         . ([scriptblock]::Create($function.Extent.Text))
+      }
    }
 
    It 'accepts CLI version without Git metadata outside a checkout' `
@@ -57,5 +60,108 @@ Describe 'Installed update smoke boundaries' `
          @(Get-ChildItem -LiteralPath $output).Count | Should -Be 0
       }
       finally { Remove-Item -LiteralPath $output }
+   }
+}
+
+
+Describe 'Actual registry readbacks for installed file types' `
+{
+   BeforeAll `
+   {
+      $ast = [Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot 'Test-InstalledUpdates.ps1'), [ref]$null, [ref]$null)
+      foreach($name in @('Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved'))
+      {
+         $function = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name }, $true)
+         . ([scriptblock]::Create($function.Extent.Text))
+      }
+   }
+
+   BeforeEach `
+   {
+      $script:FixtureRelative = 'Software\KofTwentyTwo\MarkdownViewr.Windows.SmokeRegistrationTests\' + [guid]::NewGuid().ToString('N')
+      $script:FixtureRoot = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($script:FixtureRelative)
+      $script:Exe = Join-Path $TestDrive 'installed app/current/MarkdownViewr.Windows.exe'
+      $script:Identity = 'KofTwentyTwo.MarkdownViewr.stable.fixture'
+      $script:Capabilities = "Software\KofTwentyTwo\MarkdownViewr\FileAssociations\$script:Identity\Capabilities"
+      $key = $script:FixtureRoot.CreateSubKey('Software\RegisteredApplications')
+      $key.SetValue($script:Identity, $script:Capabilities)
+      $key.Dispose()
+      $key = $script:FixtureRoot.CreateSubKey("Software\Classes\$script:Identity\shell\open\command")
+      $key.SetValue('', '"' + $script:Exe + '" "%1"')
+      $key.Dispose()
+      $key = $script:FixtureRoot.CreateSubKey("$script:Capabilities\FileAssociations")
+      foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt')) { $key.SetValue($extension, $script:Identity) }
+      $key.Dispose()
+      foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+      {
+         $key = $script:FixtureRoot.CreateSubKey("Software\Classes\$extension")
+         $key.SetValue('', 'Other.Reader')
+         $key.Dispose()
+         $key = $script:FixtureRoot.CreateSubKey("Software\Classes\$extension\OpenWithProgids")
+         $key.SetValue($script:Identity, '')
+         $key.SetValue('Other.Reader', '')
+         $key.Dispose()
+         $key = $script:FixtureRoot.CreateSubKey("Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$extension\UserChoice")
+         $key.SetValue('ProgId', 'Other.Reader')
+         $key.SetValue('Hash', 'existing-choice-fixture')
+         $key.Dispose()
+      }
+   }
+
+   AfterEach `
+   {
+      $script:FixtureRoot.Dispose()
+      [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree($script:FixtureRelative)
+   }
+
+   It 'recognizes only the exact installed executable and channel without changing defaults' `
+   {
+      $before = Get-SmokeDefaultChoiceSnapshot -RegistryRoot $script:FixtureRoot | ConvertTo-Json -Depth 3 -Compress
+      $registration = Get-SmokeFileRegistration -Exe $script:Exe -Channel stable -RegistryRoot $script:FixtureRoot
+      $registration.ProgId | Should -BeExactly $script:Identity
+      $registration.ExtensionsVerified | Should -Be 5
+      { Get-SmokeFileRegistration -Exe $script:Exe -Channel dev -RegistryRoot $script:FixtureRoot } | Should -Throw '*exactly one*'
+      { Get-SmokeFileRegistration -Exe (Join-Path $TestDrive 'other.exe') -Channel stable -RegistryRoot $script:FixtureRoot } | Should -Throw '*exactly one*'
+      (Get-SmokeDefaultChoiceSnapshot -RegistryRoot $script:FixtureRoot | ConvertTo-Json -Depth 3 -Compress) | Should -BeExactly $before
+   }
+
+   It 'rejects a missing Open With registration for <MissingExtension>' -ForEach @(
+      @{ MissingExtension = '.md' }, @{ MissingExtension = '.markdown' }, @{ MissingExtension = '.mdown' }, @{ MissingExtension = '.mkd' }, @{ MissingExtension = '.txt' }
+   ) `
+   {
+      $key = $script:FixtureRoot.OpenSubKey("Software\Classes\$MissingExtension\OpenWithProgids", $true)
+      $key.DeleteValue($script:Identity)
+      $key.Dispose()
+      { Get-SmokeFileRegistration -Exe $script:Exe -Channel stable -RegistryRoot $script:FixtureRoot } | Should -Throw '*Open With extension*'
+   }
+
+   It 'rejects an advertised extension mapped to a different application' `
+   {
+      $key = $script:FixtureRoot.OpenSubKey("$script:Capabilities\FileAssociations", $true)
+      $key.SetValue('.txt', 'Other.Reader')
+      $key.Dispose()
+      { Get-SmokeFileRegistration -Exe $script:Exe -Channel stable -RegistryRoot $script:FixtureRoot } | Should -Throw '*Default Apps extension*'
+   }
+
+   It 'requires complete owned cleanup while leaving unrelated Open With and defaults intact' `
+   {
+      $before = Get-SmokeDefaultChoiceSnapshot -RegistryRoot $script:FixtureRoot | ConvertTo-Json -Depth 3 -Compress
+      $registration = Get-SmokeFileRegistration -Exe $script:Exe -Channel stable -RegistryRoot $script:FixtureRoot
+      { Assert-SmokeFileRegistrationRemoved -Registration $registration -RegistryRoot $script:FixtureRoot } | Should -Throw '*registration remains*'
+      $script:FixtureRoot.DeleteSubKeyTree("Software\Classes\$script:Identity")
+      $script:FixtureRoot.DeleteSubKeyTree($script:Capabilities)
+      $key = $script:FixtureRoot.OpenSubKey('Software\RegisteredApplications', $true)
+      $key.DeleteValue($script:Identity)
+      $key.Dispose()
+      { Assert-SmokeFileRegistrationRemoved -Registration $registration -RegistryRoot $script:FixtureRoot } | Should -Throw '*Open With entry remains*'
+      foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+      {
+         $key = $script:FixtureRoot.OpenSubKey("Software\Classes\$extension\OpenWithProgids", $true)
+         $key.DeleteValue($script:Identity)
+         $key.GetValue('Other.Reader') | Should -BeExactly ''
+         $key.Dispose()
+      }
+      { Assert-SmokeFileRegistrationRemoved -Registration $registration -RegistryRoot $script:FixtureRoot } | Should -Not -Throw
+      (Get-SmokeDefaultChoiceSnapshot -RegistryRoot $script:FixtureRoot | ConvertTo-Json -Depth 3 -Compress) | Should -BeExactly $before
    }
 }

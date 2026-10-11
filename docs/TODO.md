@@ -2,7 +2,8 @@
 
 - [x] Exact6374611: native97/98 and published97/98, focused19/20, zero skips; actual sustained colors/hover/focus and outline pass.
 - [x] Exact9994eda: offscreen native geometry correction passes focused20/20 and full native98/98; original focus/both-direction glyph/wheel assertions unchanged.
-- [ ] Verify published/installed9994eda and freshly verify clean diagnostic-free candidate before release.
+- [x] Exact9994eda: published98/98 and installed stable/dev97/97 each, real update/apply/restart and target hashes pass; zero skips.
+- [ ] Verify the clean1.0 milestone candidate, actual install/update/uninstall registration readbacks and new raw-HTML runtime case on the next exact head.
 
 - [x] Generate and publish the GUI-only AppKit application with the approved identity.
 - [x] Configure/read back repository protections and establish the initial hosted CI baseline.

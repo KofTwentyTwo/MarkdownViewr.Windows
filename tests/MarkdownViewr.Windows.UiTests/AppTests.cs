@@ -540,6 +540,59 @@ public partial class AppTests
 
 
 
+   /// <summary>Raw multiline/same-line HTML headings retain literal source provenance through real outline, find, folding and watched reload.</summary>
+   [Fact]
+   public void Source_RawHtmlHeadingProvenance_PreservesFoldFindAndReload()
+   {
+      string rootBody = string.Join("\n\n", Enumerable.Range(0, 40).Select(index => "Raw root body " + index));
+      string childBody = string.Join("\n\n", Enumerable.Range(0, 40).Select(index => "Raw child body " + index));
+      string tailBody = string.Join("\n\n", Enumerable.Range(0, 40).Select(index => "Raw tail body " + index));
+      string markdown = "---\ntitle: Raw fixture\n---\n<div><h1>Raw root</h1></div>\n\n" + rootBody
+         + "\n\n<H2\n title='metadata'>Raw child</H2>\n\n" + childBody
+         + "\n\n<div><h3>Raw first peer</h3><h3>Raw second peer</h3></div>\n\nPeer body\n\n```html\n<h2>Fence pseudo heading</h2>\n```\n\n# Raw last\n\n" + tailBody;
+      using var session = new AppSession(document: markdown);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Raw root")), "the raw HTML fixture", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "SourceToggle");
+      AutomationElement source = session.WaitForElement("SourceText");
+      Assert.Equal(markdown, source.Patterns.Value.Pattern.Value.Value.ReplaceLineEndings("\n"));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.WaitForElement("OutlineDepth").AsComboBox().Select(5);
+      session.WaitForElement("OutlineHeading:3");
+      Assert.Equal("Raw first peer", session.WaitForElement("OutlineHeading:2").Name);
+      Assert.Equal("Raw second peer", session.WaitForElement("OutlineHeading:3").Name);
+      foreach((int index, string text) in new[] { (2, "<h3>Raw first peer"), (3, "<h3>Raw second peer") })
+      {
+         session.ClickElement("OutlineHeading:" + index);
+         WaitForBrowserHeadingAlignment(session, "mv-heading-" + index);
+         WaitForSourceHeadingAlignment(session, source, text);
+      }
+      session.ClickElement("OutlineHeading:1");
+      WaitForBrowserHeadingAlignment(session, "mv-heading-1");
+      WaitForSourceHeadingAlignment(session, source, "<H2");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => !value.Contains("Raw child body", StringComparison.Ordinal)
+         && !value.Contains("Raw first peer", StringComparison.Ordinal) && value.Contains("# Raw last", StringComparison.Ordinal)
+         && value.ReplaceLineEndings("\n").Contains("<H2\n title='metadata'>Raw child</H2>", StringComparison.Ordinal), "literal source folded at raw HTML heading boundaries");
+      session.WaitForElementGone("mv-heading-2");
+      session.InvokeMenuItem("Edit", "FindMenuItem");
+      session.EnterText("FindText", "Raw child body 0");
+      WaitForFindCount(session, "1 of 1");
+      Assert.Equal("Raw child body 0", ReadSourceSelection(source));
+      WaitForSourceValue(session, source, value => value.Contains("<h3>Raw first peer</h3><h3>Raw second peer</h3>", StringComparison.Ordinal), "both unchanged same-line source headings revealed for find");
+      session.ClickElement("FindCloseButton");
+      WaitForSourceValue(session, source, value => !value.Contains("Raw child body", StringComparison.Ordinal), "raw HTML fold restored after find");
+      string replacement = markdown.Replace("Raw child body 0", "Raw child body reloaded", StringComparison.Ordinal);
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), replacement);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reloaded document.md")), "the watched raw HTML reload");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      WaitForSourceValue(session, source, value => value.Contains("Raw child body reloaded", StringComparison.Ordinal), "the new canonical raw HTML body after expansion");
+      Assert.Equal(replacement, source.Patterns.Value.Pattern.Value.Value.ReplaceLineEndings("\n"));
+      RetainDocumentWindow(session, session.MainWindow, "raw-html-source-provenance");
+   }
+
+
+
    /// <summary>Drives physical source-wheel input, measuring its native movement and aligning from actual glyph geometry.</summary>
    private void ScrollSourceHeadingToTop(AppSession session, AutomationElement source, string text)
    {

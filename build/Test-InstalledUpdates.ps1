@@ -58,6 +58,92 @@ $script:smokeProcessNumber = 0
 
 <#
 .SYNOPSIS
+Reads Windows default choices without changing them or retaining their private hashes in evidence.
+#>
+function Get-SmokeDefaultChoiceSnapshot
+{
+   param([Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser)
+   foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+   {
+      $choice = "$($RegistryRoot.Name)\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$extension\UserChoice"
+      [ordered]@{
+         Extension        = $extension
+         ExtensionDefault = [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension", '', $null)
+         ProgId           = [Microsoft.Win32.Registry]::GetValue($choice, 'ProgId', $null)
+         Hash             = [Microsoft.Win32.Registry]::GetValue($choice, 'Hash', $null)
+      }
+   }
+}
+
+
+
+<#
+.SYNOPSIS
+Requires actual installer-owned Open With and Default Apps registration for all five advertised extensions.
+#>
+function Get-SmokeFileRegistration
+{
+   param(
+      [Parameter(Mandatory)][string]$Exe,
+      [Parameter(Mandatory)][ValidateSet('stable', 'dev')][string]$Channel,
+      [Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser
+   )
+   $Exe = [IO.Path]::GetFullPath($Exe)
+   $applications = $RegistryRoot.OpenSubKey('Software\RegisteredApplications')
+   $found = @()
+   try
+   {
+      if($null -ne $applications)
+      {
+         foreach($identity in $applications.GetValueNames())
+         {
+            if(-not $identity.StartsWith("KofTwentyTwo.MarkdownViewr.$Channel.", [StringComparison]::Ordinal)) { continue }
+            $command = [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$identity\shell\open\command", '', $null)
+            if($command -cne ('"' + $Exe + '" "%1"')) { continue }
+            $capabilities = $applications.GetValue($identity)
+            if($capabilities -cne "Software\KofTwentyTwo\MarkdownViewr\FileAssociations\$identity\Capabilities") { throw 'The installed Default Apps capabilities are incorrect.' }
+            foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+            {
+               if([Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\$capabilities\FileAssociations", $extension, $null) -cne $identity) { throw 'An installed Default Apps extension is missing or incorrect.' }
+               if($null -eq [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension\OpenWithProgids", $identity, $null)) { throw 'An installed Open With extension is missing.' }
+            }
+            $found += [pscustomobject]@{ ProgId = $identity; Capabilities = $capabilities; ExtensionsVerified = 5 }
+         }
+      }
+   }
+   finally { if($null -ne $applications) { $applications.Dispose() } }
+   if($found.Count -ne 1) { throw 'Expected exactly one file registration for this installed executable and channel.' }
+   return $found[0]
+}
+
+
+
+<#
+.SYNOPSIS
+Requires uninstall to remove only the recorded installation's file-type registrations.
+#>
+function Assert-SmokeFileRegistrationRemoved
+{
+   param(
+      [Parameter(Mandatory)][object]$Registration,
+      [Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser
+   )
+   foreach($path in @("Software\Classes\$($Registration.ProgId)", $Registration.Capabilities))
+   {
+      $key = $RegistryRoot.OpenSubKey($path)
+      if($null -ne $key) { $key.Dispose(); throw 'An uninstalled file-type registration remains.' }
+   }
+   if($null -ne [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\RegisteredApplications", $Registration.ProgId, $null)) { throw 'An uninstalled Default Apps entry remains.' }
+   foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+   {
+      if($null -ne [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension\OpenWithProgids", $Registration.ProgId, $null)) { throw 'An uninstalled Open With entry remains.' }
+   }
+}
+
+
+
+<#
+.SYNOPSIS
 Runs one process with literal arguments, bounded duration and checked exit status.
 #>
 function Invoke-SmokeProcess
@@ -215,10 +301,15 @@ try
       '{"ShowSplashScreen":false,"CheckForUpdatesOnStartup":false}' | Set-Content -LiteralPath (Join-Path $data 'settings.json')
       [Environment]::SetEnvironmentVariable($dataVariable, $data)
       [Environment]::SetEnvironmentVariable($devDataVariable, $data)
+      $defaultChoices = Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress
+      $registration = $null
       Invoke-SmokeProcess -File $setup -Arguments @('--silent', '--installto', $install, '--log', (Join-Path $outputRoot "install-$channel.log"))
       try
       {
          $currentExe = Join-Path $install "current/$mainExe"
+         $registration = Get-SmokeFileRegistration -Exe $currentExe -Channel $channel
+         if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Installation changed existing Windows default choices.' }
+         $registration | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-before.json")
          $installedProbe = Join-Path $install "current/$probeExe"
          $before = Get-SmokeResult -Exe $installedProbe -ResultPath (Join-Path $outputRoot "$channel-before.json") -Mode 'apply'
          if(-not $before.Installed -or -not $before.AppKitSupported -or $before.IsPortable -or $before.Version -ne $initial.version -or $before.AppKitVersion -ne $initial.version -or $before.Channel -ne $channel -or $before.UpdateVersion -ne $initial.target -or $before.IncludePrereleases -ne ($channel -eq 'dev')) { throw "Incorrect $channel installed update offer." }
@@ -246,6 +337,10 @@ try
          Stop-SmokeApp -Exe $currentExe -Confirm:$false
          $after = Get-SmokeResult -Exe $installedProbe -ResultPath (Join-Path $outputRoot "$channel-after.json")
          if($after.Version -ne $initial.target -or $after.Channel -ne $channel -or $null -ne $after.UpdateVersion -or $after.AppKitVersion -ne $initial.target) { throw 'Post-upgrade identity or channel is incorrect.' }
+         $updatedRegistration = Get-SmokeFileRegistration -Exe $currentExe -Channel $channel
+         if($updatedRegistration.ProgId -cne $registration.ProgId) { throw 'Update changed the stable file-type owner identity.' }
+         if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Update changed existing Windows default choices.' }
+         $updatedRegistration | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-after.json")
          $env:K22_UITEST_INSTALLED = '1'
          $env:K22_UITEST_EXE = $currentExe
          Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 600
@@ -265,6 +360,12 @@ try
             while((Test-Path -LiteralPath $install) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 200 }
             if(Test-Path -LiteralPath $install) { throw "Smoke installation was not removed: $install" }
             if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$initialPackageId") { throw 'Smoke uninstall registry entry remains.' }
+            if($null -ne $registration)
+            {
+               Assert-SmokeFileRegistrationRemoved -Registration $registration
+               if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Uninstall changed existing Windows default choices.' }
+               [ordered]@{ ProgId = $registration.ProgId; Removed = $true; ExistingDefaultsPreserved = $true } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-removed.json")
+            }
          }
       }
    }

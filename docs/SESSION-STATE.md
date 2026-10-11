@@ -2,6 +2,43 @@
 
 Updated: 2026-10-11
 
+## All distributed source cases pass; next release acceptance checks - 2026-10-11
+
+Exact9994eda CI38176727468 is terminal success: focused20/20, native98/98,
+published98/98, installed stable97/97 and dev97/97, zero failures/skips.
+Actual AppKit apply/restart advances stable0.1.0→0.4.0 and devbeta.1→beta.2;
+post-upgrade channel/versions and target DLL hashes are verified by the harness.
+Retain actual TRXs and before/after JSON under artifacts/current-installed-evidence-38176727468.
+These fixtures are unsigned and sequential; they do not prove production signing
+or simultaneous stable/dev coexistence. Signed cleanupc89ce5c remains local.
+
+New read-only harness checks require all five Open With/Default Apps extensions
+at real initial install and after upgrade, the same owned ProgID, complete owned
+cleanup after uninstall, and unchanged extension/default UserChoice values/hashes.
+Snapshots stay in memory; retained evidence contains only public registration
+metadata and success booleans. Actual isolated registry negative fixtures cover
+each missing extension, wrong executable/channel and incomplete cleanup.
+All63 tooling tests and every analyzer rule on changed scripts pass locally;
+actual install lifecycle readbacks await the next exact-head hosted run.
+
+Add actual multiline/same-line HTML heading navigation, complete literal header
+folding, paired find/cancel and watched reload to full and focused UI acceptance.
+The new case compiles; runtime proof is pending. Set the app version prefix1.0.0
+while keeping dev suffix; tagged workflow versions remain authoritative. This
+changes the app milestone, not published AppKit0.1.0 dependencies.
+
+Standards inventory draftPR36 signed6b4fd17 registers this app and the Windows
+starter as Product, adoption in progress; documentation/conformance checks pass,
+review/merge remains required. Shared Help AppKitPR29 and starterPR4 now have
+passing exact-head gates, including starter2688e3f all-rule analyzer correction.
+No PR merged, tag created or production release published. Preserve owner55472
+and its output/profile; no local desktop input or Azure login retry.
+
+Still required: fresh diagnostic-free/native/raw-HTML/lifecycle acceptance,
+actual OS chooser/Explorer, real simultaneous channel isolation, owner design
+and genuine current-head review, reviewed/published owned-file signing builder,
+verified Azure repository identity/profile/subject and shipped signatures.
+
 ## Source correction passes full native acceptance; cleanup local - 2026-10-11
 
 Exact signed9994eda CI38176727468 passes focused20/20 and full native98/98,
