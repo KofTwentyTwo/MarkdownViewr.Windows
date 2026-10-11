@@ -389,7 +389,7 @@ public class AppTests
       WaitForSourceValue(session, source, value => !value.Contains("Grand body", StringComparison.Ordinal) && !value.Contains("# Fence pseudo", StringComparison.Ordinal) && value.Contains("### Source fold grandchild", StringComparison.Ordinal), "the folded native grandchild body and fence");
       session.ClickElement("OutlineHeading:1");
       session.ClickElement("ToggleSection");
-      WaitForSourceValue(session, source, value => !value.Contains("### Source fold grandchild", StringComparison.Ordinal) && value.Contains("Source fold peer\r\n----------------", StringComparison.Ordinal), "the folded parent and retained Setext peer");
+      WaitForSourceValue(session, source, value => !value.Contains("### Source fold grandchild", StringComparison.Ordinal) && value.ReplaceLineEndings("\n").Contains("Source fold peer\n----------------", StringComparison.Ordinal), "the folded parent and retained Setext peer");
       session.InvokeMenuItem("Edit", "FindMenuItem");
       session.EnterText("FindText", "Grand body");
       WaitForFindCount(session, "1 of 1");

@@ -97,7 +97,7 @@ capability. These parser tests do not prove browser behavior. ADR status remains
 
 ## Literal source folding and scroll synchronization
 
-A pure source projection normalizes native CRLF display offsets, retains heading
+A pure source projection normalizes native CR display offsets, retains heading
 lines and replaces folded bodies with plain ellipses. Nested choices remain
 independent; search expands the projection without changing the original snapshot.
 Native selections map original UTF-16 query ranges into the visible literal text.

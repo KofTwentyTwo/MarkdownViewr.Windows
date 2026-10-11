@@ -20,15 +20,15 @@ public sealed class DocumentSourceTextTests
    {
       string original = string.Join(newline, "😀 Intro", "", "Parent", "======", "Parent body", "", "## Child", "Child body", "```md", "# Fake", "```", "", "> ## Peer", "> Peer body", "", "# Last", "Tail");
       var source = new DocumentSourceText(original, new DocumentOutline(original));
-      Assert.Equal(original.ReplaceLineEndings("\r\n"), source.Text);
+      Assert.Equal(original.ReplaceLineEndings("\r"), source.Text);
       Assert.Equal(4, source.Headings.Count);
       Assert.True(source.SetCollapsed([1]));
       Assert.Contains("Parent body", source.Text, StringComparison.Ordinal);
-      Assert.Contains("## Child\r\n⋯\r\n> ## Peer", source.Text, StringComparison.Ordinal);
+      Assert.Contains("## Child\r⋯\r> ## Peer", source.Text, StringComparison.Ordinal);
       Assert.DoesNotContain("# Fake", source.Text, StringComparison.Ordinal);
       Assert.Null(source.GetDisplayRange(original.IndexOf("Child body", StringComparison.Ordinal), 5));
       Assert.True(source.SetCollapsed([0, 1]));
-      Assert.Contains("Parent\r\n======\r\n⋯\r\n# Last", source.Text, StringComparison.Ordinal);
+      Assert.Contains("Parent\r======\r⋯\r# Last", source.Text, StringComparison.Ordinal);
       Assert.DoesNotContain("Child", source.Text, StringComparison.Ordinal);
       Assert.Equal(new[] { 0, 3 }, source.Headings.Select(heading => heading.Index));
       Assert.True(source.SetCollapsed([1]));
@@ -36,7 +36,7 @@ public sealed class DocumentSourceTextTests
       Assert.DoesNotContain("Child body", source.Text, StringComparison.Ordinal);
       Assert.False(source.SetCollapsed([1, 1]));
       Assert.True(source.SetCollapsed([]));
-      Assert.Equal(original.ReplaceLineEndings("\r\n"), source.Text);
+      Assert.Equal(original.ReplaceLineEndings("\r"), source.Text);
    }
 
 
@@ -73,7 +73,7 @@ public sealed class DocumentSourceTextTests
    {
       var source = new DocumentSourceText(original, new DocumentOutline(original));
       source.SetCollapsed([-1, 0, 99]);
-      Assert.Equal(original.ReplaceLineEndings("\r\n"), source.Text);
+      Assert.Equal(original.ReplaceLineEndings("\r"), source.Text);
       Assert.Throws<ArgumentNullException>(() => source.SetCollapsed(null!));
    }
 
@@ -88,7 +88,7 @@ public sealed class DocumentSourceTextTests
       source.SetCollapsed([0, 1]);
       Assert.Contains("<h2>One</h2><h2>Two</h2>", source.Text, StringComparison.Ordinal);
       Assert.DoesNotContain("Body", source.Text, StringComparison.Ordinal);
-      Assert.Contains("# Last\r\nTail", source.Text, StringComparison.Ordinal);
+      Assert.Contains("# Last\rTail", source.Text, StringComparison.Ordinal);
    }
 
 

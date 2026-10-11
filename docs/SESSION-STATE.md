@@ -21,7 +21,7 @@ zero failures/skips, at artifacts/source-anchors-verified-installed-38113042618.
 Fixtures remain synthetic/unsigned; all prior producers are terminal.
 
 The current increment implements literal nested source folding and bidirectional
-heading-anchor scroll mapping. Canonical snapshots remain immutable; native CRLF
+heading-anchor scroll mapping. Canonical snapshots remain immutable; native CR
 and folded offsets retain exact find selections. Browser geometry is bounded,
 validated and current-page/query guarded; feedback holds preserve explicit find
 viewports. Microsoft TextBoxView content coordinates do not receive a duplicate
@@ -375,3 +375,17 @@ quadratic full-remainder scan for adversarial long raw HTML lines. The source
 snapshot remains immutable; no new capability/dependency is introduced. Update
 PRODUCT/TODO with actual vim proof; source synchronization UI stays pending and
 full scope remains active. No local GUI input, Azure attempt, merge/tag/release.
+
+## Current native newline failure and correction
+
+ddb98ac / CI 38114492408 native job 114396569276 finished FAILURE: 42/46,
+zero skips. Existing paired source selections shift by two characters after two
+line breaks; actual selections are pha** and *[x] followed by CR. WinUI's text
+provider uses one CR per line break, not CRLF. The new model now normalizes display
+to CR, subtracts only original CRLF extra characters and retains canonical source
+positions. This also corrects heading geometry indices. The fold fixture compares
+literal Setext text after newline normalization; all hide/reveal/find/reload and
+actual viewport/physical-wheel assertions remain. Exact native log retained at
+artifacts/source-sync-ui-38114492408.log. Build/core/format, CodeQL, scripts,
+security and PR gates passed; installed producer is still observed before a push.
+No local desktop input or weakening of coverage/selection/viewport checks.

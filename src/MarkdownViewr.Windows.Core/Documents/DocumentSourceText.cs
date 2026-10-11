@@ -12,10 +12,10 @@ namespace MarkdownViewr.Windows.Core.Documents;
 /// <summary>Mirrors section folds in a literal native display while preserving the original snapshot and source identities.</summary>
 public sealed class DocumentSourceText
 {
-   private const string Ellipsis = "⋯\r\n";
+   private const string Ellipsis = "⋯\r";
    private readonly string _source;
    private readonly string _native;
-   private readonly int[] _singleBreaks;
+   private readonly int[] _crlfBreaks;
    private readonly int[] _lineStarts;
    private readonly DocumentSourceHeading[] _originalHeadings;
    private readonly (int Index, int Start, int End)[] _sections;
@@ -40,8 +40,8 @@ public sealed class DocumentSourceText
          throw new ArgumentException("Source positions must belong to the committed snapshot.", nameof(outline));
       }
       _source = source;
-      _native = source.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').Replace("\n", "\r\n", StringComparison.Ordinal);
-      var singleBreaks = new List<int>();
+      _native = source.Replace("\r\n", "\r", StringComparison.Ordinal).Replace('\n', '\r');
+      var crlfBreaks = new List<int>();
       var lineStarts = new List<int> { 0 };
       for(int index = 0; index < source.Length; index++)
       {
@@ -50,15 +50,12 @@ public sealed class DocumentSourceText
             if(source[index] == '\r' && index + 1 < source.Length && source[index + 1] == '\n')
             {
                index++;
-            }
-            else
-            {
-               singleBreaks.Add(index);
+               crlfBreaks.Add(index);
             }
             lineStarts.Add(index + 1);
          }
       }
-      _singleBreaks = singleBreaks.ToArray();
+      _crlfBreaks = crlfBreaks.ToArray();
       _lineStarts = lineStarts.ToArray();
       _originalHeadings = outline.SourceHeadings.OrderBy(heading => heading.Start).ToArray();
       _sections = new (int, int, int)[_originalHeadings.Length];
@@ -81,7 +78,7 @@ public sealed class DocumentSourceText
 
 
 
-   /// <summary>Visible literal text with Windows newlines and a plain ellipsis for omitted bodies, never HTML or rich text.</summary>
+   /// <summary>Visible literal text with native CR newlines and a plain ellipsis for omitted bodies, never HTML or rich text.</summary>
    public string Text { get; private set; } = "";
 
 
@@ -163,11 +160,11 @@ public sealed class DocumentSourceText
 
 
 
-   /// <summary>Each original lone CR/LF expands by one native character; existing CRLF and Unicode text keep their lengths.</summary>
+   /// <summary>Each original CRLF loses its LF in WinUI text; lone CR/LF and Unicode retain their lengths.</summary>
    private int ToNative(int position)
    {
-      int index = Array.BinarySearch(_singleBreaks, position);
-      return position + (index >= 0 ? index : ~index);
+      int index = Array.BinarySearch(_crlfBreaks, position);
+      return position - (index >= 0 ? index : ~index);
    }
 
 
