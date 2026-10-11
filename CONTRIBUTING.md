@@ -96,6 +96,12 @@ pre-commit install --hook-type pre-commit --hook-type commit-msg
 | `review / automated` (single maintainer) | Current-commit automated review acknowledged by the configured human maintainer |
 
 Run `npm ci --ignore-scripts`, `npm run lint` and `npm test` for repository JavaScript.
+CI checks `PSUseCorrectCasing` alone, then all remaining rules, using the unchanged
+settings and failing on every finding or engine exception. This avoids the observed
+1.25.0 command-metadata race; neither pass disables a required rule. Negative fixtures
+verify both partitions still report violations. For the same local workaround, supply
+`-IncludeRule PSUseCorrectCasing` and then `-ExcludeRule PSUseCorrectCasing` in two
+sequential `Invoke-ScriptAnalyzer` calls; evaluate findings from both.
 Run PSScriptAnalyzer with `PSScriptAnalyzerSettings.psd1` and Pester against
 `build/*.Tests.ps1`. New owners follow [repository setup](docs/repository-setup.md).
 

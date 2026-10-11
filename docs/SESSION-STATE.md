@@ -44,9 +44,18 @@ New diagnostic keeps the exact assertion and records fixture settings/log/UIA tr
 
 Issue #5 tracks intermittent PSScriptAnalyzer 1.25.0 internal exceptions. Signed
 d3530d106fa54316308a532dd1bb2d784f0ef207 logs offending file/full stack and rethrows;
-all rules and required checks preserved. Recent successful runs are not an engine fix.
+all rules and required checks preserved. Current scripts 38104585530 captured the
+exact failure in InstalledUpdates.Tests.ps1: CommandInfo.get_Parameters ->
+UseCorrectCasing.AnalyzeScript, matching upstream #1708. Locally verified workaround
+checks casing alone, then every other rule; all 13 files and both negative fixtures
+pass, plus a bounded 20-iteration offending-file probe. CI must verify this change;
+no suppression, retry or analyzer-version change. Recent successes alone are not a fix.
 
 ## Outline milestone being prepared
+
+Pushed outline head: 5c3988e012b46aff2959eabd16c6de2b7381ab04. Authoritative CI
+38104585881 and CodeQL 38104585849 are live; security/pr-gates passed, scripts
+38104585530 failed with the captured race above. Do not restart or supersede live runs.
 
 Issue #9: sanitized heading labels, GFM fragment mapping, generated numeric identities,
 stack-free section construction, duplicate/nested headings and passive markup.
