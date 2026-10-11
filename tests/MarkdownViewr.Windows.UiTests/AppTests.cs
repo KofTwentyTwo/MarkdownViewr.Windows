@@ -95,12 +95,15 @@ public class AppTests
    {
       using var session = new AppSession(document: "# Theme acceptance");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme acceptance")), "the document heading", TimeSpan.FromSeconds(30));
+      WaitForDocumentColor(session, System.Drawing.Color.FromArgb(30, 30, 46));
       session.InvokeMenuItem("View", "DocumentThemesMenu");
       session.ClickElement("DocumentTheme:GitHub Light");
       session.WaitFor(
          () => session.ReadSettings().Contains("\"DocumentTheme\": \"GitHub Light\"", StringComparison.Ordinal) ? session.MainWindow : null,
          "the selected document theme to be saved");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Theme acceptance")), "the document after its theme changes");
+      WaitForDocumentColor(session, System.Drawing.Color.White);
+      _output.WriteLine(session.DescribeDocumentStatus());
       Assert.DoesNotContain("\"Theme\": \"Light\"", session.ReadSettings(), StringComparison.Ordinal);
    }
 
@@ -249,6 +252,19 @@ public class AppTests
       Assert.False(listener.Pending(), "The document attempted to fetch its remote image.");
    }
 
+
+
+   /// <summary>Waits for the actual painted document palette rather than just a saved preference or old heading.</summary>
+   private static void WaitForDocumentColor(AppSession session, System.Drawing.Color expected)
+   {
+      session.WaitFor(
+         () =>
+         {
+            using System.Drawing.Bitmap image = session.MainWindow.Capture();
+            return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? session.MainWindow : null;
+         },
+         "the rendered document background " + expected);
+   }
 
 
    /// <summary>Finds the browser's actual scroll provider, which is separate from the native window.</summary>

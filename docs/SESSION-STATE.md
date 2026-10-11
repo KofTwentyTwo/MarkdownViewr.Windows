@@ -52,6 +52,16 @@ assertions remain unchanged. Theme commit 0507ca5 is local until this follow-up 
 117 core tests/100% coverage and zero-warning build/format passed. Real browser proof
 of display fitting and theme selection remains pending.
 
+Fitted head fa0df78 passed 25/26 hosted native/UI tests, including the document-theme
+choice, but still failed the initial status lookup. The retained fitted screenshot
+shows the status line visibly inside the window; fitting fixed clipping, not the
+remaining automation problem. Diagnostics encountered an unsupported IsOffscreen
+property on a browser peer; reads now use ValueOrDefault. The next change declares
+the native status peer before WebView2, retaining Grid.Row=2 and the same visual
+layout, to test the embedded-provider traversal boundary. The theme test also checks
+actual painted dark/light backgrounds and retains its fixture screenshot. No assertion
+is weakened or skipped; proof remains pending.
+
 ## Repository and authorization
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).

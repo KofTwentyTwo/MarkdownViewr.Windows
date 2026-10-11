@@ -103,7 +103,7 @@ public sealed class AppSession : IDisposable
       string name = Guid.NewGuid().ToString("N");
       MainWindow.CaptureToFile(Path.Combine(directory, name + ".png"));
       string tree = string.Join(Environment.NewLine, MainWindow.FindAllDescendants().Take(200).Select(element =>
-         $"Id={element.Properties.AutomationId.ValueOrDefault}; Name={element.Properties.Name.ValueOrDefault}; Type={element.Properties.ControlType.ValueOrDefault}; Bounds={element.BoundingRectangle}; Offscreen={element.IsOffscreen}"));
+         $"Id={element.Properties.AutomationId.ValueOrDefault}; Name={element.Properties.Name.ValueOrDefault}; Type={element.Properties.ControlType.ValueOrDefault}; Bounds={element.Properties.BoundingRectangle.ValueOrDefault}; Offscreen={element.Properties.IsOffscreen.ValueOrDefault}"));
       File.WriteAllText(Path.Combine(directory, name + ".log"), tree);
       return tree;
    }
