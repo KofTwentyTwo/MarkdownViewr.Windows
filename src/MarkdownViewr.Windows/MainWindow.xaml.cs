@@ -39,6 +39,7 @@ public sealed partial class MainWindow : Window, IDisposable
       _themes = Core.Themes.ThemeCatalog.Combine(_settings.UserThemes.Select(Core.Themes.ReaderTheme.Parse));
       _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme());
       CreateDocumentThemeMenu();
+      InitializeOutline();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
       Title = AppIdentity.Info.DisplayName;
       FitInitialWindow();
@@ -179,12 +180,12 @@ public sealed partial class MainWindow : Window, IDisposable
          _browserInitialization ??= _browser.InitializeAsync();
          await _browserInitialization;
          Core.Documents.DocumentViewport viewport = reload ? await _browser.CaptureViewportAsync() : default;
-         (DocumentFiles files, string html) = await ReadDocumentAsync(path, _settings.FrontmatterKind);
+         (DocumentFiles files, Core.Documents.DocumentOutline outline) = await ReadDocumentAsync(path, _settings.FrontmatterKind);
          if(_closed)
          {
             return;
          }
-         ShowDocument(files, html, path, viewport, reload);
+         ShowDocument(files, outline, path, viewport, reload);
       }
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.COMException)
       {
@@ -254,7 +255,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Retries only transient missing/sharing violations from an editor's replace/save operation.</summary>
-   private static async Task<(DocumentFiles Files, string Html)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter)
+   private static async Task<(DocumentFiles Files, Core.Documents.DocumentOutline Outline)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter)
    {
       for(int attempt = 0; ; attempt++)
       {
@@ -263,7 +264,7 @@ public sealed partial class MainWindow : Window, IDisposable
             return await Task.Run(() =>
             {
                var document = DocumentFiles.Open(path);
-               return (document, new Core.Documents.MarkdownRenderer().Render(document.Markdown, frontmatter));
+               return (document, new Core.Documents.DocumentOutline(document.Markdown, frontmatter));
             });
          }
          catch(IOException exception) when(attempt < 3 && (exception.HResult & 0xFFFF) is 2 or 3 or 32 or 33)
@@ -276,9 +277,11 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Commits a fully parsed snapshot and changes the watcher only when the selected document changes.</summary>
-   private void ShowDocument(DocumentFiles files, string html, string path, Core.Documents.DocumentViewport viewport, bool reload)
+   private void ShowDocument(DocumentFiles files, Core.Documents.DocumentOutline outline, string path, Core.Documents.DocumentViewport viewport, bool reload)
    {
-      _browser.Show(files, html, Path.GetFileName(path), viewport);
+      _browser.Show(files, outline.Html, Path.GetFileName(path), viewport, outline.Headings);
+      _outline = outline;
+      RefreshOutline();
       _documentPath = Path.GetFullPath(path);
       Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;
       StatusText.Text = (reload ? "Reloaded " : "Opened ") + Path.GetFileName(path);

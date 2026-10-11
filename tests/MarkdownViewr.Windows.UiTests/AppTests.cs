@@ -186,16 +186,118 @@ public class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Table)), "the frontmatter table");
       session.InvokeMenuItem("View", "FrontmatterMenu");
       session.ClickElement("FrontmatterMarkdown");
-      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Table)), "the metadata table after switching to Markdown");
+      try
+      {
+         session.WaitFor(
+               () => session.ReadSettings().Contains("\"Frontmatter\": \"Markdown\"", StringComparison.Ordinal) ? session.MainWindow : null,
+               "the Markdown frontmatter choice to be saved");
+         AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Table)), "the metadata table after switching to Markdown");
+      }
+      catch(TimeoutException exception)
+      {
+         throw new TimeoutException($"{exception.Message} Settings: {session.ReadSettings()} Logs: {session.ReadLogs()} Native tree: {session.DescribeDocumentStatus()}", exception);
+      }
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the rendered frontmatter heading");
-      session.WaitFor(
-         () => session.ReadSettings().Contains("\"Frontmatter\": \"Markdown\"", StringComparison.Ordinal) ? session.MainWindow : null,
-         "the Markdown frontmatter choice to be saved");
       session.InvokeMenuItem("View", "FrontmatterMenu");
       session.ClickElement("FrontmatterHide");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Reloaded document.md")), "the hidden-mode reload status");
       AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Visible metadata")), "the hidden metadata");
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Frontmatter body")));
+   }
+
+
+   /// <summary>The native depth choice filters exact headings and a real divider drag saves its new width.</summary>
+   [Fact]
+   public void Outline_DepthAndResize_PersistsNativeChoices()
+   {
+      using var session = new AppSession(document: "# Root outline\n\n## Child outline\n\n#### Deep outline");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Root outline")), "the document heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.WaitForElement("OutlineHeading:1");
+      Assert.Null(session.FindInApp(cf => cf.ByAutomationId("OutlineHeading:2")));
+      session.WaitForElement("OutlineDepth").AsComboBox().Select(0);
+      session.WaitForElementGone("OutlineHeading:1");
+      session.WaitForElement("OutlineDepth").AsComboBox().Select(3);
+      session.WaitForElement("OutlineHeading:2");
+      AutomationElement divider = session.WaitForElement("OutlineDivider");
+      session.MainWindow.SetForeground();
+      Assert.True(divider.TryGetClickablePoint(out System.Drawing.Point start));
+      Assert.Equal(session.App.ProcessId, session.Automation.FromPoint(start).Properties.ProcessId.ValueOrDefault);
+      FlaUI.Core.Input.Mouse.DragHorizontally(start, 70);
+      session.WaitFor(
+         () =>
+         {
+            using var settings = JsonDocument.Parse(session.ReadSettings());
+            return settings.RootElement.GetProperty("OutlineWidth").GetDouble() > 240 ? session.MainWindow : null;
+         },
+         "the resized outline width to be saved");
+      using var saved = JsonDocument.Parse(session.ReadSettings());
+      Assert.True(saved.RootElement.GetProperty("ShowOutline").GetBoolean());
+      Assert.Equal(4, saved.RootElement.GetProperty("OutlineDepth").GetInt32());
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.WaitForElementGone("OutlineHeading:0");
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>A heading selection moves the actual browser viewport and all-section operations change displayed content.</summary>
+   [Fact]
+   public void Outline_HeadingJumpAndCollapse_UpdatesActualDocument()
+   {
+      string paragraphs = string.Join("\n\n", Enumerable.Range(0, 100).Select(index => "Long outline paragraph " + index));
+      using var session = new AppSession(document: "# Start outline\n\n" + paragraphs + "\n\n## Target outline\n\nTarget section content\n\n## Peer outline\n\nPeer section content");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Start outline")), "the initial heading", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:1");
+      session.WaitFor(
+         () =>
+         {
+            AutomationElement scroller = FindDocumentScroller(session);
+            return scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value > 70 ? scroller : null;
+         },
+         "the actual browser to jump to the target heading");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Target section content")), "the collapsed target body");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Peer section content")));
+      session.ClickElement("ToggleSection");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target section content")), "the expanded target body");
+      session.ClickElement("CollapseSections");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Peer section content")), "all collapsed section content");
+      session.ClickElement("ExpandSections");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Target section content")), "all expanded sections");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Peer section content")), "the expanded peer section");
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>Expanding a parent retains a collapsed child, and theme/reload retain the same hierarchy's collapse state.</summary>
+   [Fact]
+   public void Outline_NestedCollapse_RetainsStateAcrossThemeAndReload()
+   {
+      using var session = new AppSession(document: "# Parent outline\n\nParent body\n\n## Child outline\n\nHidden child body\n\n## Peer outline\n\nVisible peer body");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Parent body")), "the original body", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Hidden child body")), "the collapsed child");
+      session.ClickElement("OutlineHeading:0");
+      session.ClickElement("ToggleSection");
+      AppSession.WaitUntilGone(() => session.FindInApp(cf => cf.ByName("Visible peer body")), "the collapsed parent");
+      session.ClickElement("ToggleSection");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Visible peer body")), "the expanded parent");
+      Assert.Null(session.FindInApp(cf => cf.ByName("Hidden child body")));
+      session.InvokeMenuItem("View", "DocumentThemesMenu");
+      session.ClickElement("DocumentTheme:GitHub Light");
+      WaitForDocumentColor(session, System.Drawing.Color.White);
+      Assert.Null(session.FindInApp(cf => cf.ByName("Hidden child body")));
+      File.WriteAllText(Path.Combine(session.DataDirectory, "document.md"), "# Parent outline\n\nParent body\n\n## Child outline\n\nUpdated child body\n\n## Peer outline\n\nUpdated peer body");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Updated peer body")), "the new snapshot");
+      Assert.Null(session.FindInApp(cf => cf.ByName("Updated child body")));
+      session.ClickElement("OutlineHeading:1");
+      session.ClickElement("ToggleSection");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Updated child body")), "the expanded reloaded child");
    }
 
 

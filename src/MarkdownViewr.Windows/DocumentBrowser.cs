@@ -6,6 +6,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 
@@ -30,6 +31,8 @@ internal sealed class DocumentBrowser
    private Core.Themes.ReaderTheme _theme;
    private string _sanitizedHtml = "";
    private string _title = "MarkdownViewr";
+   private IReadOnlyList<Core.Documents.DocumentHeading> _headings = [];
+   private int[] _collapsedSections = [];
 
 
 
@@ -77,8 +80,14 @@ internal sealed class DocumentBrowser
 
 
    /// <summary>Replaces the document capability and navigates to an intercepted HTTPS response, with no HTTP server.</summary>
-   public void Show(DocumentFiles? files, string sanitizedHtml, string title, Core.Documents.DocumentViewport viewport = default)
+   public void Show(DocumentFiles? files, string sanitizedHtml, string title, Core.Documents.DocumentViewport viewport = default, IReadOnlyList<Core.Documents.DocumentHeading>? headings = null)
    {
+      headings ??= [];
+      if(!_headings.SequenceEqual(headings))
+      {
+         _collapsedSections = [];
+      }
+      _headings = headings;
       _files = files;
       _sanitizedHtml = sanitizedHtml;
       _title = title;
@@ -99,7 +108,58 @@ internal sealed class DocumentBrowser
       _theme = theme;
       if(!_closed)
       {
-         Show(_files, _sanitizedHtml, _title, viewport);
+         Show(_files, _sanitizedHtml, _title, viewport, _headings);
+      }
+   }
+
+
+   /// <summary>Reveals a heading's hidden ancestors before moving the actual reading viewport to it.</summary>
+   public Task JumpToHeadingAsync(int index)
+   {
+      if(index < 0 || index >= _headings.Count)
+      {
+         return Task.CompletedTask;
+      }
+      return ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const h=document.getElementById('mv-heading-{index}'); if(h){{ for(let p=h.parentElement;p;p=p.parentElement) p.hidden=false; h.scrollIntoView({{block:'start'}}); }}}})()"));
+   }
+
+
+
+   /// <summary>Only a host-generated section body can be collapsed, leaving its own heading visible.</summary>
+   public Task ToggleSectionAsync(int index)
+   {
+      if(index < 0 || index >= _headings.Count)
+      {
+         return Task.CompletedTask;
+      }
+      return ExecuteDocumentScriptAsync(FormattableString.Invariant($"(()=>{{const e=document.querySelector('[data-mv-body=\"{index}\"]'); if(e) e.hidden=!e.hidden;}})()"));
+   }
+
+
+
+   /// <summary>Applies an explicit native command to every generated section, including nested descendants.</summary>
+   public Task SetSectionsAsync(bool collapsed)
+      => ExecuteDocumentScriptAsync("for(const e of document.querySelectorAll('[data-mv-body]')) e.hidden=" + (collapsed ? "true" : "false") + ";");
+
+
+
+   /// <summary>Fixed host operations run only on the ready intercepted document; content script execution remains disabled.</summary>
+   private async Task ExecuteDocumentScriptAsync(string script)
+   {
+      if(_closed || !_pageReady || !IsCurrentDocument())
+      {
+         return;
+      }
+      try
+      {
+         await _view.CoreWebView2.ExecuteScriptAsync(script);
+      }
+      catch(COMException)
+      {
+         if(!_closed)
+         {
+            _status("The document navigation could not be completed.");
+         }
       }
    }
 
@@ -124,6 +184,11 @@ internal sealed class DocumentBrowser
          if(!_closed && document == _policy.DocumentUri && navigation == _navigationId && IsCurrentDocument())
          {
             _viewport = Core.Documents.DocumentViewport.FromBrowserResult(result);
+            string collapsed = await _view.CoreWebView2.ExecuteScriptAsync("Array.from(document.querySelectorAll('[data-mv-body]')).filter(e=>e.hidden).map(e=>Number(e.dataset.mvBody))");
+            if(!_closed && document == _policy.DocumentUri && navigation == _navigationId && IsCurrentDocument())
+            {
+               _collapsedSections = (JsonSerializer.Deserialize<int[]>(collapsed) ?? []).Where(index => index >= 0 && index < _headings.Count).Distinct().ToArray();
+            }
          }
       }
       return _viewport;
@@ -150,6 +215,8 @@ internal sealed class DocumentBrowser
       _restoreViewport = false;
       try
       {
+         string collapsed = JsonSerializer.Serialize(_collapsedSections);
+         await sender.ExecuteScriptAsync("for(const e of document.querySelectorAll('[data-mv-body]')) e.hidden=" + collapsed + ".includes(Number(e.dataset.mvBody));");
          string script = FormattableString.Invariant($"if(location.href.split('#')[0] === '{_policy.DocumentUri.AbsoluteUri}') window.scrollTo({_viewport.HorizontalFraction:R}*Math.max(0,document.documentElement.scrollWidth-innerWidth),{_viewport.VerticalFraction:R}*Math.max(0,document.documentElement.scrollHeight-innerHeight));");
          await sender.ExecuteScriptAsync(script);
          if(!_closed && args.NavigationId == _navigationId && IsCurrentDocument())
@@ -190,6 +257,13 @@ internal sealed class DocumentBrowser
          string.Equals(uri.GetLeftPart(UriPartial.Path), _policy.DocumentUri.AbsoluteUri, StringComparison.Ordinal) &&
          uri.Query.Length == 0)
       {
+         if(args.IsUserInitiated && uri.Fragment.StartsWith("#mv-heading-", StringComparison.Ordinal) &&
+            int.TryParse(uri.Fragment.AsSpan(12), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out int heading))
+         {
+            args.Cancel = true;
+            await JumpToHeadingAsync(heading);
+            return;
+         }
          _navigationId = args.NavigationId;
          return;
       }

@@ -15,8 +15,10 @@
 - [x] Port Darin's 20 built-in themes and persistent document selection; validate schema, font escaping and invariant CSS.
 - [x] Verify hosted built-in theme selection and actual painted colors on 77dd04d.
 - [x] Implement persisted editable theme overrides/custom names, color/code-font/CSS controls and built-in restoration.
-- [ ] Complete hosted theme editor/validation/restoration acceptance (issue #7).
-- [ ] Add TOC, section collapse, source pane, synchronized navigation, find and vim keys.
+- [x] Complete hosted theme editor/validation/restoration acceptance (issue #7): CI 38102867556 passed; size 17 edit also passes in 29/30 later UI tests.
+- [x] Implement persistent resizable TOC/depth, safe heading/local-fragment jumps and independent nested section collapse (issue #9).
+- [ ] Verify hosted outline depth/resize/scroll/collapse/theme/reload acceptance.
+- [ ] Add source pane, synchronized navigation, find and vim keys.
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [ ] Verify actual hosted frontmatter mode switching and code-font size editing.
 - [ ] Add safe configured editor launch and printing options.

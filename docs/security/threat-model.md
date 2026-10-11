@@ -29,6 +29,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Local images | Per-document URI prefix; one decode; filename/extension policy; final open-handle containment; 16 MiB limit |
 | Remote resources | Denied by CSP and resource interception |
 | External links | HTTP(S) only, actual browser user gesture, external Windows handler; no document navigation outside current page |
+| Heading navigation | Labels extracted after sanitation; authored identity attributes stripped; generated numeric targets only. Fixed host operations reveal/jump/collapse on the current intercepted page; authored scripts, messages and host objects remain disabled |
 | Settings / logs | AppKit sanitation; per-user data root; log operational events without document content or paths |
 | Updates | Repository HTTPS feed, Velopack integrity checks and production signing preflight |
 | Repository / CI | Protected main and release tags; producer-bound checks; no untrusted PR checkout with privileged review token |
@@ -37,10 +38,10 @@ physical directory. It does not authorize native commands or remote resource acc
 
 | Threat | Mitigation and evidence |
 | --- | --- |
-| Document script or native-command execution | Sanitizer regressions pass; host disables scripts/bridge; actual browser acceptance pending |
+| Document script or native-command execution | Sanitizer regressions pass; host disables scripts/bridge; actual browser malicious-script and reader acceptance passed on 77dd04d |
 | Image traversal, device/ADS paths or encoded separators | Core path-policy tests pass; denied before filesystem access |
 | Junction/symlink escape or check/reopen race | Check normalized physical path on opened image handle; read same handle; real junction rejection test passes |
-| Remote image tracking / resource exfiltration | No-referrer header, no document networking; browser network acceptance pending |
+| Remote image tracking / resource exfiltration | No-referrer header, no document networking; actual listening-server browser denial passed on 77dd04d |
 | Oversized input / image denial of service | Pre-parse character bound and image byte bound; native limit tests pass; performance acceptance remains |
 | Settings corruption / UI exception | AppKit shell sanitation and crash handling; inherited foundation tests |
 | Tampered installer/update | Fail-closed signing/provenance/checksum release pipeline; real Azure CI authorization and signed artifacts remain unverified |
@@ -48,11 +49,11 @@ physical directory. It does not authorize native commands or remote resource acc
 
 ## Remaining risks and work
 
-This is a first reader, not a completed port. User theme editor acceptance, external editor commands,
+This is a first reader, not a completed port. Native outline/collapse acceptance, external editor commands,
 print and any future browser bridge need their own controls and tests. Save watching is
 implemented; hosted real browser replacement/deletion/scroll and remote-image denial pass on 77dd04d.
 Local links to other documents and mailto links are currently blocked. WebView2 uses
-the installed evergreen runtime; installed deployment acceptance remains required.
+the installed evergreen runtime; published and both installed channels passed reader acceptance on 77dd04d and editable themes on 30ca094. New frontmatter/outline acceptance remains required.
 
 Historical EX-0002 does not authorize unsigned production publication. Azure setup
 and real final-artifact signature validation are deferred; an active profile alone

@@ -32,10 +32,26 @@ public sealed class AppSettings : ShellSettings
    public Documents.FrontmatterMode FrontmatterKind => Enum.TryParse(Frontmatter, out Documents.FrontmatterMode mode) && Enum.IsDefined(mode) ? mode : Documents.FrontmatterMode.Hide;
 
 
+   /// <summary>Shows the native heading sidebar when requested.</summary>
+   public bool ShowOutline { get; set; }
+
+
+
+   /// <summary>Maximum heading depth displayed in the sidebar.</summary>
+   public int OutlineDepth { get; set; } = 3;
+
+
+
+   /// <summary>Last native sidebar width in device-independent pixels.</summary>
+   public double OutlineWidth { get; set; } = 220;
+
+
    /// <inheritdoc/>
    public override void Sanitize()
    {
       base.Sanitize();
+      OutlineDepth = Math.Clamp(OutlineDepth, 1, 6);
+      OutlineWidth = double.IsFinite(OutlineWidth) ? Math.Clamp(OutlineWidth, 140, 500) : 220;
       Frontmatter = FrontmatterKind.ToString();
       if(string.IsNullOrWhiteSpace(DocumentTheme) || DocumentTheme.Length > 80 || DocumentTheme.Any(char.IsControl))
       {

@@ -61,6 +61,7 @@ public sealed class DocumentFrontmatterTests
       Assert.DoesNotContain("<script", metadata, StringComparison.Ordinal);
       Assert.Contains("<h1>Body heading</h1>", metadata, StringComparison.Ordinal);
       string rendered = renderer.Render(Markdown, FrontmatterMode.Markdown);
+      Assert.DoesNotContain("<table", rendered, StringComparison.Ordinal);
       Assert.Contains("<strong>Visible value</strong>", rendered, StringComparison.Ordinal);
       Assert.DoesNotContain("<script", rendered, StringComparison.Ordinal);
       Assert.Contains("<h1>Body heading</h1>", rendered, StringComparison.Ordinal);
