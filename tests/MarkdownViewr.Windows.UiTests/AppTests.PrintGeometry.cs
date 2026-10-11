@@ -24,7 +24,9 @@ public partial class AppTests
       for(int step = 0; step < 4; step++)
       {
          session.ClickElement("ZoomInButton");
-         WaitForZoomGlyph(session, height * Math.Pow(1.1, step + 1));
+         double expected = height * Math.Pow(1.1, step + 1);
+         _output.WriteLine(FormattableString.Invariant($"Print zoom step={step + 1}; original height={height}; expected={expected}; actual={session.WaitForElement("mv-heading-0").BoundingRectangle}; reset={session.WaitForElement("ZoomResetButton").Name}."));
+         WaitForZoomGlyph(session, expected);
       }
       session.InvokeMenuItem("View", "SourceToggle");
       session.InvokeMenuItem("Edit", "FindMenuItem");

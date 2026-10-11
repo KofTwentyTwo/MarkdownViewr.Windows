@@ -11,7 +11,7 @@ draft PR #3. Owner authorizes signed/DCO commits, pushes, configuration and tick
 No merges, tags/releases, new Azure sign-ins or fabricated human review.
 Hosted Windows UI tests are authorized; no current local desktop reservation.
 
-## Printing native baseline verified; installed baseline live
+## Printing baseline verified; expanded geometry investigation
 
 Native File/Print/Ctrl+P, copied themes/layout preferences and explicit native PDF
 saving are implemented. Core363/100% measured lines;55 scripts; build/format pass.
@@ -26,18 +26,26 @@ Hosted probes proved41pixel PDF reading movement. SavePdf restores validated
 vertical position in finally only for the same ready navigation; no completion is
 guessed for void native print UI. Filename typing waits for exact full native
 readback. Stale UIA200% values are replaced by actual glyph/view assertions.
-Cleaned300e145 / CI38126078284 native52/52 passes, zero failures/skips; format,
-core, scripts/security/PR gates pass. Installed job114430656496 remains live.
-Native log: artifacts/print-clean-native-38126078284.log. Preserve this installed
-producer before pushing further changes; require published52/stable-dev51.
+Cleaned300e145 / CI38126078284 fully passes: native/published52 each,
+installed stable/dev51 each, zero failures/skips. Both AppKit apply/restart probes
+reach expected versions without check/apply errors; fixtures are unsigned.
+Retained native log and installed evidence: artifacts/print-clean-native-38126078284.log
+and artifacts/print-clean-verified-installed-38126078284 (six real PDFs).
 
 Two additional native-output cases now compile/format locally: first printed
 heading glyph ratios for standard/matching zoom, real40px padding shift and paired
 find/source selection/screen paint after each PDF; saved user-theme240px block
 width versus full page and actual optional border rows. New helper edits actual
 native options, including padding NumberBox; all generated PDF/PNG bytes retained.
-These cases have not run. Full expanded suites expect54 native/published and53 per
-installed channel. No new dependency or local GUI input. ADR-0003 remains proposed.
+Signedd0a225d / CI38127089763 finishes native/published53/54, zero skips.
+Actual saved custom-width/border/full-page case passes. Font/padding case fails
+before PDF output at the fourth requested zoom wait; installed channels are not
+reached. Exact expected/actual glyph rectangles and native state are now retained
+on failure; all original assertions remain. Retained red log and published TRX:
+artifacts/print-geometry-native-38127089763.log and
+artifacts/print-geometry-installed-38127089763. New diagnostic head requires54
+native/published and53 per installed channel. No local GUI input or new dependency.
+ADR-0003 remains proposed; full font/padding/paired-find acceptance is pending.
 
 Live settings validate. Official conformance34PASS/1FAIL/1WARN/3REVIEW: required
 standards inventory lacks app, confirmed live. Exact reviewed addition prepared,
@@ -75,7 +83,7 @@ Superseded diagnostic jobs are not fixed-head acceptance proof.
 
 ## Next steps
 
-1. Require full cleaned printing gates; retain actual TRX/PDF/PNG and update evidence.
+1. Diagnose exact fourth-zoom geometry; require expanded full gates and retained PDF/TRX evidence.
 2. Complete source raw-heading audit and broader zoom/theme/find/collapse proof.
 3. Complete print #12 output/state acceptance, windows/recents/activation and remaining theme/render/link parity.
 4. Finish standards inventory; exact signed stable/dev artifacts remain deferred.

@@ -863,11 +863,20 @@ public partial class AppTests
    /// <summary>Accepts only actual browser glyph height after the matching native zoom controls are ready.</summary>
    private static void WaitForZoomGlyph(AppSession session, double expectedHeight)
    {
-      session.WaitFor(() =>
+      try
+      {
+         session.WaitFor(() =>
+         {
+            AutomationElement? heading = session.FindInApp(cf => cf.ByAutomationId("mv-heading-0"));
+            return heading is not null && Math.Abs(heading.BoundingRectangle.Height - expectedHeight) <= 1 && session.WaitForElement("ZoomResetButton").IsEnabled ? heading : null;
+         }, "the actual rendered heading glyph at the requested zoom");
+      }
+      catch(TimeoutException exception)
       {
          AutomationElement? heading = session.FindInApp(cf => cf.ByAutomationId("mv-heading-0"));
-         return heading is not null && Math.Abs(heading.BoundingRectangle.Height - expectedHeight) <= 1 && session.WaitForElement("ZoomResetButton").IsEnabled ? heading : null;
-      }, "the actual rendered heading glyph at the requested zoom");
+         AutomationElement? reset = session.FindInApp(cf => cf.ByAutomationId("ZoomResetButton"));
+         throw new TimeoutException(FormattableString.Invariant($"{exception.Message} Expected height={expectedHeight}; actual heading={heading?.BoundingRectangle}; reset={reset?.Name}; enabled={reset?.IsEnabled}. Logs: {session.ReadLogs()}. Native tree: {session.DescribeDocumentStatus()}"), exception);
+      }
    }
 
 
