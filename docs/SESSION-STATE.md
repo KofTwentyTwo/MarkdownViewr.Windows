@@ -11,6 +11,19 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Activation boundary trace after physical reproduction — 2026-10-11
+
+016c745 focused source 38120650945/job 114414500506 still fails at the
+repeated last-heading alignment; owned physical down/up events appear in logs.
+This falsifies the explanation that only UIA invocation bypasses ItemClick.
+Do not change app logic again without observing the boundary. Add a trace only
+under the existing fixture input-trace opt-in: clicked native type, numeric
+heading identity and refresh guard. Record the owned pointer target and assert
+the actual browser last-heading glyph before the unchanged native source check.
+This separates missing activation, unexpected payload and reverse source feedback.
+No authored-content/path logs, delays or weakened assertions. Current full CI
+38120651378 remains observed until terminal before pushing another diagnostic.
+
 ## Physical repeat-activation diagnostic — 2026-10-11
 
 Signed 2bf1d14 pushed. Focused source 38120152677/job 114413026121 still

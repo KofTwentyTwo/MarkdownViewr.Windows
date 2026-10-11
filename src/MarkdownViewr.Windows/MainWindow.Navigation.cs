@@ -106,6 +106,11 @@ public sealed partial class MainWindow
    /// <summary>Activating the same heading again returns to it after scrolling; selection changes still support keyboard navigation.</summary>
    private async void Outline_ItemClick(object sender, ItemClickEventArgs args)
    {
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         int index = (args.ClickedItem as ListViewItem)?.Tag is Core.Documents.DocumentHeading clicked ? clicked.Index : -1;
+         App.Log.Info($"[DEBUG-outline-activation] clicked type={args.ClickedItem?.GetType().Name}; refreshing={_refreshingOutline}; index={index}.");
+      }
       if(!_refreshingOutline && args.ClickedItem is ListViewItem { Tag: Core.Documents.DocumentHeading heading })
       {
          await _browser.JumpToHeadingAsync(heading.Index);
