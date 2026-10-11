@@ -33,9 +33,42 @@ public sealed partial class MainWindow
       _sourceSyncTimer.Interval = TimeSpan.FromMilliseconds(150);
       _sourceSyncTimer.Tick += async (_, _) => await SynchronizeSourceAsync();
       SourceText.Loaded += (_, _) => AttachSourceScroller();
+      SourceText.GettingFocus += Source_GettingFocus;
       _browser.DocumentReady += (_, _) => _sourceReaderLastY = double.NaN;
       Closed += (_, _) => _sourceSyncTimer.Stop();
       _sourceSyncTimer.Start();
+   }
+
+
+
+   /// <summary>Entering read-only source preserves its synchronized viewport instead of revealing the old native caret.</summary>
+   private void Source_GettingFocus(UIElement sender, Microsoft.UI.Xaml.Input.GettingFocusEventArgs args)
+   {
+      if(_closed || !_settings.ShowSource || FindBar.Visibility == Visibility.Visible)
+      {
+         return;
+      }
+      AttachSourceScroller();
+      if(_sourceScroller is not { } scroller)
+      {
+         return;
+      }
+      double position = scroller.VerticalOffset;
+      if(string.Equals(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_INPUT_TRACE"), "1", StringComparison.Ordinal))
+      {
+         App.Log.Info(FormattableString.Invariant($"Input trace: source focus before={position:R}, last={_sourceLastY:R}."));
+      }
+      Core.Documents.DocumentSourceText? snapshot = _sourceDocument;
+      DispatcherQueue.TryEnqueue(() =>
+      {
+         if(!_closed && ReferenceEquals(snapshot, _sourceDocument) && SourceText.FocusState != FocusState.Unfocused)
+         {
+            _sourceSyncHoldUntil = Environment.TickCount64 + 200;
+            scroller.ChangeView(null, position, null, disableAnimation: true);
+            _sourceLastY = position;
+            _sourceScrolled = false;
+         }
+      });
    }
 
 

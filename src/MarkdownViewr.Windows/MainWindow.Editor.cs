@@ -13,46 +13,41 @@ namespace MarkdownViewr.Windows;
 /// <summary>Routes deliberate native editor commands through a literal process argument boundary.</summary>
 public sealed partial class MainWindow
 {
-   /// <summary>A configured editor becomes available only after a document has been committed.</summary>
+   /// <summary>One named editor is a direct action; multiple editors expose their saved order through native choices.</summary>
    private void RefreshEditorCommands()
-      => OpenEditorMenuItem.IsEnabled = _documentPath is not null && Core.Editors.EditorLaunch.IsExecutablePath(_settings.ExternalEditor);
+   {
+      Core.Editors.EditorConfiguration[] editors = _settings.ConfiguredEditors;
+      OpenEditorMenuItem.Visibility = editors.Length > 1 ? Visibility.Collapsed : Visibility.Visible;
+      OpenEditorMenuItem.IsEnabled = _documentPath is not null && editors.Length == 1;
+      OpenEditorMenuItem.Text = editors.Length == 1 ? "Open in " + editors[0].Name + (editors[0].OpensFolder ? " (folder)" : "") : "Open in editor";
+      OpenEditorChoices.Visibility = editors.Length > 1 ? Visibility.Visible : Visibility.Collapsed;
+      OpenEditorChoices.IsEnabled = _documentPath is not null;
+      OpenEditorChoices.Items.Clear();
+      foreach(Core.Editors.EditorConfiguration editor in editors)
+      {
+         var item = new MenuFlyoutItem { Text = editor.Name + (editor.OpensFolder ? " (folder)" : ""), Tag = editor.Id };
+         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, "EditorLaunch:" + editor.Id);
+         item.Click += OpenEditor_Click;
+         OpenEditorChoices.Items.Add(item);
+      }
+   }
 
 
 
-   /// <summary>Validates an installed executable before persisting the user's deliberate choice.</summary>
+   /// <summary>Changes remain in the dialog's copied list until the user's validated Save.</summary>
    private async void ConfigureEditor_Click(object sender, RoutedEventArgs e)
    {
-      var path = new TextBox { Name = "EditorPath", Header = "Editor executable path", Text = _settings.ExternalEditor, MaxLength = 32767, MinWidth = 320 };
-      var error = new TextBlock { Name = "EditorError", TextWrapping = TextWrapping.Wrap };
-      var panel = new StackPanel { Spacing = 12 };
-      panel.Children.Add(new TextBlock { Text = "Enter the full path of an installed Windows editor. It receives the current document as one file argument.", TextWrapping = TextWrapping.Wrap });
-      panel.Children.Add(path);
-      panel.Children.Add(error);
-      var dialog = new ContentDialog
-      {
-         Title = "Configure editor",
-         Content = panel,
-         PrimaryButtonText = "Save",
-         CloseButtonText = "Cancel",
-         DefaultButton = ContentDialogButton.Primary,
-         XamlRoot = Content.XamlRoot,
-      };
-      dialog.PrimaryButtonClick += (_, args) =>
-      {
-         if(!Core.Editors.EditorLaunch.IsExecutablePath(path.Text) || !File.Exists(path.Text))
-         {
-            args.Cancel = true;
-            error.Text = "Enter the full path of an existing .exe file.";
-         }
-      };
-      if(await dialog.ShowAsync() != ContentDialogResult.Primary || _closed)
+      var editor = new EditorConfigurationDialog(_settings.ConfiguredEditors);
+      Core.Editors.EditorConfiguration[]? choices = await editor.ShowAsync(Content.XamlRoot);
+      if(choices is null || _closed)
       {
          return;
       }
-      _settings.ExternalEditor = path.Text;
+      _settings.ConfiguredEditors = choices;
+      _settings.ExternalEditor = choices.FirstOrDefault()?.Executable ?? "";
       Save();
       RefreshEditorCommands();
-      StatusText.Text = "Editor configured.";
+      StatusText.Text = "Editors configured.";
    }
 
 
@@ -64,7 +59,14 @@ public sealed partial class MainWindow
       {
          return;
       }
-      if(!File.Exists(_settings.ExternalEditor))
+      Core.Editors.EditorConfiguration? editor = sender is MenuFlyoutItem { Tag: Guid identity }
+         ? _settings.ConfiguredEditors.FirstOrDefault(choice => choice.Id == identity)
+         : _settings.ConfiguredEditors.FirstOrDefault();
+      if(!Core.Editors.EditorConfiguration.IsValid(editor))
+      {
+         return;
+      }
+      if(!File.Exists(editor!.Executable))
       {
          StatusText.Text = "The configured editor is missing. Use File → Configure editor to choose an installed executable.";
          return;
@@ -76,8 +78,8 @@ public sealed partial class MainWindow
       }
       try
       {
-         using var process = Process.Start(Core.Editors.EditorLaunch.Create(_settings.ExternalEditor, _documentPath));
-         StatusText.Text = process is not null ? "Opened document in the configured editor." : "The configured editor did not start.";
+         using var process = Process.Start(Core.Editors.EditorLaunch.Create(editor.Executable, _documentPath, editor.OpensFolder));
+         StatusText.Text = process is not null ? editor.OpensFolder ? "Opened document folder in the configured editor." : "Opened document in the configured editor." : "The configured editor did not start.";
          App.Log.Info("Requested a document launch in the configured editor.");
       }
       catch(Exception exception) when(exception is System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)

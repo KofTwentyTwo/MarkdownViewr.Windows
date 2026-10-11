@@ -95,6 +95,103 @@ public class AppTests
 
 
 
+   /// <summary>Saved editor identities/order choose actual file or parent-folder arguments through the native submenu.</summary>
+   [Fact]
+   public void Editor_ListFolderChoice_PersistsOrderAndLaunchesLiteralTargets()
+   {
+      using var session = new AppSession(document: "# Editor list fixture", editorProbe: true, documentFileName: "notes & café $HOME.md");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor list fixture")), "the editor list document", TimeSpan.FromSeconds(30));
+      string executable = ResolveEditorProbe();
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.EnterText("EditorName", "File editor");
+      session.EnterText("EditorPath", executable);
+      session.ClickElement("EditorAdd");
+      session.EnterText("EditorName", "Folder editor");
+      session.EnterText("EditorPath", executable);
+      session.WaitForElement("EditorFolder").Patterns.Toggle.Pattern.Toggle();
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      using var initial = JsonDocument.Parse(session.ReadSettings());
+      JsonElement initialChoices = initial.RootElement.GetProperty("ConfiguredEditors");
+      Assert.Equal(2, initialChoices.GetArrayLength());
+      string fileId = initialChoices[0].GetProperty("Id").GetString()!;
+      string folderId = initialChoices[1].GetProperty("Id").GetString()!;
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.WaitForElement("EditorChoice:" + folderId).Patterns.SelectionItem.Pattern.Select();
+      Wait.UntilInputIsProcessed();
+      session.ClickElement("EditorUp");
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      using var reordered = JsonDocument.Parse(session.ReadSettings());
+      JsonElement choices = reordered.RootElement.GetProperty("ConfiguredEditors");
+      Assert.Equal(folderId, choices[0].GetProperty("Id").GetString());
+      Assert.Equal(fileId, choices[1].GetProperty("Id").GetString());
+      Assert.True(choices[0].GetProperty("OpensFolder").GetBoolean());
+      using JsonDocument folderResult = LaunchConfiguredEditor(session, folderId);
+      Assert.Equal(session.DataDirectory, Assert.Single(folderResult.RootElement.GetProperty("Arguments").EnumerateArray()).GetString());
+      Assert.Equal(session.DataDirectory, folderResult.RootElement.GetProperty("WorkingDirectory").GetString());
+      File.Delete(Path.Combine(session.DataDirectory, "editor-result.json"));
+      using JsonDocument fileResult = LaunchConfiguredEditor(session, fileId);
+      Assert.Equal(Path.Combine(session.DataDirectory, "notes & café $HOME.md"), Assert.Single(fileResult.RootElement.GetProperty("Arguments").EnumerateArray()).GetString());
+      Assert.DoesNotContain("notes & café", session.ReadLogs(), StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>Draft add/remove changes cancel atomically; saving the final removal disables the native command without resurrection.</summary>
+   [Fact]
+   public void Editor_ListCancelAndLastRemoval_PreservesCommittedChoices()
+   {
+      using var session = new AppSession(document: "# Editor removal fixture");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor removal fixture")), "the removal fixture document", TimeSpan.FromSeconds(30));
+      string executable = Path.Combine(session.DataDirectory, "presence-only-editor.exe");
+      File.WriteAllText(executable, "Never executed; configuration presence fixture.");
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.EnterText("EditorName", "Original editor");
+      session.EnterText("EditorPath", executable);
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      using var original = JsonDocument.Parse(session.ReadSettings());
+      string identity = Assert.Single(original.RootElement.GetProperty("ConfiguredEditors").EnumerateArray()).GetProperty("Id").GetString()!;
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.ClickElement("EditorAdd");
+      session.EnterText("EditorName", "Cancelled editor");
+      session.EnterText("EditorPath", executable);
+      session.ClickElement("EditorAdd");
+      session.WaitForElement("EditorChoice:" + identity).Patterns.SelectionItem.Pattern.Select();
+      Wait.UntilInputIsProcessed();
+      session.ClickElement("EditorRemove");
+      session.ClickButton("Cancel");
+      session.WaitForElementGone("EditorPath");
+      using var cancelled = JsonDocument.Parse(session.ReadSettings());
+      Assert.Equal(identity, Assert.Single(cancelled.RootElement.GetProperty("ConfiguredEditors").EnumerateArray()).GetProperty("Id").GetString());
+      Assert.DoesNotContain("Cancelled editor", session.ReadSettings(), StringComparison.Ordinal);
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.ClickElement("EditorRemove");
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      using var removed = JsonDocument.Parse(session.ReadSettings());
+      Assert.Empty(removed.RootElement.GetProperty("ConfiguredEditors").EnumerateArray());
+      Assert.Equal("", removed.RootElement.GetProperty("ExternalEditor").GetString());
+      AutomationElement menu = session.WaitFor(() => session.FindInApp(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.MenuItem).And(cf.ByName("File"))), "the native File menu");
+      menu.Patterns.ExpandCollapse.Pattern.Expand();
+      Assert.False(session.WaitForElement("OpenEditorMenuItem").IsEnabled);
+   }
+
+
+
+   /// <summary>Reads the actual owned probe process output after selecting a native editor submenu entry.</summary>
+   private static JsonDocument LaunchConfiguredEditor(AppSession session, string identity)
+   {
+      session.InvokeMenuItem("File", "OpenEditorChoices");
+      session.ClickElement("EditorLaunch:" + identity);
+      string path = Path.Combine(session.DataDirectory, "editor-result.json");
+      session.WaitFor(() => File.Exists(path) ? session.MainWindow : null, "the actual selected editor fixture launch");
+      return JsonDocument.Parse(File.ReadAllText(path));
+   }
+
+
+
    /// <summary>Uses the solution's existing test-only executable, never a real user's editor.</summary>
    private static string ResolveEditorProbe()
    {
@@ -356,6 +453,7 @@ public class AppTests
       session.ClickElement("OutlineHeading:2");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
       session.MouseClickElement("SourceText");
+      WaitForSourceHeadingAlignment(session, source, "## Source sync last");
       FlaUI.Core.ITextRange middle = source.Patterns.Text.Pattern.DocumentRange.FindText("## Source sync middle", backward: false, ignoreCase: false);
       Assert.NotNull(middle);
       middle.ScrollIntoView(alignToTop: true);
@@ -427,6 +525,8 @@ public class AppTests
       }
       catch(TimeoutException)
       {
+         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+         _output.WriteLine("Native source glyph bounds: " + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())) + "; viewport=" + source.BoundingRectangle);
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;

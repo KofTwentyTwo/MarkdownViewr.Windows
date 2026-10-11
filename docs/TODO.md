@@ -34,7 +34,8 @@
 - [x] Verify actual hosted frontmatter mode switching on 4bf0b81 (including both installed channels).
 - [x] Implement bounded persisted editor selection and deliberate native launch using one literal process argument (issue #11).
 - [x] Verify actual editor fixture launch, validation/cancel and missing-executable acceptance on 5a9af63 in native/published/installed builds.
-- [ ] Audit editor list selection/reordering/removal and folder-opening parity (issue #11).
+- [x] Audit and implement named editor lists, stable migration, selection/reordering/removal, cancel-safe drafts and folder-opening parity (issue #11).
+- [ ] Verify actual editor-list/menu order, file/folder probe arguments, cancellation and final removal in hosted/installed builds.
 - [ ] Add native printing/theme/layout options and screen-state restoration.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.

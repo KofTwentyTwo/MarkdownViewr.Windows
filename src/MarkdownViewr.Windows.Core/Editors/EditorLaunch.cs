@@ -17,14 +17,14 @@ public static class EditorLaunch
 
 
 
-   /// <summary>Supplies exactly one literal file argument; filesystem availability is checked by the Windows adapter.</summary>
-   public static ProcessStartInfo Create(string executable, string document)
+   /// <summary>Supplies exactly one literal file or parent-folder argument; availability is checked by the Windows adapter.</summary>
+   public static ProcessStartInfo Create(string executable, string document, bool opensFolder = false)
    {
       if(!IsExecutablePath(executable))
       {
          throw new ArgumentException("Choose an editor executable using its full path.", nameof(executable));
       }
-      if(string.IsNullOrEmpty(document) || document.Length > 32767 || document.Any(char.IsControl) || !Path.IsPathFullyQualified(document))
+      if(string.IsNullOrEmpty(document) || document.Length > 32767 || document.Any(char.IsControl) || !Path.IsPathFullyQualified(document) || Path.GetFileName(document).Length == 0)
       {
          throw new ArgumentException("The document must have a full file path.", nameof(document));
       }
@@ -34,7 +34,7 @@ public static class EditorLaunch
          UseShellExecute = false,
          WorkingDirectory = Path.GetDirectoryName(document),
       };
-      start.ArgumentList.Add(document);
+      start.ArgumentList.Add(opensFolder ? Path.GetDirectoryName(document)! : document);
       return start;
    }
 }

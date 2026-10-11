@@ -11,6 +11,39 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Current named-editor and source-focus increment — 2026-10-11
+
+2dc509d / CI 38115411266 is terminal FAILURE: native/published 45/46,
+one failure/no skips; installed channels not reached. Build/core/format,
+CodeQL 38115411093, scripts 38115410579, security 38115411111 and PR gates
+38115411139 passed. Logs and published TRX retained at
+artifacts/source-sync-focus-failed-installed-38115411266 and source-sync-focus
+native/installed logs. New glyph assertion proves the UIA range request does not
+align native source. Numeric logs show entering SourceText resets offset to 0
+from target 5310.9 before pointer press. The source now restores its pre-focus
+viewport asynchronously with snapshot/closed/find guards. The test also verifies
+last-heading alignment after physical focus before requesting middle alignment;
+actual glyph bounds are retained on failure. No acceptance weakening or GUI input.
+
+Named editor lists now persist stable IDs/order, bounded names/.exe paths and
+per-editor file/folder choices. Legacy paths migrate once; the compatible path
+mirrors the first choice and clears on last removal. The native manager edits a
+copied list with add/remove/move/save/cancel; one editor is direct, several use a
+saved-order submenu. Each launch revalidates the selected identity and receives
+one literal file or parent-folder argument. No dependencies or shell interpolation.
+312 core tests/100% measured lines pass at artifacts/editor-catalog-core,
+including stable migration, corrupt/duplicate/capped choices, trimmed AppKit
+save/load/removal and literal Unicode/punctuation/UNC/root folder arguments.
+Two new hosted editor tests await proof: actual selected probe file/folder arguments,
+persisted reordering, cancel and final removal/native disabled command. Expected
+48 native/published and 47 per installed channel. Build zero warnings passes;
+final format/docs/hook gates and signed commit/push are next.
+
+Full PRODUCT.md remains active; no local GUI/Azure/merge/tag/release or fabricated
+human acknowledgement. Published AppKit 0.1.0 retained. Source raw-heading audit,
+new acceptance, print, windows/recents/activation, broader theme/rendering/link
+parity, standards inventory and actual signed stable/dev final bytes remain.
+
 ## Current source synchronization increment — 2026-10-11
 
 Previous pushed b0f3b8638f16d75e4dce5dc6f2cb585fb5214927 is fully verified:

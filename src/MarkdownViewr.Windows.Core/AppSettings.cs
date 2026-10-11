@@ -56,8 +56,13 @@ public sealed class AppSettings : ShellSettings
 
 
 
-   /// <summary>The user-selected external editor; an empty value requires deliberate configuration.</summary>
+   /// <summary>Legacy single-editor path, migrated into the list and kept as the first choice for compatible settings readers.</summary>
    public string ExternalEditor { get; set; } = "";
+
+
+
+   /// <summary>Ordered named editor choices; the legacy path migrates into one entry on load.</summary>
+   public Editors.EditorConfiguration[] ConfiguredEditors { get; set; } = [];
 
 
 
@@ -66,6 +71,12 @@ public sealed class AppSettings : ShellSettings
    {
       base.Sanitize();
       ExternalEditor = Editors.EditorLaunch.IsExecutablePath(ExternalEditor) ? ExternalEditor : "";
+      ConfiguredEditors = Editors.EditorConfiguration.Sanitize(ConfiguredEditors);
+      if(ConfiguredEditors.Length == 0 && ExternalEditor.Length > 0)
+      {
+         ConfiguredEditors = [new Editors.EditorConfiguration(Guid.NewGuid(), "Editor", ExternalEditor)];
+      }
+      ExternalEditor = ConfiguredEditors.FirstOrDefault()?.Executable ?? "";
       SourceWidth = double.IsFinite(SourceWidth) ? Math.Clamp(SourceWidth, 160, 600) : 320;
       OutlineDepth = Math.Clamp(OutlineDepth, 1, 6);
       OutlineWidth = double.IsFinite(OutlineWidth) ? Math.Clamp(OutlineWidth, 140, 500) : 220;

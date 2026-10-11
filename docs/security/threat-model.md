@@ -86,16 +86,19 @@ See Microsoft's [thread-hook contract](https://learn.microsoft.com/en-us/windows
 
 ## Configured editor boundary
 
-Only deliberate native configuration selects an existing, bounded, fully qualified
-`.exe`. AppKit sanitizes the saved choice. Opening the editor requires a current
-existing document and passes its full path as exactly one `ArgumentList` value with
+Only deliberate native configuration selects existing, bounded, fully qualified
+`.exe` editors. AppKit sanitizes at most 32 named stable-ID choices, discarding
+invalid/duplicate IDs, corrupt names and executable paths. Legacy single-path
+settings migrate into one entry; cancel edits only a copied list. Opening the editor requires a current
+existing document and passes its full file path or selected parent folder as exactly
+one `ArgumentList` value with
 `UseShellExecute=false`; Markdown cannot choose an executable or supply switches.
 The chosen application runs with the user's permissions and receives the document.
 Missing files and native launch errors leave the viewer open; logs omit paths and
 contents. Core tests cover metacharacters/Unicode, relative/script paths, corruption
 and bounds. Actual fixture-process/UI acceptance passed on 5a9af63 in native, published and
-installed channels; reference editor-list
-and folder-opening parity still require review.
+installed channels; new named-list/submenu order, cancellation/removal and actual folder/file probe
+launch acceptance remain pending.
 
 ## Source provenance boundary
 
@@ -121,6 +124,12 @@ stops the timer; hidden panes do not synchronize. Literal ellipses only affect t
 presentation; canonical document bytes and independent nested fold choices remain.
 Opt-in fixture geometry logs contain numeric positions/counts only.
 
-300 core tests cover folding, original/native offsets and malformed numeric frames
+312 core tests cover editor migration/persistence/folder arguments, folding, original/native offsets and malformed numeric frames
 at 100% measured line coverage. Hosted actual glyph/viewport and fold/find/reload
 acceptance is pending; raw multiline/same-line heading parity still needs audit.
+
+Entering read-only source now defers restoration of its prior viewport after native
+focus/caret revelation, guarded by the current snapshot/window and excluding active
+find. This prevents a caret at the document start from being interpreted as a new
+user scroll. Hosted acceptance must verify actual glyph positions before/after
+focus and native source-to-reader movement; numeric fixture logs contain no text.
