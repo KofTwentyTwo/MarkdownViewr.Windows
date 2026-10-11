@@ -32,7 +32,7 @@ public sealed class AppSession : IDisposable
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false, string? document = null)
+   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md")
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
@@ -44,9 +44,13 @@ public sealed class AppSession : IDisposable
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
       startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
       startInfo.Environment["MARKDOWNVIEWR_INPUT_TRACE"] = "1";
+      if(editorProbe)
+      {
+         startInfo.Environment["MARKDOWNVIEWR_EDITOR_PROBE_RESULT"] = Path.Combine(DataDirectory, "editor-result.json");
+      }
       if(document is not null)
       {
-         string path = Path.Combine(DataDirectory, "document.md");
+         string path = Path.Combine(DataDirectory, documentFileName);
          File.WriteAllText(path, document);
          startInfo.ArgumentList.Add(path);
       }

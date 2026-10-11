@@ -27,7 +27,9 @@
 - [x] Implement and core-test hidden/metadata/Markdown frontmatter modes, with persisted native controls and attribution.
 - [x] Verify actual code-font size 17 editing in hosted UI runs.
 - [x] Verify actual hosted frontmatter mode switching on 4bf0b81 (including both installed channels).
-- [ ] Add safe configured editor launch and printing options.
+- [x] Implement bounded persisted editor selection and deliberate native launch using one literal process argument (issue #11).
+- [ ] Verify real hosted editor fixture launch, validation/cancel and missing-executable acceptance; audit editor list/folder parity.
+- [ ] Add native printing/theme/layout options and screen-state restoration.
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
 - [ ] Verify hosted checks on each actual implementation head.

@@ -29,6 +29,85 @@ public class AppTests
 
 
 
+   /// <summary>The native command launches the chosen real fixture process with one literal document path.</summary>
+   [Fact]
+   public void Editor_ConfiguredExecutable_LaunchesLiteralDocument()
+   {
+      using var session = new AppSession(document: "# Editor fixture", editorProbe: true, documentFileName: "notes & café $HOME.md");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Editor fixture")), "the editor fixture heading", TimeSpan.FromSeconds(30));
+      string editor = ResolveEditorProbe();
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.EnterText("EditorPath", editor);
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      using(var settings = JsonDocument.Parse(session.ReadSettings()))
+      {
+         Assert.Equal(editor, settings.RootElement.GetProperty("ExternalEditor").GetString());
+      }
+      session.InvokeMenuItem("File", "OpenEditorMenuItem");
+      string resultPath = Path.Combine(session.DataDirectory, "editor-result.json");
+      session.WaitFor(() => File.Exists(resultPath) ? session.MainWindow : null, "the actual editor fixture's result file");
+      using var result = JsonDocument.Parse(File.ReadAllText(resultPath));
+      Assert.Equal(Path.Combine(session.DataDirectory, "notes & café $HOME.md"), Assert.Single(result.RootElement.GetProperty("Arguments").EnumerateArray()).GetString());
+      Assert.Equal(session.DataDirectory, result.RootElement.GetProperty("WorkingDirectory").GetString());
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Editor fixture")));
+      Assert.DoesNotContain("notes & café", session.ReadLogs(), StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>A missing choice keeps the dialog open; cancel does not change saved settings.</summary>
+   [Fact]
+   public void Editor_InvalidExecutableAndCancel_DoesNotPersist()
+   {
+      using var session = new AppSession();
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.EnterText("EditorPath", Path.Combine(session.DataDirectory, "missing.exe"));
+      session.ClickButton("Save");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Enter the full path of an existing .exe file.")), "the editor validation error");
+      Assert.NotNull(session.FindInApp(cf => cf.ByAutomationId("EditorPath")));
+      session.ClickButton("Cancel");
+      session.WaitForElementGone("EditorPath");
+      Assert.DoesNotContain("missing.exe", session.ReadSettings(), StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>An editor uninstalled after configuration reports the problem without launching anything.</summary>
+   [Fact]
+   public void Editor_MissingConfiguredExecutable_PreservesDocument()
+   {
+      using var session = new AppSession(document: "# Missing editor fixture");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("Missing editor fixture")), "the fixture heading", TimeSpan.FromSeconds(30));
+      string editor = Path.Combine(session.DataDirectory, "removed-editor.exe");
+      File.WriteAllText(editor, "Never executed; presence-only configuration fixture.");
+      session.InvokeMenuItem("File", "ConfigureEditorMenuItem");
+      session.EnterText("EditorPath", editor);
+      session.ClickButton("Save");
+      session.WaitForElementGone("EditorPath");
+      File.Delete(editor);
+      session.InvokeMenuItem("File", "OpenEditorMenuItem");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName("The configured editor is missing. Use File → Configure editor to choose an installed executable.")), "the missing editor status");
+      Assert.NotNull(session.FindInApp(cf => cf.ByName("Missing editor fixture")));
+   }
+
+
+
+   /// <summary>Uses the solution's existing test-only executable, never a real user's editor.</summary>
+   private static string ResolveEditorProbe()
+   {
+      for(DirectoryInfo? current = new(AppContext.BaseDirectory); current is not null; current = current.Parent)
+      {
+         if(File.Exists(Path.Combine(current.FullName, "MarkdownViewr.Windows.slnx")))
+         {
+            string path = Path.Combine(current.FullName, "tests", "MarkdownViewr.Windows.UpdateProbe", "bin", "Debug", "net10.0-windows", "MarkdownViewr.Windows.UpdateProbe.exe");
+            return File.Exists(path) ? path : throw new FileNotFoundException("Build the solution's test-only editor probe first.", path);
+         }
+      }
+      throw new FileNotFoundException("Could not locate the solution's editor probe.");
+   }
+
+
    /// <summary>Splash: shows, then dismisses itself.</summary>
    [Fact]
    public void Splash_ShowsThenDismissesItself()

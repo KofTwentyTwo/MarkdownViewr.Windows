@@ -205,3 +205,21 @@ and artifacts/window-find-installed-38109196556.log.
 Separate local editor work is tracked by issue #11: literal ProcessStartInfo
 ArgumentList, persisted executable selection and native controls. Its 195 core
 tests/100% lines pass; that work is not included in this keyboard correction.
+
+## Configured editor increment prepared locally
+
+Issue #11 tracks editor launch and the broader reference list/folder parity audit.
+The local increment adds a sanitized persisted executable path, native configure
+Save/Cancel and open commands, missing-editor/document status, and one literal
+ProcessStartInfo.ArgumentList value with UseShellExecute=false. No arguments or
+source content determine executable selection; operational logs omit paths/content.
+195 core tests pass with 100% measured lines; final native build has zero warnings
+and formatting passes. Three new hosted tests use the existing test-only UpdateProbe
+in an environment-selected capture mode; it never reads document contents. They
+verify actual process arguments/working directory, saved configuration, invalid
+selection/cancel and an editor removed after selection. No local GUI input occurred.
+
+This editor work remains separate from pushed keyboard head 2292603 until its
+live CI 38109719180 ends. CodeQL 38109719207 remains under observation;
+scripts 38109718804, security 38109719182 and PR gates 38109719194 passed.
+Keyboard/fragment and editor hosted acceptance remain unverified; full scope active.

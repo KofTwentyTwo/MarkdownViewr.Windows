@@ -29,6 +29,9 @@
             </MenuFlyoutItem>
             <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
             <MenuFlyoutSeparator />
+            <MenuFlyoutItem x:Name="OpenEditorMenuItem" Text="Open in editor" Click="OpenEditor_Click" IsEnabled="False" />
+            <MenuFlyoutItem x:Name="ConfigureEditorMenuItem" Text="Configure editor..." Click="ConfigureEditor_Click" />
+            <MenuFlyoutSeparator />
             <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
          </MenuBarItem>
          <MenuBarItem Title="Edit">

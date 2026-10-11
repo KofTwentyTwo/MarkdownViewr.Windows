@@ -56,10 +56,16 @@ public sealed class AppSettings : ShellSettings
 
 
 
+   /// <summary>The user-selected external editor; an empty value requires deliberate configuration.</summary>
+   public string ExternalEditor { get; set; } = "";
+
+
+
    /// <inheritdoc/>
    public override void Sanitize()
    {
       base.Sanitize();
+      ExternalEditor = Editors.EditorLaunch.IsExecutablePath(ExternalEditor) ? ExternalEditor : "";
       SourceWidth = double.IsFinite(SourceWidth) ? Math.Clamp(SourceWidth, 160, 600) : 320;
       OutlineDepth = Math.Clamp(OutlineDepth, 1, 6);
       OutlineWidth = double.IsFinite(OutlineWidth) ? Math.Clamp(OutlineWidth, 140, 500) : 220;

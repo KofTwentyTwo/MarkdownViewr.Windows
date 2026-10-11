@@ -79,3 +79,15 @@ through; closing the window removes the callback. No global keyboard registratio
 other-process input capture, arbitrary command dispatch, browser bridge or text
 logging is introduced. Actual hosted browser-focus acceptance is still required.
 See Microsoft's [thread-hook contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexw).
+
+## Configured editor boundary
+
+Only deliberate native configuration selects an existing, bounded, fully qualified
+`.exe`. AppKit sanitizes the saved choice. Opening the editor requires a current
+existing document and passes its full path as exactly one `ArgumentList` value with
+`UseShellExecute=false`; Markdown cannot choose an executable or supply switches.
+The chosen application runs with the user's permissions and receives the document.
+Missing files and native launch errors leave the viewer open; logs omit paths and
+contents. Core tests cover metacharacters/Unicode, relative/script paths, corruption
+and bounds. Actual fixture-process/UI acceptance is pending; reference editor-list
+and folder-opening parity still require review.

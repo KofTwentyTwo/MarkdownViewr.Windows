@@ -42,6 +42,7 @@ public sealed partial class MainWindow : Window, IDisposable
       InitializeOutline();
       InitializeSource();
       InitializeFind();
+      RefreshEditorCommands();
       InitializeInputDiagnostics();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;
       Title = AppIdentity.Info.DisplayName;
@@ -290,6 +291,7 @@ public sealed partial class MainWindow : Window, IDisposable
       _outline = outline;
       RefreshOutline();
       _documentPath = Path.GetFullPath(path);
+      RefreshEditorCommands();
       Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;
       StatusText.Text = (reload ? "Reloaded " : "Opened ") + Path.GetFileName(path);
       App.Log.Info(reload ? "Reloaded a Markdown document." : "Opened a Markdown document.");
