@@ -2,6 +2,28 @@
 
 Updated: 2026-10-11
 
+## Mac screenshot comparison and inline-heading correction - 2026-10-11
+
+Reviewed all eight owner-provided Mac screenshots; issue #21 records the concrete
+Windows gaps: General default-viewer status, configurable Contents wrapping/depth
+markers, theme palette previews and clear Enabled/default choices, and a dedicated
+Printing settings page. Use native Windows controls and retain the owner's visible
+Print/Contents, removed duplicate depth selector and off-by-default panes. Private
+screenshots/document contents remain outside the repository and public tickets.
+
+A separate valid multiline raw heading inside a Markdown paragraph reproduced the
+remaining complete-header fold loss. Pair actual HtmlInline AST nodes within their
+Markdown leaf, excluding code/comment lookalikes; preserve the original closing
+line and distinct implicit-close positions. All592 core tests pass, zero skips,
+with100% measured core line coverage; Release build has zero warnings/errors.
+The existing raw-HTML UI fixture now exercises that inline variant; its hosted
+runtime outcome is not yet proved. Do not infer it from the older block fixture.
+
+Pushed53755ab / CI38182128299 passes focused21/21 and full native99/99,
+zero failures/skips; retain current-native-53755ab.log (9m14). Installed job
+114596717826 remains live at this observation. Hold the next push until terminal;
+no current distributed/registration/coexistence outcome or signature is claimed.
+
 ## Published print startup failures retained; next diagnostic candidate - 2026-10-11
 
 Exactbd3d72a / CI38180868496 is terminal: focused21/21 and native99/99 pass,

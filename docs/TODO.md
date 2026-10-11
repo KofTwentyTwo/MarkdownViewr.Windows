@@ -1,5 +1,10 @@
 # Development Tasks
 
+- [x] Review all eight Mac screenshots and record verified Settings gaps in issue #21 without private content.
+- [ ] Implement/accept the native Windows Settings organization, General default-viewer status, Contents options, theme previews/defaults and Printing page.
+- [x] Reproduce/correct multiline inline raw-heading fold loss;592 core tests/100% measured lines and zero-warning Release pass.
+- [ ] Verify the updated inline raw-heading runtime fixture and complete distributed acceptance on its exact pushed head.
+
 - [x] Exact6374611: native97/98 and published97/98, focused19/20, zero skips; actual sustained colors/hover/focus and outline pass.
 - [x] Exact9994eda: offscreen native geometry correction passes focused20/20 and full native98/98; original focus/both-direction glyph/wheel assertions unchanged.
 - [x] Exact9994eda: published98/98 and installed stable/dev97/97 each, real update/apply/restart and target hashes pass; zero skips.

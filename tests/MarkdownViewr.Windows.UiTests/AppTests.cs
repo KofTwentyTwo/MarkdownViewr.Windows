@@ -548,7 +548,7 @@ public partial class AppTests
       string childBody = string.Join("\n\n", Enumerable.Range(0, 40).Select(index => "Raw child body " + index));
       string tailBody = string.Join("\n\n", Enumerable.Range(0, 40).Select(index => "Raw tail body " + index));
       string markdown = "---\ntitle: Raw fixture\n---\n<div><h1>Raw root</h1></div>\n\n" + rootBody
-         + "\n\n<H2\n title='metadata'>Raw child</H2>\n\n" + childBody
+         + "\n\nIntro <H2\n title='metadata'>Raw child\n</H2>\n\n" + childBody
          + "\n\n<div><h3>Raw first peer</h3><h3>Raw second peer</h3></div>\n\nPeer body\n\n```html\n<h2>Fence pseudo heading</h2>\n```\n\n# Raw last\n\n" + tailBody;
       using var session = new AppSession(document: markdown);
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Raw root")), "the raw HTML fixture", TimeSpan.FromSeconds(30));
@@ -572,7 +572,7 @@ public partial class AppTests
       session.ClickElement("ToggleSection");
       WaitForSourceValue(session, source, value => !value.Contains("Raw child body", StringComparison.Ordinal)
          && !value.Contains("Raw first peer", StringComparison.Ordinal) && value.Contains("# Raw last", StringComparison.Ordinal)
-         && value.ReplaceLineEndings("\n").Contains("<H2\n title='metadata'>Raw child</H2>", StringComparison.Ordinal), "literal source folded at raw HTML heading boundaries");
+         && value.ReplaceLineEndings("\n").Contains("<H2\n title='metadata'>Raw child\n</H2>", StringComparison.Ordinal), "literal source folded at raw HTML heading boundaries");
       session.WaitForElementGone("mv-heading-2");
       session.InvokeMenuItem("Edit", "FindMenuItem");
       session.EnterText("FindText", "Raw child body 0");

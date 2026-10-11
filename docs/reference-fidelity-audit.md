@@ -33,7 +33,9 @@ Parser identities retain original UTF-16 offsets through frontmatter, Setext,
 raw multiline/same-line HTML and fenced pseudo-headings. A reproduced multiline
 header-fold defect is fixed in `bd3d72a`; 589 core tests and 100% measured lines pass.
 Its focused hosted suite passes 21/21 and full native 99/99, zero skips, including actual raw-heading jumps,
-literal folds, paired find/cancel and watched reload. Published/installed acceptance on that head is still running.
+literal folds, paired find/cancel and watched reload. That head’s published suite timed out after two initial print-fixture failures;
+installed lifecycle acceptance was not reached. The next pushed53755ab passes
+focused21/21 and native99/99; its installed job remains live at this observation.
 
 ## Remaining release evidence
 
@@ -41,3 +43,18 @@ Complete current distributed acceptance, actual Default Apps/Explorer selection,
 concurrent stable/dev isolation and owner design review. Retain real screenshots
 and print/PDF output. Final signing, genuine maintainer review and publication
 remain required; fixtures and CSS comparisons do not replace them.
+
+## Owner-provided Mac design reference
+
+Eight screenshots clarify the General/Editors/Themes/Markdown/Printing grouping,
+aligned settings values, short explanations, palette swatches and Enabled/default
+choices. Verified Windows gaps are tracked in issue #21: effective default-viewer
+status in General, configurable Contents wrapping/depth markers, clearer theme
+management/default semantics and a dedicated Printing page. Preserve the owner’s
+Windows toolbar/default-pane choices. Private screenshots and document contents
+are not reproduced here; this comparison does not certify the redesign.
+
+A valid multiline raw heading within a Markdown paragraph exposed a separate
+source-fold defect. Actual inline parser nodes now retain the complete header;
+592 core tests pass with100% measured line coverage. The existing runtime fixture
+now exercises this variant, with fresh hosted execution still required.

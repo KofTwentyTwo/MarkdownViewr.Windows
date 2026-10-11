@@ -50,6 +50,19 @@ public sealed class DocumentSourceHeadingTests
 
 
 
+   /// <summary>An implicit closing heading stays distinct from the next raw inline heading on the same authored line.</summary>
+   [Fact]
+   public void Create_ImplicitInlineHeadingClose_PreservesDistinctSourcePositions()
+   {
+      const string Source = "Intro <h2>One<h3>Two</h3>";
+      var outline = new DocumentOutline(Source);
+      Assert.Equal(new[] { "One", "Two" }, outline.Headings.Select(heading => heading.Title), StringComparer.Ordinal);
+      Assert.Equal(new[] { Source.IndexOf("<h2>", StringComparison.Ordinal), Source.IndexOf("<h3>", StringComparison.Ordinal) }, outline.SourceHeadings.Select(heading => heading.Start));
+      Assert.All(outline.SourceHeadings, heading => Assert.Equal(Source.Length, heading.End));
+   }
+
+
+
    /// <summary>Hidden/metadata frontmatter retains body offsets; Markdown mode also maps metadata with its original delimiter spacing.</summary>
    [Theory]
    [InlineData(FrontmatterMode.Hide, 1)]

@@ -116,6 +116,25 @@ public sealed class DocumentSourceTextTests
 
 
 
+   /// <summary>Inline raw headings may span Markdown lines; folding preserves their complete authored title and closing tag.</summary>
+   [Theory]
+   [InlineData("<h2 title='inline'>Raw <em>inline</em>\nheading</h2>")]
+   [InlineData("<h2>Raw `</h2><h3>fake</h3>`<!-- </h2> -->\nheading</h2>")]
+   public void SetCollapsed_RawInlineMultilineHeading_PreservesCompleteHeader(string header)
+   {
+      string original = "# Root\n\nIntro " + header + "\n\nHidden body\n\n# Last\nTail";
+      var source = new DocumentSourceText(original, new DocumentOutline(original));
+      Assert.Equal(3, source.Headings.Count);
+      Assert.True(source.SetCollapsed([1]));
+      Assert.Contains(header.ReplaceLineEndings("\r"), source.Text, StringComparison.Ordinal);
+      Assert.DoesNotContain("Hidden body", source.Text, StringComparison.Ordinal);
+      Assert.Contains("# Last\rTail", source.Text, StringComparison.Ordinal);
+      Assert.True(source.SetCollapsed([]));
+      Assert.Equal(original, source.GetCopyText(0, source.Text.Length));
+   }
+
+
+
    /// <summary>Folding accepts only bounded canonical snapshots with matching source anchors.</summary>
    [Fact]
    public void Create_InvalidSnapshot_RejectsInput()

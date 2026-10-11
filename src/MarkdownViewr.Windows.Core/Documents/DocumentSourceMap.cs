@@ -70,10 +70,9 @@ internal sealed class DocumentSourceMap
          {
             AnnotateHtmlBlock(block, offset);
          }
-         else if(node is HtmlInline inline && IsHeadingTag(inline.Tag))
+         if(node is LeafBlock { Inline: not null } leaf)
          {
-            int start = offset + inline.Span.Start;
-            inline.Tag = inline.Tag.Insert(3, Attribute(AddPosition(start, EndOfLine(offset + inline.Span.End))));
+            AnnotateInlineHeadings(leaf, offset);
          }
       }
       return Markdown.ToHtml(document, pipeline);
@@ -83,6 +82,43 @@ internal sealed class DocumentSourceMap
 
    /// <summary>A real opening heading tag is distinguished from comments, closing tags and heading-like tag names.</summary>
    private static bool IsHeadingTag(string tag) => tag.Length > 3 && tag.StartsWith("<h", StringComparison.OrdinalIgnoreCase) && tag[2] is >= '1' and <= '6' && (tag[3] is '>' or '/' || char.IsWhiteSpace(tag[3]));
+
+
+
+   /// <summary>Pairs actual inline heading nodes within one Markdown leaf, excluding fenced/inline code and comment lookalikes.</summary>
+   private void AnnotateInlineHeadings(LeafBlock leaf, int offset)
+   {
+      HtmlInline? opening = null;
+      foreach(HtmlInline inline in leaf.Inline!.Descendants().OfType<HtmlInline>())
+      {
+         if(IsHeadingTag(inline.Tag))
+         {
+            if(opening is not null)
+            {
+               AnnotateInlineHeading(opening, opening.Span.End, offset);
+            }
+            opening = inline;
+         }
+         else if(opening is not null && inline.Tag.Length > 4 && inline.Tag.StartsWith("</h", StringComparison.OrdinalIgnoreCase)
+            && inline.Tag[3] is >= '1' and <= '6' && (inline.Tag[4] == '>' || char.IsWhiteSpace(inline.Tag[4])))
+         {
+            AnnotateInlineHeading(opening, inline.Span.End, offset);
+            opening = null;
+         }
+      }
+      if(opening is not null)
+      {
+         AnnotateInlineHeading(opening, opening.Span.End, offset);
+      }
+   }
+
+
+
+   /// <summary>Retains original syntax through the parsed closing line while inserting only the private identity in the opening tag.</summary>
+   private void AnnotateInlineHeading(HtmlInline opening, int end, int offset)
+   {
+      opening.Tag = opening.Tag.Insert(3, Attribute(AddPosition(offset + opening.Span.Start, EndOfLine(offset + end))));
+   }
 
 
 
