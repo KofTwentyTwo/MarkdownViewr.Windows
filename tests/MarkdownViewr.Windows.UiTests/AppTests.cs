@@ -541,12 +541,15 @@ public class AppTests
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       AutomationElement hit = session.Automation.FromPoint(point);
       bool exactLink = hit.Equals(link) || hit.Parent.Equals(link);
-      if(!exactLink)
+      bool browserHost = hit.Equals(session.WaitForElement("DocumentView"));
+      bool withinLink = link.BoundingRectangle.Contains(FlaUI.Core.Input.Mouse.Position);
+      if(!exactLink && !browserHost || !withinLink)
       {
          _output.WriteLine($"Fragment point={point}; mouse={FlaUI.Core.Input.Mouse.Position}; link={link.Properties.BoundingRectangle.ValueOrDefault}; hit Id={hit.Properties.AutomationId.ValueOrDefault}; Type={hit.Properties.ControlType.ValueOrDefault}; PID={hit.Properties.ProcessId.ValueOrDefault}; bounds={hit.Properties.BoundingRectangle.ValueOrDefault}; parent Type={hit.Parent.Properties.ControlType.ValueOrDefault}; bounds={hit.Parent.Properties.BoundingRectangle.ValueOrDefault}.");
          _output.WriteLine(session.DescribeDocumentStatus());
       }
-      Assert.True(exactLink, "The pointer must hit the exact owned document link or its text child.");
+      Assert.True(withinLink, "The physical pointer must stay within the exact document link bounds.");
+      Assert.True(exactLink || browserHost, "The pointer must belong to the owned browser provider or the exact link/text child.");
       FlaUI.Core.Input.Mouse.Down(FlaUI.Core.Input.MouseButton.Left);
       FlaUI.Core.Input.Wait.UntilInputIsProcessed();
       FlaUI.Core.Input.Mouse.Up(FlaUI.Core.Input.MouseButton.Left);

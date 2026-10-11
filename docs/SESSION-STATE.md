@@ -223,3 +223,25 @@ This editor work remains separate from pushed keyboard head 2292603 until its
 live CI 38109719180 ends. CodeQL 38109719207 remains under observation;
 scripts 38109718804, security 38109719182 and PR gates 38109719194 passed.
 Keyboard/fragment and editor hosted acceptance remain unverified; full scope active.
+
+## Browser link provider correction
+
+2292603569d5a78b214933e185842f6cf233010f native/UI job 114382576572
+finished 37/38: physical Ctrl+F from browser focus, actual paired source selections,
+wraparound, viewport navigation and reload/collapse cases pass. Fragment diagnostics
+show pointer (311,128) inside the exact link bounds (266,119,91,19), while UIA
+ElementFromPoint returns owned DocumentView rather than its composed hyperlink.
+Retained log: artifacts/thread-find-ui-38109719180.log. Installed producer still
+requires observation before claiming channel acceptance.
+
+The fixture now requires the pointer inside that exact link rectangle and the hit
+provider to be the owned DocumentView or exact link/text. It retains the physical
+Down/Up click, hidden generated-heading lookup and revealed heading/body assertions.
+Those actual navigation outcomes must pass; this does not substitute bounds or
+provider identity for successful link activation. No local GUI input occurred.
+
+Local editor increment signed as 574b57432a11b04d67085cbb0203b757ea85b1f4,
+not pushed while the existing producer is live. 195 core tests/100% line coverage,
+zero-warning build/format/docs/hooks pass. Headless capture-fixture self-check
+preserves one literal Unicode/metacharacter argument; native launch/UI acceptance
+still requires the prepared three hosted tests. Full PRODUCT.md scope remains.
