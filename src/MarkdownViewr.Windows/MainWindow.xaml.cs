@@ -161,13 +161,14 @@ public sealed partial class MainWindow : Window, IDisposable
       }
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.COMException)
       {
+         App.Log.Warning(FormattableString.Invariant($"Could not open a Markdown document. Reload={reload}; exception={exception.GetType().Name}; HRESULT=0x{exception.HResult:X8}; UIThread={DispatcherQueue.HasThreadAccess}."));
          if(!_closed)
          {
             StatusText.Text = reload && exception is FileNotFoundException
                ? "The document is missing. Showing the last version; it will reload when restored."
                : "Could not open this document: " + exception.Message;
          }
-         App.Log.Warning("Could not open a Markdown document.");
+
       }
       finally
       {

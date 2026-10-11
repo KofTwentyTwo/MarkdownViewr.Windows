@@ -37,6 +37,20 @@ public sealed class DocumentFilesTests : IDisposable
 
 
 
+   /// <summary>A loaded snapshot does not keep the source file open or hide its subsequent deletion.</summary>
+   [Fact]
+   public void Open_DeletedSource_ThrowsFileNotFound()
+   {
+      string path = Path.Combine(_root, "document", "read.md");
+      File.WriteAllText(path, "# Snapshot");
+      var files = DocumentFiles.Open(path);
+      File.Delete(path);
+      Assert.Equal("# Snapshot", files.Markdown);
+      Assert.Throws<FileNotFoundException>(() => DocumentFiles.Open(path));
+   }
+
+
+
    /// <summary>Ordinary relative images inside the selected folder retain their exact bytes.</summary>
    [Fact]
    public void ReadImage_InsideDocumentFolder_ReturnsExactBytes()

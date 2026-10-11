@@ -151,9 +151,17 @@ public class AppTests
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last readable version")), "the initial heading", TimeSpan.FromSeconds(30));
       string path = Path.Combine(session.DataDirectory, "document.md");
       File.Delete(path);
-      session.WaitFor(
-         () => session.FindInApp(cf => cf.ByName("The document is missing. Showing the last version; it will reload when restored.")),
-         "the missing-file status");
+      try
+      {
+         session.WaitFor(
+            () => session.FindInApp(cf => cf.ByName("The document is missing. Showing the last version; it will reload when restored.")),
+            "the missing-file status");
+      }
+      catch(TimeoutException exception)
+      {
+         AutomationElement? status = session.FindInApp(cf => cf.ByAutomationId("StatusText"));
+         throw new TimeoutException($"{exception.Message} Observed status: '{status?.Properties.Name.ValueOrDefault}'. Logs: {session.ReadLogs()}", exception);
+      }
       Assert.NotNull(session.FindInApp(cf => cf.ByName("Last readable version")));
       File.WriteAllText(path, "# Recovered document");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Recovered document")), "the recreated document heading");

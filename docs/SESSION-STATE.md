@@ -25,11 +25,15 @@ native messaging stay disabled; fixed native queries check the current document 
 and results are validated finite fractions before numeric-only restoration.
 
 Local evidence: zero-warning solution build; 82 core tests, zero skipped, 100% core
-line coverage; 12 native filesystem/watcher tests passed. Browser replacement,
+line coverage; 13 native filesystem/watcher tests passed, including loaded-file handle release and the
+actual FileNotFoundException after deletion. Browser replacement,
 deletion/recreation, editor lock, relative-scroll and remote-image denial tests have
 been added but not run locally. Desktop reservation remains unanswered; do not drive
-this desktop without availability. Hosted current-head acceptance will be the next
-runtime proof. Issues #4 (reader boundary), #6 (reload) and #1 (full scope) remain open.
+this desktop without availability. Reload head 09d14e6 hosted UI/published acceptance reproduced a deletion-status
+timeout in both builds: 23 of 24 tests passed, including replacement, editor-lock,
+scroll and remote-image denial. Diagnostics now preserve the exact assertion and
+record observed status, exception type/HRESULT/thread access and app logs; root cause
+is still unproven. Do not weaken or skip the deletion assertion. Issues #4 (reader boundary), #6 (reload) and #1 (full scope) remain open.
 
 ## Repository and authorization
 
@@ -51,3 +55,7 @@ frontmatter, editor, print, multiple windows, recents and Windows associations.
 Original reference is pinned at 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021 under
 AppKit/artifacts/markdownviewr-reference. No original code/resources copied yet;
 retain Darin's MIT notices when adapting them. Full PRODUCT.md scope remains open.
+
+Reference preparation: all 20 original JSON themes have been downloaded into
+AppKit/artifacts/markdownviewr-reference/markdownViewr/Resources/themes and checked
+against their Git blob hashes at the pinned commit. They are not yet in the app.
