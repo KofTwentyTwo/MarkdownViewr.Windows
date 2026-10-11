@@ -62,6 +62,18 @@ internal sealed class FileTypeRegistration
 
 
 
+   /// <summary>Only this unchanged registered installation is the default; an unavailable native query remains unknown.</summary>
+   internal bool? IsDefaultMarkdownViewer(string? effectiveProgId)
+   {
+      if(GetDefaultAppsUri(supportsAppPage: false) is null)
+      {
+         return false;
+      }
+      return effectiveProgId is null ? null : string.Equals(effectiveProgId, ProgId, StringComparison.OrdinalIgnoreCase);
+   }
+
+
+
    /// <summary>Advertises the viewer to Open With and Default Apps without setting extension defaults or touching UserChoice.</summary>
    internal void Register()
    {

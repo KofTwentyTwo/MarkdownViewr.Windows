@@ -2,6 +2,38 @@
 
 Updated: 2026-10-11
 
+## Effective Markdown default status prepared - 2026-10-11
+
+General now reports Default/Not default/Unknown/Unregistered for this exact
+installed edition. A bounded read-only Windows AssocQueryStringW/ASSOCSTR_PROGID
+query reads the effective user-selected `.md` ProgID; unchanged owned registration
+is required. Registration alone cannot report Default, and an unavailable query
+cannot become success. Refresh on returning from Windows Settings and through a
+native Refresh status action. No UserChoice/hash/default writes or competitor
+paths are read/displayed. ADR0005 and threat-model boundaries are updated.
+
+Seven actual read-only Windows API/isolated registry cases pass, zero skips:
+real `.txt` query, preserved existing `.md` choice, other edition/default and
+retargeted/unregistered/unknown ownership. Release build has zero warnings/errors;
+format passes.105 native cases compile/discover including updated actual General
+status/refresh and new long-title tooltip/physical-heading acceptance, not run.
+Core is unchanged from598 passing cases/100% measured lines.
+
+Pushedb2ecc8c / CI38185403701 focused23/24 fails, zero skips. Actual TRX proves
+both Printing defaults/draft cases, raw-inline folds, picker cancellation and
+Contents presentation pass. The remaining physical source/reader alignment fails.
+Retain current-focused-b2ecc8c.log and actual bundle at
+artifacts/reader-regressions-38185403701. Actual evidence still shows a short-title
+tooltip; only truly trimmed native labels now receive tips, with explicit placement
+target. The new physical hover/click case and retained mouse-invocation diagnostics
+must verify this candidate before calling the remaining failure resolved.
+
+Full native114606533948 and installed114606533825 are still live. Preserve both
+before pushing this preparation. Next: inspect terminal outcomes, verify tooltip
+and default status on the next exact hosted head; complete theme previews/default
+clarity and remaining owner/chooser/signing/review requirements. No local input,
+preview55472 changes, Azure retries, shared merge, tags or release publication.
+
 ## Terminal published regressions retained; next candidate ready - 2026-10-11
 
 Exactb5e519e CI38184378762 is terminal failure: focused19/22, native98/100,

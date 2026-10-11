@@ -33,6 +33,19 @@ internal static partial class InstalledFileTypes
 
 
 
+   /// <summary>Reads Windows' effective .md ProgID and verifies exact channel/install ownership; registration alone is not a selected default.</summary>
+   internal static bool? IsDefaultMarkdownViewer()
+   {
+      FileTypeRegistration? registration = CurrentRegistration();
+      if(registration is null)
+      {
+         return false;
+      }
+      return registration.IsDefaultMarkdownViewer(ShellFileAssociations.QueryProgId(".md"));
+   }
+
+
+
    /// <summary>Velopack fast callbacks run before XAML; this path uses only the registry and bounded local metadata.</summary>
    private static void Change(bool uninstall)
    {

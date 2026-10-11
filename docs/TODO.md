@@ -1,5 +1,10 @@
 # Development Tasks
 
+- [x] Prepare truthful General effective `.md` default status with bounded read-only Windows querying and automatic/manual refresh;7 actual read-only/isolated adapter tests pass.
+- [ ] Verify actual General status/refresh and user-selected OS chooser/Explorer behavior on an installed build; registration alone is not default selection.
+- [x] Exactb2ecc8c focused23/24: both Printing cases/raw-inline/picker/Contents options pass, zero skips; retain remaining physical alignment failure.
+- [ ] Verify trim-only tooltip placement and actual long-title physical activation plus the unchanged source alignment regression on the next exact hosted head.
+
 - [x] Retain terminal b5e519e published98/100 TRX: same raw-fold/source-click failures, zero skips; installed lifecycle phase not reached.
 
 - [x] Prepare shared native Printing Settings options with Apply/Restore, validated checked saves and sibling draft preservation; zero-warning Release/format pass.

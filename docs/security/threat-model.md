@@ -343,6 +343,15 @@ with no writes to UserChoice/defaults and `.txt` explicitly optional. Eleven
 isolated adapter tests now pass; OS chooser behavior still needs acceptance.
 
 
+The native General default-status read uses fixed `.md` and Windows
+AssocQueryStringW/ASSOCSTR_PROGID with a1024-character Unicode buffer. Require
+unchanged channel/install registration before displaying Default; missing/error
+responses stay Not default or Unknown. No UserChoice hash, competitor executable
+path, document content or authored native command is read/logged. Returning from
+Windows Settings refreshes status without setting associations. Seven real
+read-only/isolated adapter cases pass; actual OS selection still needs acceptance.
+
+
 ## Reference CSS, Settings drafts and document status
 
 The attributed reference stylesheet is an embedded application resource. Rendered

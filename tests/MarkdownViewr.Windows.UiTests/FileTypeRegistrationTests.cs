@@ -48,6 +48,29 @@ public sealed class FileTypeRegistrationTests
 
 
 
+   /// <summary>Advertising an installation is not choosing it; an unavailable query and a retargeted command cannot report a selected default.</summary>
+   [Fact]
+   public void DefaultMarkdownStatus_EffectiveSelection_RequiresExactRegisteredOwner()
+   {
+      using var fixture = new RegistryFixture();
+      var registration = new FileTypeRegistration(fixture.Root, Path.Combine(Path.GetTempPath(), "current", "MarkdownViewr.Windows.exe"), "stable");
+      Assert.False(registration.IsDefaultMarkdownViewer(registration.ProgId));
+      registration.Register();
+      Assert.False(registration.IsDefaultMarkdownViewer("Other.Markdown"));
+      Assert.False(registration.IsDefaultMarkdownViewer(""));
+      Assert.Null(registration.IsDefaultMarkdownViewer(null));
+      Assert.True(registration.IsDefaultMarkdownViewer(registration.ProgId));
+      Assert.True(registration.IsDefaultMarkdownViewer(registration.ProgId.ToLowerInvariant()));
+      var dev = new FileTypeRegistration(fixture.Root, Path.Combine(Path.GetTempPath(), "current", "MarkdownViewr.Windows.exe"), "dev");
+      dev.Register();
+      Assert.False(registration.IsDefaultMarkdownViewer(dev.ProgId));
+      using RegistryKey command = fixture.Root.OpenSubKey("Software\\Classes\\" + registration.ProgId + "\\shell\\open\\command", writable: true)!;
+      command.SetValue("", "another deliberately selected command");
+      Assert.False(registration.IsDefaultMarkdownViewer(registration.ProgId));
+   }
+
+
+
    /// <summary>An external retarget of an owned ProgID is preserved rather than erased on uninstall.</summary>
    [Fact]
    public void Unregister_RetargetedCommand_LeavesRegistrationUntouched()

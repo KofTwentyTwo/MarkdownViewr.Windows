@@ -46,7 +46,7 @@ logs contain only failure kind/HRESULT.
 
 ## User-selected default file types
 
-Settings → Advanced exposes a native Choose default file types button. Read-only
+Settings → General exposes a native Choose default file types button. Read-only
 checks require this installed executable's unchanged command and the exact owned
 RegisteredApplications value. Portable/unregistered previews instead show install
 or repair guidance and cannot launch the selection action. Nothing selects or
@@ -57,7 +57,18 @@ URI-escaped registered value name (the installation/channel ProgID, not a displa
 name). Earlier builds use general Default Apps with instructions to search `.md`;
 this conservatively includes Windows 11 builds predating the supported deep link.
 The native action revalidates ownership at click time, handles launch failure with
-manual OS guidance and logs only error kind/HRESULT. Document content has no route
+manual OS guidance and logs only error kind/HRESULT.
+
+General also reports the effective `.md` default using Windows' read-only
+[AssocQueryStringW](https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-assocquerystringw)
+with [ASSOCSTR_PROGID](https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/ne-shlwapi-assocstr).
+Compare the returned ProgID with this installation/channel and require unchanged
+registration ownership. An unavailable query stays Unknown; registration alone
+never means Default. The Unicode buffer is capped at1024 characters, input is
+fixed `.md`, and no UserChoice/hash/default writes or competing-app paths are
+read or displayed. Refresh when returning from Windows Settings or explicitly
+through Refresh status. Seven real read-only/isolated adapter cases pass;
+actual user-selected default/Explorer acceptance is still required. Document content has no route
 to invoke it. Actual Windows chooser/selection and Explorer acceptance are pending.
 
 ## Evidence and remaining acceptance

@@ -35,6 +35,7 @@
       <Compile Include="..\..\src\MarkdownViewr.Windows\DocumentFiles.cs" Link="WindowsAdapters\DocumentFiles.cs" />
       <Compile Include="..\..\src\MarkdownViewr.Windows\DocumentWatcher.cs" Link="WindowsAdapters\DocumentWatcher.cs" />
       <Compile Include="..\..\src\MarkdownViewr.Windows\FileTypeRegistration.cs" Link="WindowsAdapters\FileTypeRegistration.cs" />
+      <Compile Include="..\..\src\MarkdownViewr.Windows\ShellFileAssociations.cs" Link="WindowsAdapters\ShellFileAssociations.cs" />
       <Compile Include="..\..\src\MarkdownViewr.Windows\ActivationRequest.cs" Link="WindowsAdapters\ActivationRequest.cs" />
       <Compile Include="..\..\src\MarkdownViewr.Windows\ActivationJsonContext.cs" Link="WindowsAdapters\ActivationJsonContext.cs" />
       <Compile Include="..\..\src\MarkdownViewr.Windows\ActivationInbox.cs" Link="WindowsAdapters\ActivationInbox.cs" />

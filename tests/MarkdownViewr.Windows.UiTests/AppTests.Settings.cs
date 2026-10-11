@@ -106,6 +106,27 @@ public partial class AppTests
 
 
 
+   /// <summary>Only a clipped Contents label needs its full-title tooltip, and physical activation still reaches that exact heading.</summary>
+   [Fact]
+   public void Settings_ContentsTooltip_TruncatedTitleKeepsPhysicalHeadingTarget()
+   {
+      const string Title = "A long Contents heading that is visibly clipped and must remain clickable while its full title is available on hover";
+      string body = string.Join("\n\n", Enumerable.Range(0, 50).Select(index => "Contents hover paragraph " + index));
+      using var session = new AppSession(document: "# Contents hover root\n\n" + body + "\n\n## " + Title + "\n\n" + body);
+      session.WaitForElement("mv-heading-0", TimeSpan.FromSeconds(30));
+      session.InvokeMenuItem("View", "OutlineToggle");
+      AutomationElement item = session.WaitForElement("OutlineHeading:1");
+      System.Drawing.Rectangle bounds = item.BoundingRectangle;
+      NativeMouse.MoveTo(new System.Drawing.Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2));
+      session.WaitFor(() => session.FindInApp(cf => cf.ByControlType(ControlType.ToolTip).And(cf.ByName(Title))), "the full title of the actually clipped Contents label");
+      session.MouseClickElement("OutlineHeading:1");
+      WaitForBrowserHeadingAlignment(session, "mv-heading-1");
+      Assert.Equal(Title, session.WaitForElement("OutlineHeading:1").Name);
+      RetainDocumentWindow(session, session.MainWindow, "contents-full-title-hover-target");
+   }
+
+
+
    /// <summary>Apply shares actual defaults with the next print dialog and sibling saves; Restore and closing discard only the draft.</summary>
    [Fact]
    public void Settings_PrintingDefaults_ApplyRestoreAndDialogCancel()
@@ -338,6 +359,7 @@ public partial class AppTests
       var dev = new FileTypeRegistration(Microsoft.Win32.Registry.CurrentUser, session.ExePath, "dev");
       bool registered = stable.GetDefaultAppsUri(supportsAppPage: true) is not null || dev.GetDefaultAppsUri(supportsAppPage: true) is not null;
       Assert.Equal(registered, choose.IsEnabled);
+      AssertDefaultMarkdownStatus(session, registered, stable, dev);
       string? installedFixture = Environment.GetEnvironmentVariable("K22_UITEST_INSTALLED");
       if(string.Equals(installedFixture, "1", StringComparison.Ordinal))
       {
@@ -368,6 +390,27 @@ public partial class AppTests
       Assert.Equal(enabled, saved.RootElement.GetProperty("ShowOutlineDepthMarkers").GetBoolean());
       Assert.False(saved.RootElement.GetProperty("ShowOutlineByDefault").GetBoolean());
       Assert.False(saved.RootElement.GetProperty("ShowSourceByDefault").GetBoolean());
+   }
+
+
+
+   /// <summary>Compares the live native status to Windows' effective ProgID, including exact edition ownership, then exercises refresh.</summary>
+   private static void AssertDefaultMarkdownStatus(AppSession session, bool registered, FileTypeRegistration stable, FileTypeRegistration dev)
+   {
+      string expected = "This copy is not registered for Markdown defaults.";
+      if(registered)
+      {
+         FileTypeRegistration current = stable.GetDefaultAppsUri(supportsAppPage: true) is not null ? stable : dev;
+         expected = current.IsDefaultMarkdownViewer(ShellFileAssociations.QueryProgId(".md")) switch
+         {
+            true => "Default viewer for .md files.",
+            false => "Not the default viewer for .md files.",
+            null => "Windows did not report the current .md default. Use Default Apps to check your choice.",
+         };
+      }
+      Assert.Equal(expected, session.WaitForElement("SettingsDefaultMarkdownStatus").Name);
+      session.ClickElement("SettingsRefreshDefaultFiles");
+      Assert.Equal(expected, session.WaitForElement("SettingsDefaultMarkdownStatus").Name);
    }
 
 

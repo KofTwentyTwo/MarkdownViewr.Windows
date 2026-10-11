@@ -709,6 +709,8 @@ public partial class AppTests
       }
       catch(TimeoutException)
       {
+         _output.WriteLine(session.LastMouseInput);
+         _output.WriteLine(session.LastInvocation);
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
          throw;
