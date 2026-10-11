@@ -525,10 +525,17 @@ public class AppTests
       }
       catch(TimeoutException)
       {
-         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
-         _output.WriteLine("Native source glyph bounds: " + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())) + "; viewport=" + source.BoundingRectangle);
          _output.WriteLine(session.ReadLogs());
          _output.WriteLine(session.DescribeDocumentStatus());
+         try
+         {
+            FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+            _output.WriteLine("[DEBUG-src-focus] Native source glyph bounds: " + string.Join("; ", range.GetBoundingRectangles().Select(rectangle => rectangle.ToString())) + "; viewport=" + source.BoundingRectangle);
+         }
+         catch(System.ComponentModel.Win32Exception exception)
+         {
+            _output.WriteLine("[DEBUG-src-focus] Native diagnostic range unavailable: " + exception.NativeErrorCode);
+         }
          throw;
       }
    }

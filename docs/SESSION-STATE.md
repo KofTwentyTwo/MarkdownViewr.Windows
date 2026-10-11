@@ -11,6 +11,34 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Tight native source diagnostics after editor acceptance
+
+f650e36 / CI 38116258625 native job 114401630861 finished FAILURE:
+47/48, one failure/no skips. Both new actual editor-menu/probe/order/cancel/removal
+tests passed; source focus preservation still fails at the post-focus last-heading
+glyph assertion. The timeout's extra rectangle read throws E_UNEXPECTED before
+printing logs, masking the original focus data. Retain native log at
+artifacts/editor-focus-ui-38116258625.log. Installed job 114401630683 finished
+FAILURE at its 180-second dotnet timeout, with no completed TRX or installed-channel
+proof. Retain logs/screenshots at artifacts/editor-focus-failed-installed-38116258625
+and artifacts/editor-focus-installed-38116258625.log. All producers are terminal;
+build/core/format, CodeQL, scripts, security and PR gates passed.
+
+The diagnostic fix prints owned logs/tree first, catches only failed diagnostic
+rectangle retrieval and rethrows the original timeout; no test outcome is relaxed.
+A temporary read-only Windows source-diagnostics job runs only the same exact native
+viewport case (15 seconds after build) and retains TRX. All required 48-test native/
+published and 47-test installed suites remain unchanged. No app-scroll change in
+this diagnostic increment; gather GettingFocus before/last offsets and actual glyph
+bounds before another hypothesis. Remove DEBUG-src-focus probes/job when resolved.
+The diagnosing-bugs workflow is applied; hosted setup dominates wall time because
+local GUI input is unavailable. Core loop remains 312 tests/100% measured lines.
+
+Reference backlog now has print issue #12 (native theme/background/image/zoom/width/
+border/padding, success/cancel/error restoration and actual output) and zoom #13
+(1.1 steps, 30–500%, Windows Ctrl+plus/minus/0, actual scaling/window state). Full
+PRODUCT scope remains active. No local GUI/Azure/merge/tag/release or false review.
+
 ## Current named-editor and source-focus increment — 2026-10-11
 
 2dc509d / CI 38115411266 is terminal FAILURE: native/published 45/46,
