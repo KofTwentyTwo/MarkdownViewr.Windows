@@ -291,3 +291,21 @@ No local GUI input, merge/tag/release or Azure attempt. Full PRODUCT.md remains;
 source heading/scroll/collapse sync, broader editor/reference/theme/rendering/link
 parity, print, windows/activation/recents, standards inventory/review and production
 signed stable/dev final bytes remain. Preserve Darin's MIT navigation attribution.
+
+## Vim producer focus evidence and physical fixture correction
+
+Current dfc41a7 / CI 38111842026 native job 114388847556 finished FAILURE:
+41/44 pass, zero skips. All existing tests passed; the three new vim cases failed
+before their first actual reading command. Opt-in native focus logs report an
+empty WinUI focused element or ToggleSection:Button while UIA reports a Pane.
+UIA DocumentView.Focus alone did not establish WinUI reading focus. Exact native
+log retained at artifacts/vim-ui-38111842026.log. Build/format, CodeQL, scripts,
+security and PR gates passed. Installed producer 114388847436 now terminal
+FAILURE; retain its log at artifacts/vim-installed-38111842026.log.
+
+The fixture correction performs real MOVE/Down/Up inside the exact owned browser
+bounds/provider before virtual-key sequences. All actual viewport, generated
+heading, hidden descendant, paired find and native query-typing assertions remain.
+No app focus guard is widened, no outcome is substituted and no local desktop
+input occurs. The previous producer is terminal before the next push.
+Full PRODUCT.md scope and deferred production signing remain unchanged.

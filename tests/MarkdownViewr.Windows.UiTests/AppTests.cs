@@ -629,11 +629,21 @@ public class AppTests
 
 
 
-   /// <summary>Focuses only the owned reader before injecting real virtual-key events.</summary>
+   /// <summary>A real click establishes WinUI reading focus; UIA SetFocus alone left the logical focus empty or on an outline button.</summary>
    private static void FocusBrowser(AppSession session)
    {
       session.MainWindow.SetForeground();
-      session.WaitForElement("DocumentView").Focus();
+      AutomationElement browser = session.WaitForElement("DocumentView");
+      System.Drawing.Rectangle bounds = browser.BoundingRectangle;
+      var point = new System.Drawing.Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+      Assert.True(bounds.Contains(point) && session.MainWindow.BoundingRectangle.Contains(point));
+      NativeMouse.MoveTo(point);
+      Wait.UntilInputIsProcessed();
+      AutomationElement hit = session.Automation.FromPoint(point);
+      Assert.True(hit.Equals(browser) || browser.FindAllDescendants().Any(element => element.Equals(hit)), "Reading focus must begin with a physical click inside the owned browser provider.");
+      Mouse.Down(MouseButton.Left);
+      Wait.UntilInputIsProcessed();
+      Mouse.Up(MouseButton.Left);
       Wait.UntilInputIsProcessed();
    }
 
