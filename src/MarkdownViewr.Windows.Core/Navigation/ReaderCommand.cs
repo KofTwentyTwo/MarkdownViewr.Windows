@@ -24,4 +24,7 @@ public enum ReaderCommand
    NextMatch,
    PreviousMatch,
    CloseFind,
+   ZoomIn,
+   ZoomOut,
+   ZoomReset,
 }

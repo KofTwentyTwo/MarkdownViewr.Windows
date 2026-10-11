@@ -124,12 +124,24 @@ stops the timer; hidden panes do not synchronize. Literal ellipses only affect t
 presentation; canonical document bytes and independent nested fold choices remain.
 Opt-in fixture geometry logs contain numeric positions/counts only.
 
-312 core tests cover editor migration/persistence/folder arguments, folding, original/native offsets and malformed numeric frames
+330 core tests cover editor migration/persistence/folder arguments, folding, original/native offsets and malformed numeric frames
 at 100% measured line coverage. Hosted actual glyph/viewport and fold/find/reload
 acceptance is pending; raw multiline/same-line heading parity still needs audit.
 
 Entering read-only source now defers restoration of its prior viewport after native
 focus/caret revelation, guarded by the current snapshot/window and excluding active
-find. This prevents a caret at the document start from being interpreted as a new
-user scroll. Hosted acceptance must verify actual glyph positions before/after
+find. An unselected read-only caret is positioned at the first visible native character
+before focus, preventing the observed later caret reset. The original post-focus
+glyph assertion passes on 1c4d1ad; source-to-reader acceptance remains open. Hosted acceptance must verify actual glyph positions before/after
 focus and native source-to-reader movement; numeric fixture logs contain no text.
+
+## Reading zoom
+
+Zoom remains window-local and receives only explicit owned native commands. Its
+finite 0.3–5 scale multiplies validated font sizes with invariant numeric formatting;
+line height, colors, theme JSON and custom CSS retain their existing semantics.
+No authored script, message bridge or new resource capability is enabled. Navigation
+uses existing matching-page viewport/collapse guards and ready-page find replay.
+Ctrl zoom commands require reading focus; editor/theme/find text input retains
+native ownership. 330 core tests/100% measured lines pass; actual glyph/key/reload
+acceptance is pending. Native menus/toolbar do not imply production release proof.

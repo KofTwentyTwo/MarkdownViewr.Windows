@@ -99,6 +99,11 @@ public sealed partial class MainWindow
             case Core.Navigation.ReaderCommand.CloseFind:
                await CloseFindAsync();
                break;
+            case Core.Navigation.ReaderCommand.ZoomIn:
+            case Core.Navigation.ReaderCommand.ZoomOut:
+            case Core.Navigation.ReaderCommand.ZoomReset:
+               await ChangeZoomAsync(command);
+               break;
             default:
                await _browser.NavigateReaderAsync(command);
                break;

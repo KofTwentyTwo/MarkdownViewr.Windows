@@ -31,6 +31,7 @@ internal sealed partial class DocumentBrowser
    private Core.Themes.ReaderTheme _theme;
    private string _sanitizedHtml = "";
    private string _title = "MarkdownViewr";
+   private double _zoomScale = 1;
    private IReadOnlyList<Core.Documents.DocumentHeading> _headings = [];
    private int[] _collapsedSections = [];
 
@@ -98,8 +99,25 @@ internal sealed partial class DocumentBrowser
       _pageReady = false;
       _restoreViewport = true;
       _policy = new Core.Documents.DocumentResourcePolicy();
-      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{_theme.Styles}</style></head><body>{sanitizedHtml}</body></html>""");
+      _html = Encoding.UTF8.GetBytes($"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(title)}</title><style>{_theme.GetStyles(_zoomScale)}</style></head><body>{sanitizedHtml}</body></html>""");
       _view.CoreWebView2.Navigate(_policy.DocumentUri.AbsoluteUri);
+   }
+
+
+
+   /// <summary>Retains window-local font scale through reload/theme navigation and restores its reading/collapse state.</summary>
+   public async Task ApplyZoomAsync(double scale)
+   {
+      if(!double.IsFinite(scale) || scale is < 0.3 or > 5)
+      {
+         throw new ArgumentOutOfRangeException(nameof(scale));
+      }
+      Core.Documents.DocumentViewport viewport = await CaptureViewportAsync();
+      if(!_closed)
+      {
+         _zoomScale = scale;
+         Show(_files, _sanitizedHtml, _title, viewport, _headings);
+      }
    }
 
 

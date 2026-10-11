@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 Darin Kelkhoff
  * Copyright (c) 2026 James Maes
  * SPDX-License-Identifier: MIT
  */
@@ -44,6 +45,19 @@ public sealed class ReaderTheme
 
 
 
+   /// <summary>Scales only validated font sizes; colors, fonts, line height and custom CSS retain their original semantics.</summary>
+   public string GetStyles(double zoomScale)
+   {
+      if(!double.IsFinite(zoomScale) || zoomScale is < 0.3 or > 5)
+      {
+         throw new ArgumentOutOfRangeException(nameof(zoomScale));
+      }
+      using var document = JsonDocument.Parse(Json);
+      return BuildStyles(document.RootElement, zoomScale);
+   }
+
+
+
    /// <summary>Accepts the original schema, including themes without an explicit version number.</summary>
    public static ReaderTheme Parse(string json)
    {
@@ -71,7 +85,7 @@ public sealed class ReaderTheme
 
 
    /// <summary>Constructs variables only from validated colors, finite sizes and escaped font families.</summary>
-   private static string BuildStyles(JsonElement root)
+   private static string BuildStyles(JsonElement root, double zoomScale = 1)
    {
       var styles = new StringBuilder(":root {");
       JsonElement colors = ReadObject(root, "colors");
@@ -84,7 +98,7 @@ public sealed class ReaderTheme
          }
          styles.Append("--").Append(field).Append(':').Append(value).Append(';');
       }
-      AddSizes(styles, ReadObject(root, "sizes"));
+      AddSizes(styles, ReadObject(root, "sizes"), zoomScale);
       JsonElement fonts = ReadObject(root, "fonts");
       foreach(string field in new[] { "body", "heading", "code" })
       {
@@ -102,7 +116,7 @@ public sealed class ReaderTheme
 
 
    /// <summary>Bounds font sizes and line height, rejecting non-finite or non-numeric values.</summary>
-   private static void AddSizes(StringBuilder styles, JsonElement sizes)
+   private static void AddSizes(StringBuilder styles, JsonElement sizes, double zoomScale)
    {
       foreach(string field in s_sizes)
       {
@@ -112,7 +126,8 @@ public sealed class ReaderTheme
          {
             throw new JsonException("Theme sizes must be finite and within the supported reading range.");
          }
-         styles.Append("--").Append(field).Append(':').Append(value.ToString("R", CultureInfo.InvariantCulture));
+         double scaled = lineHeight ? value : value * zoomScale;
+         styles.Append("--").Append(field).Append(':').Append(scaled.ToString("R", CultureInfo.InvariantCulture));
          styles.Append(lineHeight ? ";" : "px;");
       }
    }

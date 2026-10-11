@@ -36,7 +36,9 @@
 - [x] Verify actual editor fixture launch, validation/cancel and missing-executable acceptance on 5a9af63 in native/published/installed builds.
 - [x] Audit and implement named editor lists, stable migration, selection/reordering/removal, cancel-safe drafts and folder-opening parity (issue #11).
 - [ ] Verify actual editor-list/menu order, file/folder probe arguments, cancellation and final removal in hosted/installed builds.
-- [ ] Add native printing/theme/layout options and screen-state restoration.
+- [x] Implement native menu/toolbar per-window font zoom, 30–500% bounds and guarded Ctrl+plus/minus/0 commands (issue #13); 330 core tests/100% measured lines.
+- [ ] Verify actual zoom glyph/key/reload/theme/find/collapse behavior in native, published and both installed channels.
+- [ ] Add native printing/theme/layout options and screen-state restoration (issue #12).
 - [ ] Add multiple document windows, recent files and Windows activation/file associations.
 - [x] Verify the all-rule two-pass PSScriptAnalyzer mitigation on scripts 38104988748 and 38105483489; closes #5 only on reviewed merge.
 - [ ] Verify hosted checks on each actual implementation head.

@@ -64,6 +64,14 @@ public sealed class ReaderKeyboard
    /// <summary>Windows find ignores Caps Lock; Shift-modified commands remain available to native controls.</summary>
    private static ReaderCommand ResolveControl(ReaderKey key, bool readingFocused)
    {
+      if(readingFocused && key.Character is '+' or '=' && (!key.Shift || key.Character == '+'))
+      {
+         return ReaderCommand.ZoomIn;
+      }
+      if(readingFocused && !key.Shift && key.Character is '-' or '0')
+      {
+         return key.Character == '-' ? ReaderCommand.ZoomOut : ReaderCommand.ZoomReset;
+      }
       if(key.Shift)
       {
          return ReaderCommand.None;

@@ -20,52 +20,67 @@
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <MenuBar>
-         <MenuBarItem Title="File">
-            <MenuFlyoutItem x:Name="OpenMenuItem" Text="Open..." Click="Open_Click">
-               <MenuFlyoutItem.KeyboardAccelerators>
-                  <KeyboardAccelerator Key="O" Modifiers="Control" />
-               </MenuFlyoutItem.KeyboardAccelerators>
-            </MenuFlyoutItem>
-            <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutItem x:Name="OpenEditorMenuItem" Text="Open in editor" Click="OpenEditor_Click" IsEnabled="False" />
-            <MenuFlyoutSubItem x:Name="OpenEditorChoices" Text="Open in editor" Visibility="Collapsed" />
-            <MenuFlyoutItem x:Name="ConfigureEditorMenuItem" Text="Configure editor..." Click="ConfigureEditor_Click" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
-         </MenuBarItem>
-         <MenuBarItem Title="Edit">
-            <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click" KeyboardAcceleratorTextOverride="Ctrl+F" />
-         </MenuBarItem>
-         <MenuBarItem Title="View">
-            <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
-            <ToggleMenuFlyoutItem x:Name="OutlineToggle" Text="Table of contents" Click="Outline_Click" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
-            <MenuFlyoutItem x:Name="EditDocumentThemeMenu" Text="Edit document theme..." Click="EditDocumentTheme_Click" />
-            <MenuFlyoutItem x:Name="RestoreDocumentThemesMenu" Text="Restore built-in themes" Click="RestoreDocumentThemes_Click" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutSubItem x:Name="FrontmatterMenu" Text="Frontmatter">
-               <RadioMenuFlyoutItem x:Name="FrontmatterHide" Text="Hide" GroupName="Frontmatter" Tag="Hide" Click="Frontmatter_Click" />
-               <RadioMenuFlyoutItem x:Name="FrontmatterMetadata" Text="Show as metadata" GroupName="Frontmatter" Tag="Metadata" Click="Frontmatter_Click" />
-               <RadioMenuFlyoutItem x:Name="FrontmatterMarkdown" Text="Show as Markdown" GroupName="Frontmatter" Tag="Markdown" Click="Frontmatter_Click" />
-            </MenuFlyoutSubItem>
-            <MenuFlyoutSeparator />
-            <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
-            <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
-            <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />
-            <MenuFlyoutSeparator />
-            <ToggleMenuFlyoutItem x:Name="SplashToggle" Text="Show splash at startup" Click="Splash_Click" />
-            <ToggleMenuFlyoutItem x:Name="UpdateCheckToggle" Text="Check for updates at startup" Click="UpdateCheck_Click" />
-         </MenuBarItem>
-         <MenuBarItem Title="Help">
-            <MenuFlyoutItem x:Name="CheckForUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
-            <MenuFlyoutItem x:Name="ActivityLogMenuItem" Text="Activity log" Click="ActivityLog_Click" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutItem x:Name="AboutMenuItem" Text="About MarkdownViewr" Click="About_Click" />
-         </MenuBarItem>
-      </MenuBar>
+      <Grid>
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+         <MenuBar>
+            <MenuBarItem Title="File">
+               <MenuFlyoutItem x:Name="OpenMenuItem" Text="Open..." Click="Open_Click">
+                  <MenuFlyoutItem.KeyboardAccelerators>
+                     <KeyboardAccelerator Key="O" Modifiers="Control" />
+                  </MenuFlyoutItem.KeyboardAccelerators>
+               </MenuFlyoutItem>
+               <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="OpenEditorMenuItem" Text="Open in editor" Click="OpenEditor_Click" IsEnabled="False" />
+               <MenuFlyoutSubItem x:Name="OpenEditorChoices" Text="Open in editor" Visibility="Collapsed" />
+               <MenuFlyoutItem x:Name="ConfigureEditorMenuItem" Text="Configure editor..." Click="ConfigureEditor_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
+            </MenuBarItem>
+            <MenuBarItem Title="Edit">
+               <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click" KeyboardAcceleratorTextOverride="Ctrl+F" />
+            </MenuBarItem>
+            <MenuBarItem Title="View">
+               <MenuFlyoutItem x:Name="ZoomInMenu" Text="Zoom in" Tag="ZoomIn" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl++" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="ZoomOutMenu" Text="Zoom out" Tag="ZoomOut" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl+-" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="ZoomResetMenu" Text="Actual size" Tag="ZoomReset" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl+0" IsEnabled="False" />
+               <MenuFlyoutSeparator />
+               <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
+               <ToggleMenuFlyoutItem x:Name="OutlineToggle" Text="Table of contents" Click="Outline_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
+               <MenuFlyoutItem x:Name="EditDocumentThemeMenu" Text="Edit document theme..." Click="EditDocumentTheme_Click" />
+               <MenuFlyoutItem x:Name="RestoreDocumentThemesMenu" Text="Restore built-in themes" Click="RestoreDocumentThemes_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutSubItem x:Name="FrontmatterMenu" Text="Frontmatter">
+                  <RadioMenuFlyoutItem x:Name="FrontmatterHide" Text="Hide" GroupName="Frontmatter" Tag="Hide" Click="Frontmatter_Click" />
+                  <RadioMenuFlyoutItem x:Name="FrontmatterMetadata" Text="Show as metadata" GroupName="Frontmatter" Tag="Metadata" Click="Frontmatter_Click" />
+                  <RadioMenuFlyoutItem x:Name="FrontmatterMarkdown" Text="Show as Markdown" GroupName="Frontmatter" Tag="Markdown" Click="Frontmatter_Click" />
+               </MenuFlyoutSubItem>
+               <MenuFlyoutSeparator />
+               <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
+               <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
+               <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />
+               <MenuFlyoutSeparator />
+               <ToggleMenuFlyoutItem x:Name="SplashToggle" Text="Show splash at startup" Click="Splash_Click" />
+               <ToggleMenuFlyoutItem x:Name="UpdateCheckToggle" Text="Check for updates at startup" Click="UpdateCheck_Click" />
+            </MenuBarItem>
+            <MenuBarItem Title="Help">
+               <MenuFlyoutItem x:Name="CheckForUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
+               <MenuFlyoutItem x:Name="ActivityLogMenuItem" Text="Activity log" Click="ActivityLog_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="AboutMenuItem" Text="About MarkdownViewr" Click="About_Click" />
+            </MenuBarItem>
+         </MenuBar>
+         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="8,0" VerticalAlignment="Center">
+            <Button x:Name="ZoomOutButton" Content="−" Tag="ZoomOut" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Zoom out" ToolTipService.ToolTip="Zoom out (Ctrl+-)" />
+            <Button x:Name="ZoomResetButton" Content="100%" Tag="ZoomReset" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Actual size" ToolTipService.ToolTip="Actual size (Ctrl+0)" />
+            <Button x:Name="ZoomInButton" Content="+" Tag="ZoomIn" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Zoom in" ToolTipService.ToolTip="Zoom in (Ctrl++)" />
+         </StackPanel>
+      </Grid>
 
       <Grid x:Name="FindBar" Grid.Row="1" Visibility="Collapsed" Margin="16,8" ColumnSpacing="8">
          <Grid.ColumnDefinitions>

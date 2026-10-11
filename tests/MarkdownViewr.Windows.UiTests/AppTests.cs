@@ -440,7 +440,7 @@ public class AppTests
    }
 
 
-   /// <summary>Actual reader jumps, native source text-range scrolling and physical source wheel input synchronize both viewports.</summary>
+   /// <summary>Actual reader jumps, native source scrollbar scrolling and physical source wheel input synchronize both viewports.</summary>
    [Fact]
    public void Source_BidirectionalScroll_AlignsActualHeadingViewports()
    {
@@ -454,10 +454,7 @@ public class AppTests
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
       session.MouseClickElement("SourceText");
       WaitForSourceHeadingAlignment(session, source, "## Source sync last");
-      FlaUI.Core.ITextRange middle = source.Patterns.Text.Pattern.DocumentRange.FindText("## Source sync middle", backward: false, ignoreCase: false);
-      Assert.NotNull(middle);
-      middle.ScrollIntoView(alignToTop: true);
-      Wait.UntilInputIsProcessed();
+      ScrollSourceHeadingToTop(session, source, "## Source sync middle");
       WaitForSourceHeadingAlignment(session, source, "## Source sync middle");
       WaitForBrowserHeadingAlignment(session, "mv-heading-1");
       session.ClickElement("OutlineHeading:2");
@@ -507,6 +504,30 @@ public class AppTests
       session.ClickElement("ToggleSection");
       WaitForSourceValue(session, source, value => value.Contains("Grand body reloaded", StringComparison.Ordinal), "the reloaded canonical body after expansion");
       Assert.Equal(replacement, source.Patterns.Value.Pattern.Value.Value.ReplaceLineEndings("\n"));
+   }
+
+
+
+   /// <summary>Drives the real native scrollbar and aligns from its actual glyph geometry; text-range ScrollIntoView is a no-op on this SDK.</summary>
+   private static void ScrollSourceHeadingToTop(AppSession session, AutomationElement source, string text)
+   {
+      string value = source.Patterns.Value.Pattern.Value.Value;
+      int index = value.IndexOf(text, StringComparison.Ordinal);
+      Assert.True(index >= 0);
+      AutomationElement scrollbar = session.WaitFor(() => source.FindFirstDescendant(cf => cf.ByAutomationId("VerticalScrollBar")), "the source's native vertical scrollbar");
+      IRangeValuePattern scroll = scrollbar.Patterns.RangeValue.Pattern;
+      double maximum = scroll.Maximum.Value;
+      Assert.True(maximum > 0);
+      scroll.SetValue(maximum * index / value.Length);
+      AutomationElement visible = session.WaitFor(() =>
+      {
+         FlaUI.Core.ITextRange range = source.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+         return range.GetBoundingRectangles().Length > 0 ? source : null;
+      }, "the source heading's actual visible native glyph");
+      FlaUI.Core.ITextRange heading = visible.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
+      double adjustment = heading.GetBoundingRectangles()[0].Top - source.BoundingRectangle.Top - 12;
+      scroll.SetValue(Math.Clamp(scroll.Value.Value + adjustment, scroll.Minimum.Value, maximum));
+      Wait.UntilInputIsProcessed();
    }
 
 
@@ -759,6 +780,55 @@ public class AppTests
       session.InvokeMenuItem("View", "OutlineToggle");
       session.WaitForElementGone("OutlineHeading:0");
       _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>Native menu/toolbar and physical Ctrl shortcuts scale actual reader glyphs and survive document reload.</summary>
+   [Fact]
+   public void Zoom_MenuToolbarKeysAndReload_ScalesActualHeadingGlyphs()
+   {
+      const string Title = "Reading zoom fixture";
+      using var session = new AppSession(document: "# " + Title + "\n\nZoom body with `inline code`.\n\n## Zoom child\nMore body");
+      AutomationElement heading = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the actual zoom fixture heading", TimeSpan.FromSeconds(30));
+      double original = heading.BoundingRectangle.Height;
+      Assert.True(original > 0);
+      session.InvokeMenuItem("View", "ZoomInMenu");
+      WaitForZoomGlyph(session, original * 1.1);
+      session.ClickElement("ZoomOutButton");
+      WaitForZoomGlyph(session, original);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.OEM_PLUS);
+      WaitForZoomGlyph(session, original * 1.1);
+      session.InvokeMenuItem("File", "ReloadMenuItem");
+      WaitForZoomGlyph(session, original * 1.1);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.OEM_MINUS);
+      WaitForZoomGlyph(session, original);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.OEM_PLUS);
+      WaitForZoomGlyph(session, original * 1.1);
+      FocusBrowser(session);
+      SendReadingKey(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_0);
+      WaitForZoomGlyph(session, original);
+      session.ClickElement("ZoomInButton");
+      WaitForZoomGlyph(session, original * 1.1);
+      session.ClickElement("ZoomResetButton");
+      WaitForZoomGlyph(session, original);
+      Assert.NotNull(session.FindInApp(cf => cf.ByName(Title)));
+      _output.WriteLine(session.DescribeDocumentStatus());
+   }
+
+
+
+   /// <summary>Accepts only actual browser glyph height after the matching native zoom controls are ready.</summary>
+   private static void WaitForZoomGlyph(AppSession session, double expectedHeight)
+   {
+      session.WaitFor(() =>
+      {
+         AutomationElement? heading = session.FindInApp(cf => cf.ByAutomationId("mv-heading-0"));
+         return heading is not null && Math.Abs(heading.BoundingRectangle.Height - expectedHeight) <= 1 && session.WaitForElement("ZoomResetButton").IsEnabled ? heading : null;
+      }, "the actual rendered heading glyph at the requested zoom");
    }
 
 

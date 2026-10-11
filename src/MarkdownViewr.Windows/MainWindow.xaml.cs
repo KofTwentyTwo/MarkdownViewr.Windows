@@ -43,6 +43,7 @@ public sealed partial class MainWindow : Window, IDisposable
       InitializeSource();
       InitializeFind();
       InitializeKeyboard();
+      InitializeZoom();
       RefreshEditorCommands();
       InitializeInputDiagnostics();
       (_settings.FrontmatterKind switch { Core.Documents.FrontmatterMode.Metadata => FrontmatterMetadata, Core.Documents.FrontmatterMode.Markdown => FrontmatterMarkdown, _ => FrontmatterHide }).IsChecked = true;

@@ -11,7 +11,39 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
-## Source caret alignment probe � 2026-10-11
+## Zoom implementation and real native source scrolling — 2026-10-11
+
+1c4d1ad / CI 38117431818 is terminal FAILURE: native/published 47/48, zero skips;
+installed channels not reached. Original post-focus last-heading alignment now
+passes. The test reaches line461 and fails after UIA text-range ScrollIntoView:
+no native ViewChanged/offset movement, with offscreen glyph bounds unavailable.
+Evidence: artifacts/source-caret-diagnostic-38117431818.log and published TRX in
+artifacts/source-caret-failed-installed-38117431818. This confirms caret positioning
+fixed the observed reset; it does not yet prove full synchronization. The regression
+now drives the source's actual native ScrollBar RangeValue, adjusts from actual
+visible glyph bounds and retains all middle/last reader/source/wheel assertions.
+
+A new standalone source-diagnostics workflow keeps this temporary feedback job
+separate from required CI. The required-job invariant correctly rejected adding
+an optional diagnostic job to ci.yml; its test and all production check names stay
+unchanged. Remove the temporary workflow/tagged logs after the original case passes.
+
+Per-window reference font zoom is implemented with native menu/compact toolbar,
+rounded reset percentage and Ctrl+plus/equal/minus/0 reading commands. Scale starts
+at 100%, uses 1.1 steps and 30–500% bounds; body/all headings/code font sizes scale
+with invariant values while line-height/theme JSON remain unchanged. Reload/theme
+navigation retains scale and existing viewport/collapse/find replay. Reference
+ThemeManager scales fonts, not the whole browser; no unsupported WinUI ZoomFactor.
+330 core tests and 100% measured lines pass at artifacts/reader-zoom-core. Zero-warning
+build, format, six-document lint, two-pass script analysis and all 55 required Pester
+boundary tests pass (artifacts/zoom-script-boundaries.xml). New hosted glyph/key/reload test added: 49 native/published and 48 per
+installed channel expected; actual zoom acceptance is pending. No local GUI run.
+
+Full PRODUCT remains active, including print #12, remaining zoom #13 acceptance,
+source/raw-heading audit, windows/recents/activation, full theme/render/link parity,
+standards inventory and actual signed final artifacts. Azure remains deferred.
+
+## Source caret alignment probe — 2026-10-11
 
 82898bd / CI 38117005710 isolated source job 114403773700 reproduced FAILURE
 in 18 seconds. Original timeout is now retained: source focus before=5310.933,
