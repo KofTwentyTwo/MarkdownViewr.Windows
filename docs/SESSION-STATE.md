@@ -11,6 +11,26 @@ Owner authorized signed/DCO commits, pushes, repository configuration and ticket
 No merges, tags/releases or new Azure attempts. Human review acknowledgement remains
 required. Local desktop reservation is unanswered; hosted runner UI tests are authorized.
 
+## Physical source-wheel driver after actual range diagnostics — 2026-10-11
+
+Signed 06a1213 pushed. Source 38118669938/job 114408682304 still fails: actual range
+min 0/max 7370, read-only False, value 5310.933 before; requested 2455.883 and after 2455.883.
+The middle glyph remains unavailable and no resulting source geometry frame appears.
+The UIA range accepts its scalar value but does not prove that the text viewport moved.
+Retain source-range-diagnostic-38118669938.log and original full glyph assertions.
+
+The single driver change now uses physical wheel input over the already verified owned
+source target. One upward detent measures actual native movement; proportional wheel
+input reaches the approximate text region, then actual glyph bounds adjust to 12px.
+No UIA scalar setter or application mirror positions the viewport. Every source/reader
+heading and final physical-wheel assertion remains. This also exercises the original
+user gesture directly. Keep temporary diagnostics until original/full acceptance passes.
+
+0f13849 published TRX confirms 48/49, zero skips, including actual zoom glyph/key/toolbar/
+reload and editor-list cases. All other checks pass; installed channels not reached.
+Current 06a1213 full CI 38118670343 (native 114408683591, installed 114408683491, core
+114408684077, format 114408683974) remains observed until terminal before next push.
+
 ## Native zoom acceptance and source range probe — 2026-10-11
 
 Signed/DCO 0f13849 is pushed; CI 38118157164 native 114407185408 finished FAILURE:

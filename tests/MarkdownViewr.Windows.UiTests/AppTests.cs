@@ -508,7 +508,7 @@ public class AppTests
 
 
 
-   /// <summary>Drives the real native scrollbar and aligns from its actual glyph geometry; text-range ScrollIntoView is a no-op on this SDK.</summary>
+   /// <summary>Drives physical source-wheel input, measuring its native movement and aligning from actual glyph geometry.</summary>
    private void ScrollSourceHeadingToTop(AppSession session, AutomationElement source, string text)
    {
       string value = source.Patterns.Value.Pattern.Value.Value;
@@ -521,7 +521,15 @@ public class AppTests
       double before = scroll.Value.Value;
       double requested = maximum * index / value.Length;
       _output.WriteLine(FormattableString.Invariant($"[DEBUG-src-focus] scrollbar before={before:R}, minimum={scroll.Minimum.Value:R}, maximum={maximum:R}, requested={requested:R}, readonly={scroll.IsReadOnly.Value}."));
-      scroll.SetValue(requested);
+      Mouse.Scroll(1);
+      Wait.UntilInputIsProcessed();
+      session.WaitFor(() => scroll.Value.Value < before - 0.5 ? source : null, "physical wheel movement of the actual source viewport");
+      double current = WaitForSourceScrollRest(session, source, scroll);
+      double pixelsPerClick = before - current;
+      Assert.True(double.IsFinite(pixelsPerClick) && pixelsPerClick > 0);
+      Mouse.Scroll((current - requested) / pixelsPerClick);
+      Wait.UntilInputIsProcessed();
+      WaitForSourceScrollRest(session, source, scroll);
       AutomationElement visible;
       try
       {
@@ -540,8 +548,26 @@ public class AppTests
       }
       FlaUI.Core.ITextRange heading = visible.Patterns.Text.Pattern.DocumentRange.FindText(text, backward: false, ignoreCase: false);
       double adjustment = heading.GetBoundingRectangles()[0].Top - source.BoundingRectangle.Top - 12;
-      scroll.SetValue(Math.Clamp(scroll.Value.Value + adjustment, scroll.Minimum.Value, maximum));
+      Mouse.Scroll(-adjustment / pixelsPerClick);
       Wait.UntilInputIsProcessed();
+      WaitForSourceScrollRest(session, source, scroll);
+   }
+
+
+
+   /// <summary>Measures completed native wheel movement rather than calibrating from an intermediate animation frame.</summary>
+   private static double WaitForSourceScrollRest(AppSession session, AutomationElement source, IRangeValuePattern scroll)
+   {
+      double previous = double.NaN;
+      int stable = 0;
+      session.WaitFor(() =>
+      {
+         double current = scroll.Value.Value;
+         stable = double.IsFinite(previous) && Math.Abs(current - previous) < 0.5 ? stable + 1 : 0;
+         previous = current;
+         return stable >= 2 ? source : null;
+      }, "the actual native source wheel movement to settle");
+      return previous;
    }
 
 
