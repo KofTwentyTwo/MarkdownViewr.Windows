@@ -13,11 +13,26 @@ Describe 'Installed update smoke boundaries' `
       $script:SmokeArtifacts = Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts'
       $script:SmokeAppId = [regex]::Match((Get-Content -LiteralPath (Join-Path (Split-Path -Parent $PSScriptRoot) 'src/MarkdownViewr.Windows.Core/AppIdentity.cs') -Raw), '(?m)^\s*Id\s*=\s*"([a-z0-9][a-z0-9-]*)"').Groups[1].Value
       $ast = [Management.Automation.Language.Parser]::ParseFile($script:SmokeHarness, [ref]$null, [ref]$null)
-      foreach($name in @('Assert-SmokeCliVersion', 'Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved'))
+      foreach($name in @('Assert-SmokeCliVersion', 'Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved', 'Assert-SmokeInstallationOwner'))
       {
          $function = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name }, $true)
          . ([scriptblock]::Create($function.Extent.Text))
       }
+   }
+
+   It 'requires an actual matching manifest inside the resolved artifact boundary before uninstall' `
+   {
+      $root = Join-Path $TestDrive 'artifacts'
+      $install = Join-Path $root 'owned installation'
+      New-Item -ItemType Directory -Path (Join-Path $install 'current') -Force | Out-Null
+      $manifest = Join-Path $install 'current/sq.version'
+      '<package><metadata><id>owned-stable</id><version>0.4.0</version></metadata></package>' | Set-Content -LiteralPath $manifest
+      { Assert-SmokeInstallationOwner -Install $install -PackageIdentity 'owned-stable' -ArtifactRoot $root } | Should -Not -Throw
+      { Assert-SmokeInstallationOwner -Install $install -PackageIdentity 'owned-dev' -ArtifactRoot $root } | Should -Throw '*unexpected application*'
+      { Assert-SmokeInstallationOwner -Install (Join-Path $root '../outside') -PackageIdentity 'owned-stable' -ArtifactRoot $root } | Should -Throw '*outside the smoke artifact boundary*'
+      { Assert-SmokeInstallationOwner -Install (Join-Path $TestDrive 'artifacts-other') -PackageIdentity 'owned-stable' -ArtifactRoot $root } | Should -Throw '*outside the smoke artifact boundary*'
+      { Assert-SmokeInstallationOwner -Install (Join-Path $root 'missing') -PackageIdentity 'owned-stable' -ArtifactRoot $root } | Should -Throw
+      $manifest | Should -Exist
    }
 
    It 'accepts CLI version without Git metadata outside a checkout' `

@@ -2,6 +2,28 @@
 
 Updated: 2026-10-11
 
+## Simultaneous stable/dev acceptance prepared - 2026-10-11
+
+Signed pushedbd3d72a / CI38180868496 passes focused21/21, zero failures/skips,
+including unchanged raw-HTML navigation/fold/find/reload. Core/build/format pass;
+full native and installed jobs remain live. Retain current-focused-bd3d72a.log.
+Do not cancel this full run by pushing the next prepared change early.
+
+Add a separate phase after every existing published/installed suite: fresh owned
+stable/dev installs coexist, use distinct actual edition profile/log prefixes,
+show distinct document/edition titles and run in separate processes. Actual
+AppKit updates run while the sibling remains open; target hashes/versions and
+both file registrations are checked, with unchanged sibling PID/binary/settings.
+Uninstall stable while dev remains open and registered, then clean up both owned
+fixtures without changing Windows defaults. No real profile or local desktop
+input is used. The phase is locally prepared, not executed or runtime-proved.
+
+Canonical artifact boundaries and actual manifest package IDs gate every smoke
+uninstall. A real filesystem safety regression checks wrong IDs, traversal,
+prefix collisions and missing manifests. All64 tooling tests and every configured
+analyzer rule on both changed scripts pass; fresh hosted coexistence execution
+remains required after the current run finishes.
+
 ## Raw multiline heading fold reproduced and corrected - 2026-10-11
 
 Exact764c7ac / CI38179931820 is terminal: focused20/21, native98/99,
