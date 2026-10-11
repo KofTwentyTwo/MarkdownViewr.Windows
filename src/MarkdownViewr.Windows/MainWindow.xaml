@@ -43,6 +43,6 @@
       </MenuBar>
 
       <WebView2 x:Name="DocumentView" Grid.Row="1" Loaded="DocumentView_Loaded" AutomationProperties.Name="Markdown document" />
-      <TextBlock x:Name="StatusText" Grid.Row="2" Margin="16,8" Text="Starting the document surface..." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+      <TextBlock x:Name="StatusText" Grid.Row="2" Margin="16,8" Text="Starting the document surface..." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.AutomationId="StatusText" AutomationProperties.Name="{Binding Text, ElementName=StatusText}" AutomationProperties.AccessibilityView="Content" AutomationProperties.LiveSetting="Polite" />
    </Grid>
 </Window>

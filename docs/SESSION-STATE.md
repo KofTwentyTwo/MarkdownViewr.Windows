@@ -35,6 +35,14 @@ scroll and remote-image denial. Diagnostics now preserve the exact assertion and
 record observed status, exception type/HRESULT/thread access and app logs; root cause
 is still unproven. Do not weaken or skip the deletion assertion. Issues #4 (reader boundary), #6 (reload) and #1 (full scope) remain open.
 
+Diagnostic head 665ece7 is published. Hosted UI job 114356665681 in CI 38100976971
+finished with 24/25 passed; deletion raised FileNotFoundException (0x80070002) on
+the UI thread, but the status text was absent from automation. The next targeted
+change exposes StatusText with an explicit automation ID, text-bound accessible
+name and content view. The deletion assertion remains unchanged; it also requires
+the initial Opened status to be accessible. Build and formatting pass locally;
+hosted recovery proof is pending. Scripts 38100976565 reproduced the analyzer
+engine crash; no scripts/settings/workflow changed and issue #5 remains open.
 ## Repository and authorization
 
 Public repository: [MarkdownViewr.Windows](https://github.com/KofTwentyTwo/MarkdownViewr.Windows).

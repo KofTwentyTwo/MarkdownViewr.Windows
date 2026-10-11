@@ -149,6 +149,7 @@ public class AppTests
    {
       using var session = new AppSession(document: "# Last readable version");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Last readable version")), "the initial heading", TimeSpan.FromSeconds(30));
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("StatusText").And(cf.ByName("Opened document.md"))), "the accessible initial document status");
       string path = Path.Combine(session.DataDirectory, "document.md");
       File.Delete(path);
       try
