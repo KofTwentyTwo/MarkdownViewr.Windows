@@ -1,6 +1,6 @@
 # MarkdownViewr
 
-> In development: a Windows counterpart to [Darin Kelkhoff's macOS markdownViewr](https://github.com/darinkelkhoff/markdownViewr) ([his website](https://kelkhoff.com/)), built with AppKit. The reader, source/find/navigation/editor features and full printing pass hosted acceptance on `bf4fcdc`, including both installed update channels. Document-window acceptance and the new renderer, typography, shared appearance and theme-management controls remain in progress. Full reference parity and signed production releases are not complete.
+> In development: a Windows counterpart to [Darin Kelkhoff's macOS markdownViewr](https://github.com/darinkelkhoff/markdownViewr) ([his website](https://kelkhoff.com/)), built with AppKit. Native/published and installed stable/dev reader acceptance passes on `b542dcd`; the newer `82256f3` is undergoing hosted verification. Full owner design/default-app acceptance, current standards assessment and signed production releases remain incomplete.
 
 A Windows Markdown viewer with live reload, themes and document navigation.
 
@@ -10,7 +10,7 @@ A Windows Markdown viewer with live reload, themes and document navigation.
 | | |
 | --- | --- |
 | **Tier** | Product ([scope](https://github.com/KofTwentyTwo/standards/blob/main/policies/README.md#scope)) |
-| **Standards** | Adopting [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards) (pre-v1.0); built from the KofTwentyTwo Windows app template |
+| **Standards** | Adopting [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards); built from the KofTwentyTwo Windows app template |
 | **Latest release** | [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest) |
 
 Settings → Advanced contains the startup splash toggle, splash duration (500–30000 milliseconds) and startup update checks. Changes save immediately and apply on the next launch. The native toolbar keeps Print visible, aligns controls in a compact row and groups reading commands.
@@ -109,6 +109,10 @@ for the full support policy.
 Report vulnerabilities privately; see [SECURITY.md](SECURITY.md). The app's attack
 surface is described in its [threat model](docs/security/threat-model.md).
 
+[Parser fuzzing](docs/security/fuzzing.md) records reproducible security properties
+and campaign budgets. [Best Practices enrollment](docs/security/best-practices.md)
+remains incomplete; no project badge or conformance is claimed.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -119,7 +123,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 This Windows application is based on [Darin Kelkhoff's macOS markdownViewr](https://github.com/darinkelkhoff/markdownViewr). Visit [Darin's website](https://kelkhoff.com/). The original MIT copyright/license and adapted resource notices are included in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), distributed with the app.
 
-
 The current review build uses native Settings pages for long theme/editor forms,
 with Back, Save and Cancel. Contents and Source start off in new windows unless
 changed under Settings → Advanced; toolbar toggles affect the current reader.
@@ -128,7 +131,6 @@ Contents pane. The footer shows the loaded file's modification time, marks faile
 reloads/stale files and offers Open folder. Disabled editor commands explain their
 configuration state. These owner-review changes have passing local build/core/
 adapter/style gates; current native/distributed acceptance remains pending.
-
 
 Stable releases use `markdownviewr-windows`; prereleases use
 `markdownviewr-windows-dev` and show **MarkdownViewr (dev)**. Each installed edition

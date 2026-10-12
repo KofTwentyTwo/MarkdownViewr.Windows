@@ -1,0 +1,20 @@
+{
+   "schemaVersion": 1,
+   "badge": {
+      "applicability": "required",
+      "reason": "MarkdownViewr.Windows is a public open-source Product. Enrollment and maintainer attestation are required; no real project ID has been established.",
+      "projectUrl": null,
+      "evidence": "docs/security/best-practices.md"
+   },
+   "fuzzing": {
+      "applicability": "required",
+      "reason": "Untrusted Markdown/HTML/frontmatter, source ranges/folds, resource URLs, imported theme JSON and activation JSON are parser boundaries. Seeded mutation targets verify unsafe acceptance as well as exceptions.",
+      "targets": [
+         "tests/MarkdownViewr.Windows.Core.Tests/SecurityFuzzTests.cs",
+         "tests/MarkdownViewr.Windows.UiTests/ActivationFuzzTests.cs"
+      ],
+      "command": "dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz",
+      "workflow": ".github/workflows/fuzz.yml",
+      "evidence": "docs/security/fuzzing.md"
+   }
+}

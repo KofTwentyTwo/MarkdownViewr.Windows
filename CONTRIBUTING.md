@@ -34,9 +34,17 @@ dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --n
 
 # PowerShell tooling gate (install PSScriptAnalyzer 1.25.0 once)
 Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0
-Invoke-ScriptAnalyzer -Path build -Recurse -Settings ./PSScriptAnalyzerSettings.psd1 -EnableExit
+# Load repository command metadata; keep casing separate from other analyzer rules.
+Import-Module ./build/GitHubRepository.psm1 -Force
+foreach($script in Get-ChildItem build -File | Where-Object Extension -In '.ps1', '.psm1', '.psd1') {
+   $findings = @(
+      Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -IncludeRule PSUseCorrectCasing
+      Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -ExcludeRule PSUseCorrectCasing
+   )
+   if($findings.Count -ne 0) { $findings | Format-Table; throw 'Script analysis failed.' }
+}
 Import-Module Pester -RequiredVersion 5.7.1
-Invoke-Pester -Path build/Assert-Coverage.Tests.ps1 -CI
+Invoke-Pester -Path build/*.Tests.ps1 -CI
 ```
 
 `dotnet format` (without `--verify-no-changes`) fixes layout, `var` use, usings, and
@@ -85,6 +93,7 @@ pre-commit install --hook-type pre-commit --hook-type commit-msg
 | `pr / title` | The PR title is a Conventional Commit header |
 | `pr / dco` | Every commit is signed off |
 | `pr / dependency-review` | Added dependencies have no known vulnerabilities and an allowed license |
+| `fuzzing` | Repeatable parser security properties; longer weekly and release campaigns |
 | `security / secrets`, `security / sca`, `security / workflows` | No secrets, no vulnerable or malicious dependencies, safe workflows |
 | `codeql / analyze (csharp)`, `codeql / analyze (actions)` | No high-severity static analysis findings |
 | `ci / build-test` | Locked restore, zero-warning build, unit tests, 100% coverage gate |
@@ -104,6 +113,15 @@ verify both partitions still report violations. For the same local workaround, s
 sequential `Invoke-ScriptAnalyzer` calls; evaluate findings from both.
 Run PSScriptAnalyzer with `PSScriptAnalyzerSettings.psd1` and Pester against
 `build/*.Tests.ps1`. New owners follow [repository setup](docs/repository-setup.md).
+
+## Parser campaigns
+
+Run the [seeded parser targets](docs/security/fuzzing.md) when changing document,
+source, URL, theme-import or activation boundaries. The required `fuzzing` check
+runs PR/main budgets; weekly and release gates use longer campaigns. Retain and
+minimize failing synthetic inputs into regression cases. Never execute generated
+content or use private files/profiles as a corpus. Best Practices enrollment and
+actual signing remain separate maintainer requirements.
 
 ## Sign-off (Developer Certificate of Origin)
 

@@ -87,8 +87,14 @@ jobs:
     permissions:
       contents: read
 
+  fuzzing:
+    needs: verify
+    uses: ./.github/workflows/fuzz.yml
+    permissions:
+      contents: read
+
   release:
-    needs: [verify, gates, security, codeql, scripts]
+    needs: [verify, gates, security, codeql, scripts, fuzzing]
     uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@fdf5ed029603c938615a32b1beca3628b8787945 # v0.1.2
     permissions:
       contents: write      # create and publish the GitHub release

@@ -2,6 +2,12 @@
 
 ## Current release checklist
 
+- [x] Exact82256f3 CI38201379210 passes668 core/100% lines, focused28, native/published109 and installed108 per channel, zero skips; actual lifecycle artifacts/logs retained.
+- [x] Prepare current-standard assurance record, five seeded parser/property targets and honest unenrolled Best Practices assessment (#30/#31).
+- [x] Run local long campaigns:80000 core inputs plus minimized oracle regression,20000 activation envelopes,677 core tests/100% measured lines, zero-warning Release/format and23 setup tests.
+- [ ] Exact82256f3 CI38201379210 is terminal green; push the reviewed assurance/campaign delta; verify hosted fuzzing plus all native/published/installed gates and add/read back its required check.
+- [ ] Enroll this exact Windows public Product in Best Practices; use its real URL/README badge and maintainer-attested assessment. Do not approve an enrollment exception or fabricate passing criteria.
+
 - [x] Exactb542dcd all-channel CI38197169201 passes native/published109/109, focused28/28 and installed stable/dev108/108 each, zero skips; actual TRXs/lifecycle JSON retained.
 - [x] Resolve full-review finding: prefix reserved COM/LPT superscript theme-export names;668 core tests/100% measured lines and format pass.
 - [x] Finish application-source review:105 C# files plus markup/project configuration and relevant CI/release/installed paths; blob inventory and precise scope retained. Settings theme/editor edits already use pages.

@@ -2,6 +2,37 @@
 
 Updated: 2026-10-11
 
+## Current standards delta prepared; preceding checkpoint fully accepted - 2026-10-11
+
+Fresh published-standards checker at1cc9d01 identifies mandatory assurance record,
+parser campaigns and public Product enrollment missing in this app (35 PASS,
+3 FAIL,3 REVIEW); prior34/1 assessment is stale. Issues30/31 created. Implement
+five real seeded property targets (Markdown/HTML/frontmatter/extensions, source/
+folds, URLs, theme JSON, generated activation schema), a PR/main/weekly/release
+fuzz workflow and planned required context; prepare honest badge assessment with
+required scope/null project URL, never an invented badge or exception. Remove
+obsolete unsigned-release guidance from SECURITY.md; signing remains fail-closed.
+
+Local core campaigns9/9 cover80000 inputs plus the minimized regression;
+activation2/2 covers20000 envelopes; zero failures/skips. Full core677/100%
+measured lines, isolated full Release0 warnings/errors, format,23 setup tests and all64 script tests
+pass. A campaign oracle failure treated browser-relative backslashes as Windows
+file URIs; preserve failed TRXs, use actual browser URL semantics and require the
+minimized foreign-image denial regression. No production defect inferred and
+no existing assertion/case/deadline removed. New native assembly expectation111
+and installed110 per channel; fresh hosted proof not yet available.
+
+Exact82256f3/CI38201379210 is now terminal success:668 core/100%, focused28/28,
+native/published109/109, installed stable/dev108/108 each; zero failures/skips.
+Actual TRXs, coexisting-channel/registration JSON and native log retained under
+current-installed-evidence-38201379210, reader-regressions-38201379210 and
+current-native-82256f3.log. All actual lifecycle booleans pass; fixtures are unsigned.
+The reviewed next assurance push may proceed without cancelling this evidence;
+require fresh fuzzing and all original gates and add/read back the new context. Production source blobs remain unchanged. Shared signing31 approval,
+Azure resource authority/final signatures, actual enrollment/inventory, final-head
+human acknowledgement and owner design/chooser acceptance still required. No
+Azure login retry, local GUI input, shared merge, release tag or publication.
+
 ## Application source review finished; next hosted checkpoint - 2026-10-11
 
 All105 application C# files (41 core/64 native), native markup/project configuration

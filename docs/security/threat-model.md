@@ -342,7 +342,6 @@ Portable/unregistered previews cannot initiate it. Selection remains in Windows,
 with no writes to UserChoice/defaults and `.txt` explicitly optional. Eleven
 isolated adapter tests now pass; OS chooser behavior still needs acceptance.
 
-
 The native General default-status read uses fixed `.md` and Windows
 AssocQueryStringW/ASSOCSTR_PROGID with a1024-character Unicode buffer. Require
 unchanged channel/install registration before displaying Default; missing/error
@@ -350,7 +349,6 @@ responses stay Not default or Unknown. No UserChoice hash, competitor executable
 path, document content or authored native command is read/logged. Returning from
 Windows Settings refreshes status without setting associations. Seven real
 read-only/isolated adapter cases pass; actual OS selection still needs acceptance.
-
 
 ## Reference CSS, Settings drafts and document status
 
@@ -377,7 +375,6 @@ parent directory; it does not construct shell commands. Diagnostics omit authore
 content/paths. The disabled-editor tooltip reports native configuration state,
 and its timer and footer polling stop on window closure. Native status/hover/
 Explorer acceptance remains pending; passing pure or adapter tests is insufficient.
-
 
 ## Disconnected activation peers
 
@@ -420,3 +417,12 @@ committed snapshot inside the source grant. Closed source windows cannot launch
 new linked readers. Existing image, sanitizer, CSP and host-message rules remain.
 Core URI and actual filesystem/junction tests pass; the prepared physical-link/
 reload-scope desktop regression still requires hosted execution.
+
+## Repeatable parser assurance
+
+The seeded targets in [fuzzing.md](fuzzing.md) exercise Markdown/HTML/frontmatter,
+literal source/folds, resource URLs, imported theme JSON and activation JSON through
+actual parsers. Independent properties detect unsafe acceptance as well as crashes.
+Synthetic inputs never execute scripts, start native processes or touch real profiles.
+The record in [assurance.json](assurance.json) does not claim coverage-guided
+instrumentation, Best Practices enrollment or verified production signatures.
