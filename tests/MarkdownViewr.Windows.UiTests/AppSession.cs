@@ -4,6 +4,7 @@
  */
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
@@ -28,15 +29,24 @@ public sealed class AppSession : IDisposable
    private static readonly TimeSpan s_launchTimeout = TimeSpan.FromSeconds(30);
    private static readonly TimeSpan s_pollInterval = TimeSpan.FromMilliseconds(250);
    private readonly DpiAwarenessScope _dpi;
+   private readonly Stopwatch _lifetime = Stopwatch.StartNew();
+   private readonly string? _timingPath;
 
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null, IReadOnlyDictionary<string, string>? additionalDocuments = null)
+   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null, IReadOnlyDictionary<string, string>? additionalDocuments = null, [CallerMemberName] string fixtureName = "")
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
       Directory.CreateDirectory(DataDirectory);
+      if(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") is { Length: > 0 } workspace)
+      {
+         string evidence = Path.Combine(workspace, "artifacts", "installed-smoke-ui");
+         Directory.CreateDirectory(evidence);
+         _timingPath = Path.Combine(evidence, "session-" + Path.GetFileName(DataDirectory) + ".log");
+      }
+      TraceTiming("launch-start " + fixtureName);
       File.WriteAllText(
           Path.Combine(DataDirectory, "settings.json"),
           $$"""{ "ShowSplashScreen": {{(showSplash ? "true" : "false")}}, "CheckForUpdatesOnStartup": false }""");
@@ -74,6 +84,7 @@ public sealed class AppSession : IDisposable
          Automation = new UIA3Automation();
          App = Application.Launch(startInfo);
          MainWindow = WaitForMainWindow();
+         TraceTiming("main-window-ready");
       }
       catch
       {
@@ -158,7 +169,13 @@ public sealed class AppSession : IDisposable
    public AutomationElement WaitFor(Func<AutomationElement?> lookup, string description, TimeSpan? timeout = null)
    {
       TimeSpan effective = timeout ?? s_defaultTimeout;
+      long started = Stopwatch.GetTimestamp();
       RetryResult<AutomationElement?> result = Retry.WhileNull(lookup, timeout: effective, interval: s_pollInterval, ignoreException: true);
+      TimeSpan elapsed = Stopwatch.GetElapsedTime(started);
+      if(elapsed >= TimeSpan.FromSeconds(2) || result.Result is null)
+      {
+         TraceTiming(FormattableString.Invariant($"wait elapsed={elapsed.TotalMilliseconds:0}ms completed={result.Result is not null}: {description}"));
+      }
       return result.Result
           ?? throw new TimeoutException($"Timed out after {effective.TotalSeconds:0}s waiting for {description}. (app exited: {App.HasExited})");
    }
@@ -420,6 +437,25 @@ public sealed class AppSession : IDisposable
 
 
 
+   /// <summary>Retains bounded fixture-phase timings in the existing hosted evidence directory, including before an outer process timeout.</summary>
+   public void TraceTiming(string stage)
+   {
+      if(_timingPath is null)
+      {
+         return;
+      }
+      try
+      {
+         File.AppendAllText(_timingPath, FormattableString.Invariant($"[DEBUG-ui-timing] {_lifetime.Elapsed.TotalMilliseconds:0}ms {stage}\n"));
+      }
+      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException)
+      {
+         // Diagnostic retention must not replace the original acceptance result.
+      }
+   }
+
+
+
    /// <summary>FlaUI closes only the main HWND; close every fixture-owned window first so intended siblings do not force its exit timeout.</summary>
    private void CloseOwnedWindows()
    {
@@ -452,8 +488,11 @@ public sealed class AppSession : IDisposable
       {
          try
          {
+            TraceTiming("close-owned-start");
             CloseOwnedWindows();
+            TraceTiming("close-owned-complete");
             App?.Close();
+            TraceTiming("application-close-complete");
          }
          catch
          {
@@ -463,7 +502,9 @@ public sealed class AppSession : IDisposable
          {
             if(App is { HasExited: false })
             {
+               TraceTiming("kill-start");
                App.Kill();
+               TraceTiming("kill-complete");
             }
          }
          catch
@@ -484,6 +525,7 @@ public sealed class AppSession : IDisposable
       finally
       {
          _dpi.Dispose();
+         TraceTiming("session-disposed");
       }
    }
 }

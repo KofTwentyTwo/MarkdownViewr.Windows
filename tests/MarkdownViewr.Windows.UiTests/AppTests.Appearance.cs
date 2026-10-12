@@ -24,6 +24,7 @@ public partial class AppTests
       using var session = new AppSession(document: "# " + Title + "\n\nOne paired appearance needle.");
       AutomationElement initial = session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")), "the actual appearance fixture heading", TimeSpan.FromSeconds(30));
       Assert.True(initial.BoundingRectangle.Width > 350);
+      session.TraceTiming("appearance-initial-heading-ready");
       double height = initial.BoundingRectangle.Height;
       EditReadingAppearance(session, 320, "#content { background: #112233; }");
       WaitForAppearanceWindowColor(session, session.MainWindow, Color.FromArgb(17, 34, 51));
@@ -37,6 +38,7 @@ public partial class AppTests
       session.InvokeMenuItem("View", "DocumentThemesMenu");
       session.ClickElement("DocumentTheme:GitHub Light");
       WaitForAppearanceWindowColor(session, session.MainWindow, Color.FromArgb(17, 34, 51));
+      session.TraceTiming("appearance-pdf-start");
       using(Bitmap pdf = await ExportPrintFixtureAsync(session, "reader-appearance", new PrintOptions("Active Theme", Backgrounds: true, FullPage: false)))
       {
          Assert.Equal(Color.White.ToArgb(), pdf.GetPixel(pdf.Width / 2, pdf.Height / 2).ToArgb());
@@ -45,11 +47,13 @@ public partial class AppTests
       WaitForAppearanceWindowColor(session, session.MainWindow, Color.FromArgb(17, 34, 51));
       Assert.Equal(source, session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value);
       WaitForFindCount(session, "1 of 1");
+      session.TraceTiming("appearance-pdf-and-find-complete");
       string accepted = session.ReadSettings();
       Rectangle before = session.WaitForElement("mv-heading-0").BoundingRectangle;
       EditReadingAppearance(session, 320, "#content { background: #445566; }", save: false);
       Assert.Equal(accepted, session.ReadSettings());
       Assert.Equal(before, session.WaitForElement("mv-heading-0").BoundingRectangle);
+      session.TraceTiming("appearance-cancel-complete");
       EditReadingAppearance(session, 320, "#content { background: #112233; }", limit: false);
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0")) is { } heading && heading.BoundingRectangle.Width > 321 ? heading : null, "the actual heading expanding after the native width limit is disabled");
       using(var settings = JsonDocument.Parse(session.ReadSettings()))
@@ -59,6 +63,7 @@ public partial class AppTests
          Assert.Equal("#content { background: #112233; }", settings.RootElement.GetProperty("GlobalCss").GetString());
       }
       RetainDocumentWindow(session, session.MainWindow, "reader-appearance");
+      session.TraceTiming("appearance-acceptance-complete");
    }
 
 

@@ -3,7 +3,8 @@
 ## Current release checklist
 
 - [x] Pushe6fd281 and verify hosted fuzz9/9 core+2/2 activation,677 core/100% lines, focused28 and full native111, zero skips; retain actual evidence.
-- [ ] Verify the owned Settings activation candidate through exact hosted native/published/installed acceptance after the observed picker failure and600-second published timeout. Preserve all cases/assertions/deadlines; current required-check addition remains unapplied.
+- [x] Exactd052 hosted core677/100%, focused28, native111 and fuzz9+2 pass; published picker cancellation passes, but110/111 hit600 seconds without assertion failure/final TRX. Installed lifecycle not reached.
+- [ ] Measure retained launch/slow-wait/closure/Appearance-PDF timings to diagnose aggregate published runtime versus a blocked final operation; preserve111 cases and every assertion/deadline. Remove temporary timings after verified resolution; required fuzz context remains unapplied.
 
 - [x] Exact82256f3 CI38201379210 passes668 core/100% lines, focused28, native/published109 and installed108 per channel, zero skips; actual lifecycle artifacts/logs retained.
 - [x] Prepare current-standard assurance record, five seeded parser/property targets and honest unenrolled Best Practices assessment (#30/#31).

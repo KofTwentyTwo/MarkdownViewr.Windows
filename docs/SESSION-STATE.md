@@ -2,6 +2,31 @@
 
 Updated: 2026-10-12
 
+## Published acceptance timing investigation - 2026-10-12
+
+Exact d0526ef / CI38207252597 is terminal failure only in installed-updates.
+Core677/100% measured lines, focused28, native111 and fuzz9+2 pass, zero skips.
+Published process15 records110/111 passes, including native picker cancellation,
+with no assertion failure or final TRX before the unchanged600-second bound.
+The only uncompleted case is Appearance_WidthCssAndPrint. Prior822 published
+109/109 took590.96 seconds, including13.07 seconds for that unchanged case;
+three current fixture close fallbacks versus four in the prior passing run do
+not establish a new close regression. Native111 takes9m55. Retain actual logs
+and distinguish aggregate runtime from an operation hang; installed lifecycle
+was not reached.
+
+Prepare temporary hosted fixture timings for launch readiness, waits lasting
+at least2 seconds, owned-window closure and exact Appearance/PDF phases, retained
+in existing installed-smoke-ui session logs even if the outer process is stopped.
+No cases, assertions, waits/deadlines, source behavior or release gates change.
+Local isolated full Release passes with0 warnings/errors; formatting and direct
+Markdown lint of both changed documents pass.
+Full hosted proof is still required; remove DEBUG-ui-timing once the cause is
+measured and the original acceptance passes. Current required fuzz context remains
+unapplied. Shared approvals, actual enrollment/inventory, Azure verification/
+identity and shipped signatures, genuine final-head acknowledgement and owner
+visual/default-chooser acceptance remain open; no signing/release is claimed.
+
 ## Assurance push accepted natively; published picker failure investigated - 2026-10-12
 
 Signed/DCOe6fd281 is pushed. Hosted fuzz38204215912 passes core9/9 and activation2/2,
