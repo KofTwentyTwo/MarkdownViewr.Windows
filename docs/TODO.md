@@ -2,6 +2,10 @@
 
 ## Current release checklist
 
+- [x] Exactb542dcd all-channel CI38197169201 passes native/published109/109, focused28/28 and installed stable/dev108/108 each, zero skips; actual TRXs/lifecycle JSON retained.
+- [x] Resolve full-review finding: prefix reserved COM/LPT superscript theme-export names;668 core tests/100% measured lines and format pass.
+- [ ] Finish the complete final PR source/UI/build/release review;18 files currently recorded in artifacts/final-pr-review-progress.json. Hold the filename-only correction until that review is complete, then push all reviewed changes together and obtain genuine final-head acknowledgement.
+
 - [x] Exact4d34656 / CI38193736344 terminal success: focused27/27, native/published106/106, installed stable/dev105/105 each; actual authored-code/raw-heading browser and channel lifecycle cases pass, zero skips.
 - [x] Complete local-document link implementation through scoped native windows, with662 core/100% measured lines,10 actual filesystem tests and zero-warning Release/format.
 - [ ] Verify the physical local-link/duplicate/watcher/junction-reload case and 109 native/published and108 per installed channel on the next pushed head; original cases/deadlines remain.

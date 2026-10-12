@@ -2,6 +2,32 @@
 
 Updated: 2026-10-11
 
+## All-channel acceptance retained; final PR review in progress - 2026-10-11
+
+Exactb542dcd CI38197169201 is terminal success: native/published109/109,
+focused28/28 and installed stable/dev108/108 each, zero failures/skips. Actual
+TRXs/JSON retained at current-installed-evidence-38197169201; simultaneous profiles,
+windows, isolated updates/restarts/target hashes and five-extension registration/
+sibling-preserving uninstall/default preservation pass. Unsigned fixture evidence
+is not production signing or actual OS chooser/Explorer selection.
+
+Full final PR review has inspected18 source files covering core identity/editor/
+theme/settings and activation/registration/startup authority. Progress/remaining
+coverage is in artifacts/final-pr-review-progress.json; the existing incremental
+packet alone must not be called a full review. One actual finding: theme-export
+suggestions omitted reserved COM/LPT superscript device names. Prefix those six
+names consistently with the existing ASCII/device rule;668 core tests/100% measured
+lines and format pass. Local signed correction is held until the review is complete.
+No new native case or changing deadlines is needed for this filename-only fix.
+
+Remaining review: remaining core/renderer/source/navigation/printing models, native
+UI/preferences/browser, build/release policy and final combined diff. Do not infer
+completion from tests or fabricate maintainer acknowledgement. Existing Azure
+account query still reports no authentication; no login retry. Shared31 merge/
+publication approval unanswered; protected signing variables absent. Owner design/
+scaling and chooser, actual signing and final-head human review remain required.
+No GUI input, preview55472 changes, shared merge, tag or release publication.
+
 ## Bounded native local links prepared; renderer checkpoint fully verified - 2026-10-11
 
 Exact4d34656 / CI38193736344 is terminal success: focused27/27,

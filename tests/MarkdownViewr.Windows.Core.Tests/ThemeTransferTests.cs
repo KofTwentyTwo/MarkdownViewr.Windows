@@ -235,6 +235,12 @@ public sealed class ThemeTransferTests
    [InlineData("COM9", "theme-com9.json")]
    [InlineData("com10", "com10.json")]
    [InlineData("...", "theme.json")]
+   [InlineData("COM¹", "theme-com¹.json")]
+   [InlineData("COM²", "theme-com².json")]
+   [InlineData("COM³", "theme-com³.json")]
+   [InlineData("LPT¹", "theme-lpt¹.json")]
+   [InlineData("LPT²", "theme-lpt².json")]
+   [InlineData("LPT³", "theme-lpt³.json")]
    public void SuggestedFileName_UnsafeOrReserved_SuggestsSafeJson(string name, string expected)
       => Assert.Equal(expected, ThemeJson.SuggestedFileName(ThemeCatalog.Find(null).Rename(name)));
 

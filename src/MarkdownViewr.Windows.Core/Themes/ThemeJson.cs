@@ -40,7 +40,7 @@ public static class ThemeJson
          stem = "theme";
       }
       string device = stem.Split('.')[0];
-      if(device is "con" or "prn" or "aux" or "nul" || device.Length == 4 && (device.StartsWith("com", StringComparison.Ordinal) || device.StartsWith("lpt", StringComparison.Ordinal)) && device[3] is >= '1' and <= '9')
+      if(device is "con" or "prn" or "aux" or "nul" || device.Length == 4 && (device.StartsWith("com", StringComparison.Ordinal) || device.StartsWith("lpt", StringComparison.Ordinal)) && device[3] is >= '1' and <= '9' or '¹' or '²' or '³')
       {
          stem = "theme-" + stem;
       }
