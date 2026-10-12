@@ -32,6 +32,11 @@ public sealed partial class MainWindow
 
 
 
+   /// <summary>A document-created link may focus only a reader whose committed physical snapshot belongs to its authorized folder.</summary>
+   internal bool IsDocumentInside(string physicalRoot) => _documentPhysicalRoot?.StartsWith(physicalRoot, StringComparison.Ordinal) == true;
+
+
+
    /// <summary>Creates a genuinely blank window rather than re-reading the original process argument.</summary>
    private void NewWindow_Click(object sender, RoutedEventArgs args) => ((App)Application.Current).NewDocumentWindow();
 

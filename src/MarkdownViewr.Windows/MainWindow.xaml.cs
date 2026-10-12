@@ -24,6 +24,8 @@ public sealed partial class MainWindow : Window, IDisposable
    private readonly DocumentBrowser _browser;
    private Task? _browserInitialization;
    private string? _documentPath;
+   private readonly string? _requiredDocumentRoot;
+   private string? _documentPhysicalRoot;
    private bool _loaded;
    private bool _closed;
    private readonly Core.Documents.DocumentLoadScheduler _loads = new();
@@ -33,16 +35,17 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Sizes and brands the window, creates the document host, shows the splash, and schedules the quiet startup update check.</summary>
-   public MainWindow(string? documentPath = null, bool initialWindow = true)
+   public MainWindow(string? documentPath = null, bool initialWindow = true, string? requiredDocumentRoot = null)
    {
       _initialDocumentPath = documentPath;
+      _requiredDocumentRoot = requiredDocumentRoot;
       _settings.ShowOutline = _settings.ShowOutlineByDefault;
       _settings.ShowSource = _settings.ShowSourceByDefault;
       _lastSavedSettings = Core.SettingsChanges.Copy(_settings);
       InitializeComponent();
       RefreshRecentDocuments();
       _themes = Core.Themes.ThemeManagement.Enabled(_settings);
-      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme(), _settings.ReadingAppearance);
+      _browser = new DocumentBrowser(DocumentView, message => StatusText.Text = message, ActiveDocumentTheme(), _settings.ReadingAppearance, (path, root) => ((App)Application.Current).OpenLinkedDocumentAsync(this, path, root));
       CreateDocumentThemeMenu();
       InitializeOutline();
       InitializeSource();
@@ -211,7 +214,7 @@ public sealed partial class MainWindow : Window, IDisposable
          _browserInitialization ??= _browser.InitializeAsync();
          await _browserInitialization;
          Core.Documents.DocumentViewport viewport = reload ? await _browser.CaptureViewportAsync() : default;
-         (DocumentFiles files, Core.Documents.DocumentOutline outline) = await ReadDocumentAsync(path, _settings.FrontmatterKind, _settings.MarkdownExtensions);
+         (DocumentFiles files, Core.Documents.DocumentOutline outline) = await ReadDocumentAsync(path, _settings.FrontmatterKind, _settings.MarkdownExtensions, _requiredDocumentRoot);
          if(_closed)
          {
             return;
@@ -295,7 +298,7 @@ public sealed partial class MainWindow : Window, IDisposable
 
 
    /// <summary>Retries only transient missing/sharing violations from an editor's replace/save operation.</summary>
-   private static async Task<(DocumentFiles Files, Core.Documents.DocumentOutline Outline)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter, Core.Documents.MarkdownExtensions extensions)
+   private static async Task<(DocumentFiles Files, Core.Documents.DocumentOutline Outline)> ReadDocumentAsync(string path, Core.Documents.FrontmatterMode frontmatter, Core.Documents.MarkdownExtensions extensions, string? requiredDocumentRoot)
    {
       for(int attempt = 0; ; attempt++)
       {
@@ -303,7 +306,7 @@ public sealed partial class MainWindow : Window, IDisposable
          {
             return await Task.Run(() =>
             {
-               var document = DocumentFiles.Open(path);
+               var document = DocumentFiles.Open(path, requiredDocumentRoot);
                return (document, new Core.Documents.DocumentOutline(document.Markdown, frontmatter, extensions));
             });
          }
@@ -329,6 +332,7 @@ public sealed partial class MainWindow : Window, IDisposable
       RefreshSource();
       RefreshOutline();
       _documentPath = Path.GetFullPath(path);
+      _documentPhysicalRoot = files.PhysicalRoot;
       CommitDocumentFooter(files);
       RefreshEditorCommands();
       Title = Path.GetFileName(path) + " — " + AppIdentity.Info.DisplayName;

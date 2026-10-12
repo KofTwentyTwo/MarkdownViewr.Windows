@@ -6,12 +6,17 @@
 
 namespace MarkdownViewr.Windows.Core.Documents;
 
-/// <summary>Limits browser resource requests to passive images belonging to one opened document.</summary>
+/// <summary>Bounds passive image requests and user-initiated native document links to one opened document namespace.</summary>
 public sealed class DocumentResourcePolicy
 {
    private static readonly HashSet<string> s_imageExtensions = new(StringComparer.OrdinalIgnoreCase)
    {
       ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".svg", ".avif", ".ico",
+   };
+
+   private static readonly HashSet<string> s_documentExtensions = new(StringComparer.OrdinalIgnoreCase)
+   {
+      ".md", ".markdown", ".mdown", ".mkd", ".txt",
    };
 
    private static readonly HashSet<string> s_deviceNames = new(StringComparer.OrdinalIgnoreCase)
@@ -52,7 +57,21 @@ public sealed class DocumentResourcePolicy
 
 
    /// <summary>Returns a decoded relative image path, or denies the request before filesystem access.</summary>
-   public string? GetImageRelativePath(Uri request)
+   public string? GetImageRelativePath(Uri request) => GetRelativePath(request, s_imageExtensions);
+
+
+
+   /// <summary>A deliberate local document link may read a supported type, never another scheme, query or native command.</summary>
+   public string? GetDocumentRelativePath(Uri request)
+   {
+      ArgumentNullException.ThrowIfNull(request);
+      return request.IsAbsoluteUri && request.Query.Length == 0 ? GetRelativePath(request, s_documentExtensions) : null;
+   }
+
+
+
+   /// <summary>Shares once-only decoding and segment containment between images and native document-link requests.</summary>
+   private string? GetRelativePath(Uri request, HashSet<string> extensions)
    {
       ArgumentNullException.ThrowIfNull(request);
       if(!request.IsAbsoluteUri || !string.Equals(request.Scheme, "https", StringComparison.Ordinal) || !string.Equals(request.Host, DocumentUri.Host, StringComparison.Ordinal) || request.Port != 443 ||
@@ -61,7 +80,7 @@ public sealed class DocumentResourcePolicy
          return null;
       }
       string relative = Uri.UnescapeDataString(request.AbsolutePath[_prefix.Length..]);
-      if(!s_imageExtensions.Contains(Path.GetExtension(relative)) || relative.Split('/').Any(segment => !IsSafeSegment(segment)))
+      if(!extensions.Contains(Path.GetExtension(relative)) || relative.Split('/').Any(segment => !IsSafeSegment(segment)))
       {
          return null;
       }

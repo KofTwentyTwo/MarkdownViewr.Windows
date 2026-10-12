@@ -74,6 +74,51 @@ public sealed class DocumentFilesTests : IDisposable
 
 
 
+   /// <summary>A linked document is read from the checked handle, and its inherited folder scope still applies to later reads.</summary>
+   [Fact]
+   public void Open_LinkedDocumentScope_RetainsInsideReadsAndRejectsOutside()
+   {
+      DocumentFiles source = CreateDocument();
+      string child = source.ResolveDocumentLink("child.md");
+      File.WriteAllText(child, "# Child snapshot");
+      Assert.Equal("# Child snapshot", DocumentFiles.Open(child, source.PhysicalRoot).Markdown);
+      File.WriteAllText(child, "# Child replacement");
+      Assert.Equal("# Child replacement", DocumentFiles.Open(child, source.PhysicalRoot).Markdown);
+      string outside = Path.Combine(_root, "outside", "private.md");
+      File.WriteAllText(outside, "# Outside content must not be read");
+      Assert.Throws<IOException>(() => DocumentFiles.Open(outside, source.PhysicalRoot));
+   }
+
+
+
+   /// <summary>A document link cannot use a directory junction to bypass its parent reader's physical folder grant.</summary>
+   [Fact]
+   public void Open_LinkedDocumentJunction_RejectsBeforeReading()
+   {
+      DocumentFiles source = CreateDocument();
+      string link = Path.Combine(_root, "document", "linked");
+      File.WriteAllText(Path.Combine(_root, "outside", "private.md"), "# Outside content must not be read");
+      var start = new ProcessStartInfo("cmd.exe") { UseShellExecute = false, CreateNoWindow = true };
+      start.ArgumentList.Add("/c");
+      start.ArgumentList.Add("mklink");
+      start.ArgumentList.Add("/J");
+      start.ArgumentList.Add(link);
+      start.ArgumentList.Add(Path.Combine(_root, "outside"));
+      using Process process = Process.Start(start)!;
+      Assert.True(process.WaitForExit(10000), "Junction creation did not finish.");
+      Assert.Equal(0, process.ExitCode);
+      try
+      {
+         Assert.Throws<IOException>(() => DocumentFiles.Open(source.ResolveDocumentLink("linked/private.md"), source.PhysicalRoot));
+      }
+      finally
+      {
+         Directory.Delete(link);
+      }
+   }
+
+
+
    /// <summary>Ordinary relative images inside the selected folder retain their exact bytes.</summary>
    [Fact]
    public void ReadImage_InsideDocumentFolder_ReturnsExactBytes()

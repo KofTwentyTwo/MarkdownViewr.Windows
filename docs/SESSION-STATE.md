@@ -2,6 +2,32 @@
 
 Updated: 2026-10-11
 
+## Bounded native local links prepared; renderer checkpoint fully verified - 2026-10-11
+
+Exact4d34656 / CI38193736344 is terminal success: focused27/27,
+native/published106/106, installed stable/dev105/105 each; zero failures/skips.
+Actual extended raw-heading/inline/block-code browser case and all registration/
+coexistence/AppKit-update assertions pass. Retain current-native-4d34656.log and
+actual TRXs/JSON at current-installed-evidence-38193736344. Fixtures are unsigned.
+
+Local Markdown/text links previously remained blocked. They now require actual
+user initiation, current namespace/no query/supported type and once-decoded safe
+segments. Source physical root comes from its opened snapshot; the target handle
+is checked before reading. Native child windows retain the scope on every reload,
+focus only matching already-committed inside snapshots and preserve source/window
+watching. No OS shell/arbitrary protocol/executable dispatch.662 core tests/100%
+lines,10 real filesystem tests, zero-warning isolated Release/full format pass.
+A diagnosed test junction teardown failure is corrected with explicit removal of
+only the link before fixture cleanup; containment assertions remain. New physical
+browser/duplicate/watcher/junction-reload case compiled;109 native cases discovered,
+fresh hosted proof required. Original cases/deadlines retained; no local GUI input.
+
+Prior CI is terminal, so the authorized next push can proceed after signed review.
+Shared signing31 approval request unanswered; do not assume permission. Azure/
+shipped signing, actual chooser/Explorer, owner design/scaling and genuine final-
+head review remain required. No preview55472 change, login retry, shared merge,
+release tag or publication. Original upstream/native compatibility limits recorded.
+
 ## Authored HTML fidelity corrected locally; preceding run fully green - 2026-10-11
 
 Exactc3c735e / CI38190828814 is terminal success. Actual TRX native/published106/106,

@@ -17,6 +17,7 @@ internal sealed partial class DocumentBrowser
 {
    private const string SecurityHeaders = "Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nCache-Control: no-store";
    private readonly WebView2 _view;
+   private readonly Func<string, string, Task>? _openLinkedDocument;
    private readonly Action<string> _status;
    private CoreWebView2Environment? _environment;
    private Core.Documents.DocumentResourcePolicy _policy = new();
@@ -40,9 +41,10 @@ internal sealed partial class DocumentBrowser
 
 
    /// <summary>Attaches a native status callback; the document itself cannot invoke host commands.</summary>
-   public DocumentBrowser(WebView2 view, Action<string> status, Core.Themes.ReaderTheme theme, Core.Themes.ReadingAppearance? appearance = null)
+   public DocumentBrowser(WebView2 view, Action<string> status, Core.Themes.ReaderTheme theme, Core.Themes.ReadingAppearance? appearance = null, Func<string, string, Task>? openLinkedDocument = null)
    {
       _view = view;
+      _openLinkedDocument = openLinkedDocument;
       _status = status;
       _theme = theme;
       _appearance = (appearance ?? new Core.Themes.ReadingAppearance()).Sanitize();
@@ -342,6 +344,19 @@ internal sealed partial class DocumentBrowser
          return;
       }
       args.Cancel = true;
+      if(args.IsUserInitiated && uri is not null && _files is { } files && _openLinkedDocument is not null &&
+         _policy.GetDocumentRelativePath(uri) is { } relativePath)
+      {
+         try
+         {
+            await _openLinkedDocument(files.ResolveDocumentLink(relativePath), files.PhysicalRoot);
+         }
+         catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+         {
+            _status("This linked document could not be opened.");
+         }
+         return;
+      }
       if(args.IsUserInitiated && uri is not null && uri.UserInfo.Length == 0 &&
          !string.Equals(uri.Host, _policy.DocumentUri.Host, StringComparison.OrdinalIgnoreCase) && uri.Scheme is "https" or "http")
       {

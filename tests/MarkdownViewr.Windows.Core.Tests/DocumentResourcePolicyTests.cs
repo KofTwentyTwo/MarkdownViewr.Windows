@@ -92,6 +92,59 @@ public sealed class DocumentResourcePolicyTests
 
 
 
+   /// <summary>Supported local document types retain once-decoded literal paths, without providing shell commands.</summary>
+   [Theory]
+   [InlineData("child.md", "child.md")]
+   [InlineData("docs/child.MARKDOWN", "docs/child.MARKDOWN")]
+   [InlineData("child.mdown", "child.mdown")]
+   [InlineData("child.mkd", "child.mkd")]
+   [InlineData("child.txt", "child.txt")]
+   [InlineData("docs/caf%C3%A9%20%26%20%24HOME.md", "docs/café & $HOME.md")]
+   [InlineData("docs/%252e%252e.md", "docs/%2e%2e.md")]
+   public void GetDocumentRelativePath_SupportedType_DecodesOnlyOnce(string path, string expected)
+   {
+      var policy = new DocumentResourcePolicy();
+      Assert.Equal(expected, policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, path)));
+   }
+
+
+
+   /// <summary>Documents reject queries, traversal, devices, alternate streams and executable/non-document targets before native access.</summary>
+   [Theory]
+   [InlineData("child.md?command=run")]
+   [InlineData("../private.md")]
+   [InlineData("docs/%2e%2e%2f%2e%2e%2fprivate.md")]
+   [InlineData("docs/CON.md")]
+   [InlineData("docs/child.md%3aprivate")]
+   [InlineData("docs/%5cprivate.md")]
+   [InlineData("docs/%00private.md")]
+   [InlineData("docs/folder./child.md")]
+   [InlineData("docs/folder%20/child.md")]
+   [InlineData("child.exe")]
+   [InlineData("child.lnk")]
+   [InlineData("child.png")]
+   public void GetDocumentRelativePath_UnsafeTarget_DeniesAccess(string path)
+   {
+      var policy = new DocumentResourcePolicy();
+      Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, path)));
+   }
+
+
+
+   /// <summary>Other namespaces, origins, schemes and relative requests never gain document-open authority.</summary>
+   [Fact]
+   public void GetDocumentRelativePath_ForeignContext_DeniesAccess()
+   {
+      var policy = new DocumentResourcePolicy();
+      Assert.Null(policy.GetDocumentRelativePath(new Uri("child.md", UriKind.Relative)));
+      Assert.Null(policy.GetDocumentRelativePath(new Uri(new DocumentResourcePolicy().DocumentUri, "child.md")));
+      Assert.Null(policy.GetDocumentRelativePath(new Uri("file:///C:/private.md")));
+      Assert.Null(policy.GetDocumentRelativePath(new Uri("https://example.com/child.md")));
+      Assert.Throws<ArgumentNullException>(() => policy.GetDocumentRelativePath(null!));
+   }
+
+
+
    /// <summary>Requests cannot cross into another opened document.</summary>
    [Fact]
    public void GetImageRelativePath_OtherDocument_DeniesAccess()

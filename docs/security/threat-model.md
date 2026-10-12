@@ -402,3 +402,21 @@ passive formatting tags provide no scripts, host messages or native capabilities
 Core regressions exercise all16 preference combinations, protected inline/block
 code, comments/attribute lookalikes, entities and exact CRLF/Unicode source ranges.
 Fresh hosted browser/distributed acceptance is required for this correction.
+
+## Native local document-link boundary
+
+Only actual user-initiated browser navigation can request a local reader. Its URI
+must belong to the current private namespace, have no query and use one of .md,
+.markdown, .mdown, .mkd or .txt. Once-decoded segments reject traversal, devices,
+alternate streams, controls and filename aliases. No document link is dispatched
+as an executable, script, arbitrary protocol or OS shell command.
+
+The source snapshot supplies its trusted physical directory. The target's open
+handle is checked against that directory before reading, and that same handle
+supplies the snapshot. A linked reader retains the required root for every reload,
+including watcher/extension/frontmatter refresh. A changed junction cannot replace
+its committed data with outside content. Duplicate focus requires an already
+committed snapshot inside the source grant. Closed source windows cannot launch
+new linked readers. Existing image, sanitizer, CSP and host-message rules remain.
+Core URI and actual filesystem/junction tests pass; the prepared physical-link/
+reload-scope desktop regression still requires hosted execution.

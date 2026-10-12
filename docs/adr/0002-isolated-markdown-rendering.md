@@ -26,7 +26,11 @@ Document-authored styles, IDs and classes are removed. Application theme CSS is 
 Disable scripts, web messages, host objects, frames, downloads, popups and permission
 requests. Reject all browser resources except the exact document and allowlisted
 local image requests. External HTTP(S) navigation requires a real user gesture
-and opens in Windows' external handler. Other links remain blocked in this slice.
+and opens in Windows' external handler. User-initiated Markdown/text file links
+open native reader windows after the same namespace/path validation and physical
+folder check. The new reader retains that required physical root for every
+manual/automatic reload; it cannot follow a later junction outside the original
+grant. Other URI schemes and executable/non-document targets remain blocked.
 
 Decode resource paths once; reject traversal, alternate streams, devices and Windows
 filename aliases. Before reading an image, resolve its opened handle with

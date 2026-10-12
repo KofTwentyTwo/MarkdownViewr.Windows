@@ -2,6 +2,10 @@
 
 ## Current release checklist
 
+- [x] Exact4d34656 / CI38193736344 terminal success: focused27/27, native/published106/106, installed stable/dev105/105 each; actual authored-code/raw-heading browser and channel lifecycle cases pass, zero skips.
+- [x] Complete local-document link implementation through scoped native windows, with662 core/100% measured lines,10 actual filesystem tests and zero-warning Release/format.
+- [ ] Verify the physical local-link/duplicate/watcher/junction-reload case and 109 native/published and108 per installed channel on the next pushed head; original cases/deadlines remain.
+
 The detailed checkpoints below preserve historical tasks. This section supersedes
 old "prepared/not run" statuses where the completed evidence now proves acceptance.
 Full product scope remains in PRODUCT.md; unsigned fixtures are not release proof.

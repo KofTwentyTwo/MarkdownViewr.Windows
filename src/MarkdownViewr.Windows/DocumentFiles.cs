@@ -46,12 +46,26 @@ internal sealed partial class DocumentFiles
 
 
 
+   /// <summary>The physical directory authorized by the selected document's actual open handle.</summary>
+   public string PhysicalRoot => _physicalRoot;
+
+
+
+   /// <summary>Resolves only the already-validated relative spelling; the eventual read must still enforce PhysicalRoot.</summary>
+   public string ResolveDocumentLink(string relativePath) => Path.GetFullPath(Path.Combine(_directory, relativePath));
+
+
+
    /// <summary>Loads at most the parser limit plus one character, using the same handle for identity and contents.</summary>
-   public static DocumentFiles Open(string path)
+   public static DocumentFiles Open(string path, string? requiredPhysicalRoot = null)
    {
       string fullPath = Path.GetFullPath(path);
       using SafeFileHandle handle = File.OpenHandle(fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
       string physicalPath = GetPhysicalPath(handle);
+      if(requiredPhysicalRoot is not null && !physicalPath.StartsWith(requiredPhysicalRoot, StringComparison.Ordinal))
+      {
+         throw new IOException("This document resolves outside the permitted folder.");
+      }
       using var stream = new FileStream(handle, FileAccess.Read);
       using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
       char[] buffer = new char[Core.Documents.MarkdownRenderer.MaximumCharacters + 1];

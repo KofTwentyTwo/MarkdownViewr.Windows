@@ -16,7 +16,7 @@ public partial class App
 
 
    /// <summary>Creates an independent XAML window, retaining it until its native Closed event.</summary>
-   internal void NewDocumentWindow(string? path = null)
+   internal void NewDocumentWindow(string? path = null, string? requiredDocumentRoot = null)
    {
       if(path is not null)
       {
@@ -28,14 +28,14 @@ public partial class App
          {
             Log.Warning("An invalid document launch path will be reported in its reader window.");
          }
-         MainWindow? existing = _windows.FirstOrDefault(window => string.Equals(window.DocumentPath, path, StringComparison.OrdinalIgnoreCase));
+         MainWindow? existing = _windows.FirstOrDefault(window => string.Equals(window.DocumentPath, path, StringComparison.OrdinalIgnoreCase) && (requiredDocumentRoot is null || window.IsDocumentInside(requiredDocumentRoot)));
          if(existing is not null)
          {
             existing.Activate();
             return;
          }
       }
-      var window = new MainWindow(path, initialWindow: _windows.Count == 0);
+      var window = new MainWindow(path, initialWindow: _windows.Count == 0, requiredDocumentRoot);
       _windows.Add(window);
       window.Closed += (_, _) =>
       {
@@ -80,6 +80,18 @@ public partial class App
       {
          NewDocumentWindow(canonical);
       }
+   }
+
+
+
+   /// <summary>Only a live native source window can open a folder-scoped document link; its new reader retains the scope on reload.</summary>
+   internal Task OpenLinkedDocumentAsync(MainWindow requester, string path, string physicalRoot)
+   {
+      if(_windows.Contains(requester))
+      {
+         NewDocumentWindow(path, physicalRoot);
+      }
+      return Task.CompletedTask;
    }
 
 

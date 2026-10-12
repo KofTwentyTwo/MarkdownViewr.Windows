@@ -156,3 +156,28 @@ The preceding exactc3c735e / CI38190828814 is terminal success: native/published
 106/106, focused26/26, installed stable/dev105/105 each, zero skips. Actual
 complete Settings screenshots and coexistence/registration/update evidence are
 retained. Those results predate the new renderer correction and do not certify it.
+
+## Local images and navigation audit
+
+The pinned Mac WebView uses a file-directory base URI and delegates clicked links
+to NSWorkspace. Windows deliberately retains its isolated HTTPS namespace and
+bounded physical folder access. Same-document fragments jump/reveal native
+headings; HTTP(S) links use Windows after an actual user gesture. Supported local
+Markdown/text file links now open native windows, with duplicate focus, independent
+watching and the inherited physical-folder check on every reload. They never
+launch arbitrary files or protocols. Core URI tests and10 actual filesystem tests
+pass;662 core cases retain100% measured lines. Full Release/format pass. The new
+physical browser-link/duplicate/watcher/junction-reload case is compiled/discovered,
+not executed;109 native cases now discovered.
+
+Image requests support PNG, JPEG, GIF, BMP, WebP, SVG, AVIF and ICO through the
+same checked file handle and16MiB guard. Remote/absolute/traversing/aliased-outside
+requests are denied; browser paint/PDF fixtures prove representative local output.
+The Mac TIFF MIME mapping is not advertised as Windows browser support. Other
+protocol handlers and access outside the document folder remain intentional Windows
+security boundaries, not claims of arbitrary NSWorkspace equivalence.
+
+The preceding exact4d34656 / CI38193736344 is terminal success: focused27/27,
+native/published106/106, installed stable/dev105/105 each, zero failures/skips.
+Actual raw HTML/inline/block-code browser acceptance and channel lifecycle outputs
+are retained; those results predate the new local-link implementation.

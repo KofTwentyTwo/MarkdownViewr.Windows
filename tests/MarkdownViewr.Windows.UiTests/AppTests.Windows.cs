@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -50,6 +51,99 @@ public partial class AppTests
       AutomationElement reloaded = WaitForWindowHeading(session, second, "Sibling reload after close");
       Assert.Equal(secondHeight, reloaded.BoundingRectangle.Height);
       RetainDocumentWindow(session, second, "surviving-window");
+   }
+
+
+
+   /// <summary>Physical local links open native readers, focus duplicates and retain inherited containment through a junction/reload attack.</summary>
+   [Fact]
+   public void Windows_LocalDocumentLinks_OpenOwnedReaderAndPreserveReloadScope()
+   {
+      const string Filename = "child & café $HOME.md";
+      string document = "# Link source\n\n[Open linked child](nested/" + Uri.EscapeDataString(Filename) + ")\n\n[Blocked program](blocked.exe)\n\n[Blocked parent](../private.md)";
+      using var session = new AppSession(document: document, documentFileName: "links.md");
+      string nested = Path.Combine(session.DataDirectory, "nested");
+      string saved = Path.Combine(session.DataDirectory, "saved-nested");
+      Directory.CreateDirectory(nested);
+      string path = Path.Combine(nested, Filename);
+      File.WriteAllText(path, "# Linked child");
+      File.WriteAllText(Path.Combine(session.DataDirectory, "blocked.exe"), "Not an executable; must never be dispatched.");
+      Window source = WaitForDocumentWindow(session, "links.md");
+      WaitForWindowHeading(session, source, "Link source");
+      InvokeDocumentMenu(session, source, "SourceToggle", menuName: "View");
+      string original = WaitForWindowElement(session, source, "SourceText").Patterns.Value.Pattern.Value.Value;
+      ClickLocalDocumentLink(session, source, "Open linked child");
+      Window child = WaitForDocumentWindow(session, Filename);
+      WaitForWindowHeading(session, child, "Linked child");
+      Assert.Equal(2, DocumentWindows(session).Length);
+      Assert.Equal(original, WaitForWindowElement(session, source, "SourceText").Patterns.Value.Pattern.Value.Value);
+      ClickLocalDocumentLink(session, source, "Open linked child");
+      session.WaitFor(() => GetForegroundWindow() == child.Properties.NativeWindowHandle.ValueOrDefault ? child : null, "the existing linked reader focused without duplication");
+      Assert.Equal(2, DocumentWindows(session).Length);
+      File.WriteAllText(path, "# Linked child refreshed");
+      WaitForWindowHeading(session, child, "Linked child refreshed");
+      foreach(string label in new[] { "Blocked program", "Blocked parent" })
+      {
+         ClickLocalDocumentLink(session, source, label);
+         session.WaitFor(() => WaitForWindowElement(session, source, "StatusText").Name.Contains("outside", StringComparison.Ordinal) ? source : null, "the rejected document link");
+         Assert.Equal(2, DocumentWindows(session).Length);
+      }
+      AssertLinkedReloadScope(session, child, nested, saved, Filename);
+   }
+
+
+
+   /// <summary>Replacing the linked directory with an outside junction must keep the old snapshot and enforce scope on manual reload.</summary>
+   private static void AssertLinkedReloadScope(AppSession session, Window child, string nested, string saved, string filename)
+   {
+      string outside = Path.Combine(Path.GetTempPath(), "markdownviewr-link-outside-" + Guid.NewGuid().ToString("N"));
+      Directory.CreateDirectory(outside);
+      File.WriteAllText(Path.Combine(outside, filename), "# Outside content must never be displayed");
+      Assert.StartsWith(Path.GetFullPath(session.DataDirectory) + Path.DirectorySeparatorChar, Path.GetFullPath(nested), StringComparison.Ordinal);
+      Assert.StartsWith(Path.GetFullPath(session.DataDirectory) + Path.DirectorySeparatorChar, Path.GetFullPath(saved), StringComparison.Ordinal);
+      try
+      {
+         Directory.Move(nested, saved);
+         var start = new ProcessStartInfo("cmd.exe") { UseShellExecute = false, CreateNoWindow = true };
+         start.ArgumentList.Add("/c");
+         start.ArgumentList.Add("mklink");
+         start.ArgumentList.Add("/J");
+         start.ArgumentList.Add(nested);
+         start.ArgumentList.Add(outside);
+         using Process process = Process.Start(start)!;
+         Assert.True(process.WaitForExit(10000), "Junction creation did not finish.");
+         Assert.Equal(0, process.ExitCode);
+         InvokeDocumentMenu(session, child, "ReloadMenuItem");
+         session.WaitFor(() => WaitForWindowElement(session, child, "StatusText").Name.Contains("previous version", StringComparison.Ordinal) ? child : null, "folder-scoped reload retaining the committed snapshot");
+         Assert.NotNull(WaitForWindowElement(session, child, "FileStaleButton"));
+         Assert.Null(child.FindFirstDescendant(cf => cf.ByName("Outside content must never be displayed")));
+         WaitForWindowHeading(session, child, "Linked child refreshed");
+         RetainDocumentWindow(session, child, "linked-document-scope-denial");
+      }
+      finally
+      {
+         if(Directory.Exists(nested) && new DirectoryInfo(nested).Attributes.HasFlag(FileAttributes.ReparsePoint))
+         {
+            Directory.Delete(nested);
+         }
+         if(Directory.Exists(saved) && !Directory.Exists(nested))
+         {
+            Directory.Move(saved, nested);
+         }
+         Assert.StartsWith(Path.Combine(Path.GetFullPath(Path.GetTempPath()), "markdownviewr-link-outside-"), Path.GetFullPath(outside), StringComparison.Ordinal);
+         Directory.Delete(outside, recursive: true);
+      }
+   }
+
+
+
+   /// <summary>Clicks the real browser hyperlink in its owning window so the host receives actual user-initiated navigation.</summary>
+   private static void ClickLocalDocumentLink(AppSession session, Window window, string label)
+   {
+      window.SetForeground();
+      Wait.UntilInputIsProcessed();
+      AutomationElement link = session.WaitFor(() => window.FindFirstDescendant(cf => cf.ByControlType(ControlType.Hyperlink).And(cf.ByName(label))), "the owned document hyperlink " + label);
+      Mouse.Click(link.GetClickablePoint());
    }
 
 
