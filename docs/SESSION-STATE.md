@@ -2,6 +2,34 @@
 
 Updated: 2026-10-12
 
+## Release blockers after main merge - 2026-10-12
+
+The owner-reviewed application merged through PR35 at38dd5c1. Main CI38294895221
+passed; retained published111 and installed stable/dev110 reports have zero
+failures/skips. OpenSSF project15417 assessment is saved at70%, not passing.
+The exact Syft image is now explicitly owner-approved and allowlisted.
+
+Neither production release is published. Signedv1.0.0 andv1.0.0-beta.1 tags remain
+preserved. Dev38299469062 passed acceptance and Azure OIDC login, then failed the
+official signing action dependency install because --add-source conflicts with
+NuGet package source mapping. Standards PR44 stages the exact verified dependency
+without changing caller NuGet policy;40 signing tests and the real package bootstrap
+pass locally. Production CI signing and final artifact verification remain pending.
+
+Stable38299469141 attempt2 completed110 of111 published tests without a reported
+test failure before its600-second process limit. The successful main published
+suite took572 seconds. The bounded suite budget is now900 seconds; individual
+test deadlines, assertions, cases and failure handling remain unchanged. The job
+budget allows all three suites plus packaging/update probes. Two real subprocess
+regressions verify that hangs and nonzero exits still fail the gate. Fresh hosted
+acceptance is required; this timing change is not proof of a successful release.
+
+The owner's latest instruction is EXE/portable ZIP first, MSI next release (#36).
+Do not cancel runs, alter published assets, replace existing release tags, skip
+acceptance or claim public downloads. Next: genuine review and green checks for
+the two fixes, merge the shared builder, update the app's immutable builder pin,
+then publish new signed release candidates and verify the downloaded artifacts.
+
 ## Current release status - 2026-10-12
 
 Standards 1.1.0 is published immutably at

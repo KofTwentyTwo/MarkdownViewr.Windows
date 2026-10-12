@@ -63,7 +63,8 @@ jobs:
   installed-updates:
     name: installed-updates
     runs-on: windows-latest
-    timeout-minutes: 45
+    # Three complete UI suites plus packaging, installation and update probes.
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:

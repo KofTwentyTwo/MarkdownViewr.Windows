@@ -1,6 +1,20 @@
 # Development Tasks
 
-## Current release checklist
+## Current release checklist - 2026-10-12
+
+- [x] Merge genuinely owner-reviewed app through PR35 at38dd5c1; all main gates pass.
+- [x] Preserve signed1.0.0/stable and1.0.0-beta.1/dev tags; no release is published.
+- [x] Apply only the exact Syft image addition explicitly approved by the owner.
+- [x] Prove production Azure OIDC login; preserve existing account/profile/trust.
+- [x] Reproduce signing dependency conflict; standards PR44 real package bootstrap and40 signing tests pass locally.
+- [x] Measure stable retry110/111 without reported test failures before600-second limit; prepare bounded900-second suite budget with unchanged assertions/deadlines.
+- [ ] Obtain genuine reviews, pass exact-head hosted checks and merge the release fixes.
+- [ ] Update the app caller to the reviewed fixed builder's immutable SHA.
+- [ ] Publish stable/dev EXE and ZIP candidates; verify exact distributed signatures, timestamps, hashes, SBOMs and attestations (#33).
+- [ ] Update user download links only after actual verified publication.
+- [ ] Deliver signed and acceptance-tested MSI installers in the next release (#36), following the owner's latest decision.
+
+## Prior release checklist
 
 - [x] Correct the disabled-editor tooltip exception; accepted application code321816c.
 - [x] Final signing caller b1dc874 / CI38276579007 passes all hosted checks, including published111 and stable/dev110 acceptance each, zero failures/skips.

@@ -435,7 +435,9 @@ try
    $env:K22_UITEST_CHANNEL = 'stable'
    $env:K22_UITEST_INSTALLED = '0'
    $env:K22_UITEST_EXE = Join-Path $buildRoot "publish/0.1.0/$mainExe"
-   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'console;verbosity=normal', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 600
+   # The full 111-test UI suite takes 572 seconds on a passing hosted runner.
+   # Allow bounded host variation without changing any individual test deadline.
+   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'console;verbosity=normal', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 900
    foreach($initial in @($versions[0], $versions[2]))
    {
       $initialPackageId = $packageId + '-' + $initial.channel
@@ -500,7 +502,7 @@ try
          $updatedRegistration | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-after.json")
          $env:K22_UITEST_INSTALLED = '1'
          $env:K22_UITEST_EXE = $currentExe
-         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', 'console;verbosity=normal', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 600
+         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', 'console;verbosity=normal', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 900
          $records.Add(@{ kind = 'installed'; channel = $channel; before = $before; after = $after; restarted = $true; appSha256 = $installedHash })
       }
       finally
