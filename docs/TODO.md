@@ -1,5 +1,29 @@
 # Development Tasks
 
+## Current release checklist
+
+The detailed checkpoints below preserve historical tasks. This section supersedes
+old "prepared/not run" statuses where the completed evidence now proves acceptance.
+Full product scope remains in PRODUCT.md; unsigned fixtures are not release proof.
+
+- [x] Exact9d5c0d1 / CI38188145397: core598/100% measured lines; focused26/26, native/published106/106, installed stable/dev105/105 each, zero failures/skips.
+- [x] Actual source colors through hover/focus/theme/reload/copy, fold/find/raw-heading provenance and physical bidirectional Contents synchronization pass in published and both installed editions (#10/#16/#27).
+- [x] Actual independent windows, multiple-file picker/cancel, recent files, editor file/folder launches, IPC/profile boundaries, reload/deletion/locked-save recovery and snapshot footer pass (#6/#11/#14/#26).
+- [x] Native toolbar/menu synchronization, narrowed overflow, Print handoff/cancellation, real PDF glyph/pixel/layout output, width/CSS and theme editing/transfer/cancellation/sibling persistence pass (#7/#12/#13/#18/#22/#23).
+- [x] General pane defaults/Contents controls, Printing Apply/Restore and sibling drafts, palette/default controls, About runtime credits/Contributions and startup settings pass (#19/#21/#24/#25).
+- [x] Actual AppKit updates/restarts, target hashes, five-extension registration lifecycle and simultaneous stable/dev isolation with sibling-preserving uninstall pass. Retain actual TRXs and coexisting-channels.json.
+- [x] Pushedc3c735e focused26/26 passes; inspected complete native theme-manager and Printing screenshots confirm the window now fits the hosted monitor.
+- [ ] Finish c3c735e full native/published/installed CI38190828814 and its independent whole-desktop containment assertion; retain fresh results before the next push.
+- [ ] Obtain owner acceptance of the toolbar, icon and native Settings layout, including Windows11 scaling. Actual user-selected Default Apps/Open With/Explorer behavior remains unverified; read-only status/registration tests do not replace it.
+- [ ] Complete remaining reference rendering/extension/image/link fidelity review. Preserve pinned document CSS and the explicit native-pane CSS boundary; representative tests do not certify arbitrary documents or CSS.
+- [ ] Obtain the required shared maintainer decisions: standards signing builder PR31, AppKit-only tooling license proposal PR32, inventory PR36 and shared Help PRs AppKit29/windows-app-template4. Prior permission covers draft pushes only.
+- [ ] After signing builder31 is reviewed/published, adopt its published full-SHA pin and required six-file signing catalog; preserve fail-closed publication.
+- [ ] Verify actual deployed Azure subscription tenancy, region/endpoint, Active PublicTrust profile and full publisher subject; configure approved CI identity, exact repository/environment trust, profile-scoped signer permission and release variables. Reuse the existing service. Public directory discovery alone is not resource proof.
+- [ ] Obtain genuine final-head maintainer review acknowledgement, complete required checks and merge the application.
+- [ ] Publish signed stable1.0/dev releases only after exact shipped binaries/installers verify publisher/trust/SHA256/RFC3161 timestamps; retain final checksums/metadata and installed acceptance.
+
+## Historical checkpoints
+
 - [x] Exact9d5c0d1 full native106/106 and focused26/26 pass, zero skips; retain actual TRX/Settings screenshots and logs.
 - [x] Correct observed offscreen Settings placement by centering size/position in the actual monitor work area; zero-warning build/format pass.
 - [ ] Verify whole-window visibility and inspect complete Settings screenshots on pushedc3c735e / CI38190828814; preserve its live execution.

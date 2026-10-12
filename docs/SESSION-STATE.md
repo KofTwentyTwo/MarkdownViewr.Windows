@@ -2,6 +2,24 @@
 
 Updated: 2026-10-11
 
+## Placement screenshots verified; shared builder decision requested - 2026-10-11
+
+Exactc3c735e / CI38190828814 focused26/26 passes, zero failures/skips. Inspected
+actual native theme-manager and Printing screenshots in
+artifacts/reader-regressions-38190828814: complete window fits the hosted monitor;
+native scrollable Printing content and theme Save/Cancel remain within it. Full
+native114623032163 and installed114623032253 are live; do not push local docs yet.
+Core/build/format/scripts/security pass; final-head review acknowledgement absent.
+
+Add a current evidence-backed release checklist above historical tasks, preserving
+full PRODUCT scope and every old item. Passed published/installed case names prove
+source/Contents/Printing/theme/editor/reload/window/footer/attribution acceptance;
+chooser/Explorer, owner scaling/layout/icon and remaining fidelity review are
+still required. Rechecked shared signing31 and license32: all applicable checks
+green, both unmerged drafts. Requested explicit owner approval for signing31
+merge/publication only; prior authorization remains draft-only until reply.
+No assumption of approval and no Azure login retry, changes, local input or release.
+
 ## Complete distributed checkpoint; placement fix pushed - 2026-10-11
 
 Exact9d5c0d1 CI38188145397 is terminal success. Actual TRX: native/published106/106,
