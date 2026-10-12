@@ -4,11 +4,20 @@ Updated: 2026-10-11
 
 ## Placement screenshots verified; shared builder decision requested - 2026-10-11
 
+Read-only gclo v1.1.0 reference archive matches published SHA256SUMS. Extracted
+only gclo.exe to the explicit workspace path; no application execution. Installed
+Microsoft SignTool verify/pa/all/v succeeds, one signature, zero warnings/errors,
+exact subject CN=James Maes, O=James Maes, L=Chester, S=il, C=US and Microsoft
+Public RSA timestamp chain. Retain artifacts/gclo-signing-reference/verify.log.
+This corroborates the shipped recipe/publisher, not deployed profile mapping or
+MarkdownViewr OIDC/signing permission. No Azure changes or copied CI client ID.
+
 Exactc3c735e / CI38190828814 focused26/26 passes, zero failures/skips. Inspected
 actual native theme-manager and Printing screenshots in
 artifacts/reader-regressions-38190828814: complete window fits the hosted monitor;
 native scrollable Printing content and theme Save/Cancel remain within it. Full
-native114623032163 and installed114623032253 are live; do not push local docs yet.
+native114623032163 is terminal106/106, zero skips,8m6; retain current-native-
+c3c735e.log. Installed114623032253 is live; do not push local docs yet.
 Core/build/format/scripts/security pass; final-head review acknowledgement absent.
 
 Add a current evidence-backed release checklist above historical tasks, preserving

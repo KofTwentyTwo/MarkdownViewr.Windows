@@ -13,7 +13,8 @@ Full product scope remains in PRODUCT.md; unsigned fixtures are not release proo
 - [x] General pane defaults/Contents controls, Printing Apply/Restore and sibling drafts, palette/default controls, About runtime credits/Contributions and startup settings pass (#19/#21/#24/#25).
 - [x] Actual AppKit updates/restarts, target hashes, five-extension registration lifecycle and simultaneous stable/dev isolation with sibling-preserving uninstall pass. Retain actual TRXs and coexisting-channels.json.
 - [x] Pushedc3c735e focused26/26 passes; inspected complete native theme-manager and Printing screenshots confirm the window now fits the hosted monitor.
-- [ ] Finish c3c735e full native/published/installed CI38190828814 and its independent whole-desktop containment assertion; retain fresh results before the next push.
+- [x] Exactc3c735e full native106/106 passes, zero skips, including independent whole-desktop containment; retained current-native-c3c735e.log.
+- [ ] Finish c3c735e published/installed CI38190828814 and retain fresh results before the next push.
 - [ ] Obtain owner acceptance of the toolbar, icon and native Settings layout, including Windows11 scaling. Actual user-selected Default Apps/Open With/Explorer behavior remains unverified; read-only status/registration tests do not replace it.
 - [ ] Complete remaining reference rendering/extension/image/link fidelity review. Preserve pinned document CSS and the explicit native-pane CSS boundary; representative tests do not certify arbitrary documents or CSS.
 - [ ] Obtain the required shared maintainer decisions: standards signing builder PR31, AppKit-only tooling license proposal PR32, inventory PR36 and shared Help PRs AppKit29/windows-app-template4. Prior permission covers draft pushes only.

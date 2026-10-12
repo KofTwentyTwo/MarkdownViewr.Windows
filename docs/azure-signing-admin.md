@@ -45,6 +45,24 @@ the full X.500 subject rather than just the publisher's display name.
 [Microsoft's account/profile schemas](https://github.com/Azure/azure-rest-api-specs/tree/main/specification/codesigning/resource-manager/Microsoft.CodeSigning/CodeSigning/stable/2025-10-13)
 define these inspection fields.
 
+## Existing gclo signing reference
+
+Read-only release inspection on2026-10-11 confirms that
+[gclo v1.1.0](https://github.com/KofTwentyTwo/gclo/releases/tag/v1.1.0)
+ships a valid timestamped CLI signature. The archive matches its published
+SHA256SUMS (`46f02d89c9d8a459e5b02598f9791fa7aab5c16b09c254bc997f8f235a6a49e2`).
+Microsoft SignTool `verify /pa /all /v` on the extracted `gclo.exe` succeeds with
+one verified signature, zero warnings/errors. Its exact certificate subject is
+`CN=James Maes, O=James Maes, L=Chester, S=il, C=US`; the timestamp chain is
+Microsoft Public RSA Time Stamping Authority. Local reference evidence is retained
+in `artifacts/gclo-signing-reference/verify.log`; the application was not executed.
+
+This confirms the existing release recipe and shipped publisher, not the current
+Azure account/profile mapping or MarkdownViewr CI authorization. Recheck the
+actual deployed profile subject before using it here. gclo's client identity has
+its own repository trust; do not copy that client ID without an approved reuse
+and a separate exact MarkdownViewr federated credential/signer assignment.
+
 ## Configure the CI identity and trust
 
 Inspect existing CI applications and their owners first. Reuse an approved suitable
