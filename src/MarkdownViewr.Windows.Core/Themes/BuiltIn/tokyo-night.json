@@ -1,0 +1,37 @@
+{
+    "name": "Tokyo Night",
+    "colors": {
+        "background": "#1a1b26",
+        "text": "#a9b1d6",
+        "heading1": "#f7768e",
+        "heading2": "#7aa2f7",
+        "heading3": "#bb9af7",
+        "heading4": "#e0af68",
+        "heading5": "#9ece6a",
+        "heading6": "#73daca",
+        "link": "#7aa2f7",
+        "codeBackground": "#16161e",
+        "codeText": "#9ece6a",
+        "blockquoteBorder": "#bb9af7",
+        "blockquoteBackground": "#1f2335",
+        "highlightBackground": "#e0af68",
+        "highlightText": "#1a1b26"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

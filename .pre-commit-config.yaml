@@ -24,9 +24,12 @@ repos:
       - id: check-toml
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: ^THIRD-PARTY-LICENSES/
       - id: mixed-line-ending
+        exclude: ^THIRD-PARTY-LICENSES/
         args: [--fix=lf]
       - id: trailing-whitespace
+        exclude: ^THIRD-PARTY-LICENSES/
         args: [--markdown-linebreak-ext=md]
       - id: no-commit-to-branch
         args: [--branch, main]

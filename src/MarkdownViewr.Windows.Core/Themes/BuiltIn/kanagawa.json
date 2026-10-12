@@ -1,0 +1,37 @@
+{
+    "name": "Kanagawa",
+    "colors": {
+        "background": "#1f1f28",
+        "text": "#dcd7ba",
+        "heading1": "#c34043",
+        "heading2": "#7e9cd8",
+        "heading3": "#957fb8",
+        "heading4": "#e6c384",
+        "heading5": "#76946a",
+        "heading6": "#6a9589",
+        "link": "#7fb4ca",
+        "codeBackground": "#16161d",
+        "codeText": "#98bb6c",
+        "blockquoteBorder": "#957fb8",
+        "blockquoteBackground": "#2a2a37",
+        "highlightBackground": "#ff9e3b",
+        "highlightText": "#1f1f28"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

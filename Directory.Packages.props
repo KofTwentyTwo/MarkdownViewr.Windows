@@ -21,7 +21,8 @@
    <ItemGroup>
       <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
       <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
-      <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+      <PackageVersion Include="Markdig" Version="1.4.0" />
+      <PackageVersion Include="HtmlSanitizer" Version="9.2.1039" />
    </ItemGroup>
 
    <ItemGroup Label="Tests">

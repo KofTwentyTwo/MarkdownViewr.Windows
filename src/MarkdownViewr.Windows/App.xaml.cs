@@ -10,13 +10,9 @@ using Microsoft.UI.Xaml;
 
 namespace MarkdownViewr.Windows;
 
-/// <summary>The application: installs AppKit's crash net and the saved theme, then opens the main window.</summary>
+/// <summary>The application: installs AppKit's crash net and the saved theme, then opens independent document windows.</summary>
 public partial class App : Application
 {
-   private Window? _window;
-
-
-
    /// <summary>Installs the crash net and applies the saved theme; WinUI allows setting the application theme only here, before any window exists.</summary>
    public App()
    {
@@ -32,11 +28,12 @@ public partial class App : Application
 
 
 
-   /// <summary>Logs the start and opens the main window.</summary>
+   /// <summary>Logs the start and gives each literal startup path its own native document window.</summary>
    protected override void OnLaunched(LaunchActivatedEventArgs args)
    {
       Log.Info($"{AppIdentity.Info.DisplayName} started.");
-      _window = new MainWindow();
-      _window.Activate();
+      OpenActivation(Program.InitialRequest);
+      var dispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+      Program.Inbox?.Attach(request => dispatcher.TryEnqueue(() => OpenActivation(request)));
    }
 }

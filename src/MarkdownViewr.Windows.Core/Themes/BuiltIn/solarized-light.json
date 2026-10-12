@@ -1,0 +1,37 @@
+{
+    "name": "Solarized Light",
+    "colors": {
+        "background": "#fdf6e3",
+        "text": "#657b83",
+        "heading1": "#dc322f",
+        "heading2": "#268bd2",
+        "heading3": "#6c71c4",
+        "heading4": "#b58900",
+        "heading5": "#2aa198",
+        "heading6": "#859900",
+        "link": "#268bd2",
+        "codeBackground": "#eee8d5",
+        "codeText": "#859900",
+        "blockquoteBorder": "#6c71c4",
+        "blockquoteBackground": "#eee8d5",
+        "highlightBackground": "#b58900",
+        "highlightText": "#fdf6e3"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

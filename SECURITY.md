@@ -48,10 +48,15 @@ minor receives security fixes for 6 months.
 
 ## Code signing
 
-Windows installers and binaries are not yet Authenticode-signed (KofTwentyTwo standards
-exception EX-0002, until the signing identity is validated). Until then, verify downloads
-with `SHA256SUMS` and `gh attestation verify` as described in the
-[README](README.md#verifying-a-release).
+Public Windows releases require Authenticode signing of the final shipped binaries
+and installers. Publication fails closed until the approved Azure signing identity
+and expected publisher, trust and timestamp are verified. No verified signed
+MarkdownViewr release has been published yet; unsigned test fixtures are not releases.
+
+Verify final signatures, `SHA256SUMS` and provenance attestations as described in the
+[README](README.md#verifying-a-release) and
+[release signing instructions](docs/release-signing.md). No historical exception
+is claimed as permission to publish unsigned application releases.
 
 ## Published vulnerabilities
 

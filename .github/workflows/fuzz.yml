@@ -1,0 +1,66 @@
+# K22-TEST-25: reproducible security-property campaigns, without browser execution or profile writes.
+name: fuzz
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "34 6 * * 1"
+  workflow_dispatch:
+  workflow_call:
+
+permissions: {}
+
+concurrency:
+  group: fuzz-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  fuzzing:
+    name: fuzzing
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      K22_FUZZ_ITERATIONS: ${{ (github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/')) && '10000' || '500' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Restore and build locked core targets
+        shell: pwsh
+        run: |
+          dotnet restore tests/MarkdownViewr.Windows.Core.Tests -p:Platform=x64 --locked-mode
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 -warnaserror --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Restore and build activation adapter targets
+        shell: pwsh
+        run: |
+          dotnet restore tests/MarkdownViewr.Windows.UiTests -p:Platform=x64 --locked-mode
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 -warnaserror --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify seeded parser security properties
+        shell: pwsh
+        run: |
+          Write-Output "Fuzz seeds22023/99173, five targets, $env:K22_FUZZ_ITERATIONS iterations per seed/target."
+          dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz --logger 'trx;LogFileName=fuzz.trx' --results-directory artifacts/fuzz
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet test tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz --logger 'trx;LogFileName=activation-fuzz.trx' --results-directory artifacts/fuzz
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain synthetic campaign failures and results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzz-results
+          path: artifacts/fuzz/*.trx
+          if-no-files-found: error
+          retention-days: 30

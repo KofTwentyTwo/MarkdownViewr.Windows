@@ -1,0 +1,37 @@
+{
+    "name": "Everforest Dark",
+    "colors": {
+        "background": "#2d353b",
+        "text": "#d3c6aa",
+        "heading1": "#e67e80",
+        "heading2": "#7fbbb3",
+        "heading3": "#d699b6",
+        "heading4": "#dbbc7f",
+        "heading5": "#a7c080",
+        "heading6": "#83c092",
+        "link": "#7fbbb3",
+        "codeBackground": "#272e33",
+        "codeText": "#a7c080",
+        "blockquoteBorder": "#d699b6",
+        "blockquoteBackground": "#343f44",
+        "highlightBackground": "#dbbc7f",
+        "highlightText": "#2d353b"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

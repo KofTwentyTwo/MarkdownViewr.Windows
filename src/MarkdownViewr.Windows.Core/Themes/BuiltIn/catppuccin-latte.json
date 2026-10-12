@@ -1,0 +1,37 @@
+{
+    "name": "Catppuccin Latte",
+    "colors": {
+        "background": "#eff1f5",
+        "text": "#4c4f69",
+        "heading1": "#d20f39",
+        "heading2": "#1e66f5",
+        "heading3": "#8839ef",
+        "heading4": "#df8e1d",
+        "heading5": "#40a02b",
+        "heading6": "#179299",
+        "link": "#1e66f5",
+        "codeBackground": "#e6e9ef",
+        "codeText": "#40a02b",
+        "blockquoteBorder": "#8839ef",
+        "blockquoteBackground": "#e6e9ef",
+        "highlightBackground": "#f9e2af",
+        "highlightText": "#4c4f69"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

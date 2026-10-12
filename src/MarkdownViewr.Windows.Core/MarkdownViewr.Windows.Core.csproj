@@ -11,12 +11,21 @@
    </PropertyGroup>
 
    <ItemGroup>
-      <PackageReference Include="CommunityToolkit.Mvvm" />
       <PackageReference Include="KofTwentyTwo.AppKit" />
    </ItemGroup>
 
    <ItemGroup>
       <InternalsVisibleTo Include="MarkdownViewr.Windows.Core.Tests" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Markdig" />
+      <PackageReference Include="HtmlSanitizer" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <EmbeddedResource Include="Themes/BuiltIn/*.json" />
+      <EmbeddedResource Include="Themes/Document.css" LogicalName="MarkdownViewr.Windows.Core.Themes.Document.css" />
    </ItemGroup>
 
 </Project>

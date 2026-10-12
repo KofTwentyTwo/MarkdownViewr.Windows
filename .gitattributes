@@ -4,3 +4,6 @@
 *.ico binary
 *.cmd text eol=crlf
 *.bat text eol=crlf
+
+# Retain verbatim vendor license/notice bytes, including original whitespace.
+THIRD-PARTY-LICENSES/** -text whitespace=-trailing-space,-blank-at-eof

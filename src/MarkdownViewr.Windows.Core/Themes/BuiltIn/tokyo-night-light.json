@@ -1,0 +1,37 @@
+{
+    "name": "Tokyo Night Light",
+    "colors": {
+        "background": "#d5d6db",
+        "text": "#343b58",
+        "heading1": "#8c4351",
+        "heading2": "#34548a",
+        "heading3": "#5a4a78",
+        "heading4": "#8f5e15",
+        "heading5": "#33635c",
+        "heading6": "#0f4b6e",
+        "link": "#34548a",
+        "codeBackground": "#cbccd1",
+        "codeText": "#33635c",
+        "blockquoteBorder": "#5a4a78",
+        "blockquoteBackground": "#cbccd1",
+        "highlightBackground": "#f9c859",
+        "highlightText": "#343b58"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

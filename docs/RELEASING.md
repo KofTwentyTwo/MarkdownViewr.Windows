@@ -1,6 +1,5 @@
 # Releasing MarkdownViewr
 
-
 Releases follow the
 [KofTwentyTwo release standard](https://github.com/KofTwentyTwo/standards/blob/main/standards/releases.md).
 Pushing a protected `v*` tag on `main` runs [`.github/workflows/release.yml`](../.github/workflows/release.yml),
@@ -8,7 +7,7 @@ which calls the shared `release-velopack.yml` workflow in KofTwentyTwo/standards
 
 ## Workflow baseline
 
-Shared workflows are pinned to published standards v0.1.2. The release caller checks main ancestry and reruns build, coverage, formatting, UI tests, security scans and CodeQL before publication.
+The signing release builder is pinned to standards v1.1.0 (`93b1d6163a4c466ae443e98b62786fc4d80d33bd`); other shared gates retain v0.1.2. The release caller checks main ancestry and reruns build, coverage, formatting, UI tests, security scans and CodeQL before publication.
 The AppKit dependency locks now match the published 0.1.0 packages. Before changing any package version, regenerate the affected locks and verify a locked restore with a clean package cache.
 
 ## Versioning and channels
@@ -75,7 +74,7 @@ payloads, using final-byte hashes and verified provenance. Follow the
    ```
 
 4. Watch the **release** workflow, then verify the release as described in the
-   [README](../README.md#verifying-a-release).
+   [developer guide](../DEVELOPERS.md#releases-and-verification).
 5. Open a pull request that bumps `VersionPrefix` in `Directory.Build.props`.
 
 ## When something fails

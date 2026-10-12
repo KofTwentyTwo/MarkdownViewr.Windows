@@ -1,0 +1,37 @@
+{
+    "name": "GitHub Light",
+    "colors": {
+        "background": "#ffffff",
+        "text": "#1f2328",
+        "heading1": "#0550ae",
+        "heading2": "#0550ae",
+        "heading3": "#0550ae",
+        "heading4": "#0550ae",
+        "heading5": "#0550ae",
+        "heading6": "#0550ae",
+        "link": "#0969da",
+        "codeBackground": "#f6f8fa",
+        "codeText": "#1f2328",
+        "blockquoteBorder": "#d0d7de",
+        "blockquoteBackground": "#f6f8fa",
+        "highlightBackground": "#fff8c5",
+        "highlightText": "#1f2328"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

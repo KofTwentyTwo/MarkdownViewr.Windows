@@ -11,6 +11,6 @@ namespace MarkdownViewr.Windows.Core;
 /// <summary>Source-generated JSON serializer for <see cref="AppSettings"/>, so trimmed builds need no reflection.</summary>
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(AppSettings))]
-internal sealed partial class AppSettingsContext : JsonSerializerContext
+public sealed partial class AppSettingsContext : JsonSerializerContext
 {
 }
