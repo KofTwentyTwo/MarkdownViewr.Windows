@@ -1,5 +1,8 @@
 # Development Tasks
 
+- [x] Restore trusted heading Tag on the new Contents content Grid so repeat ItemClick can identify the selected row; local zero-warning build/format pass.
+- [ ] Verify the unchanged repeated physical Contents activation/source alignment case on the next exact pushed head; client input coordinates are not screen bounds.
+
 - [x] Prepare accessible native theme palette previews, state labels and explicit default radio selection with unchanged copied-draft/save semantics.
 - [ ] Execute actual theme palette pixels/default/save/reopen acceptance and inspect its Settings screenshot on the exact next hosted head.
 - [x] Retain terminal b2ecc8c focused23/24/native101/102 and published600-second timeout/no TRX; only source alignment fails in completed suites.

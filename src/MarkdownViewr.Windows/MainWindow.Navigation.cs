@@ -85,7 +85,7 @@ public sealed partial class MainWindow
                MaxLines = _settings.WrapOutlineEntries ? 0 : 1,
             };
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(label, "OutlineTitle:" + heading.Index.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            var row = new Grid { Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0), ColumnSpacing = 6 };
+            var row = new Grid { Tag = heading, Margin = new Thickness((heading.Level - 1) * 12, 0, 0, 0), ColumnSpacing = 6 };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             if(_settings.ShowOutlineDepthMarkers)

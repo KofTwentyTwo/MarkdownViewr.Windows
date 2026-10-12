@@ -76,8 +76,9 @@ Exactb5e519e focused19/22 and native98/100 fail, zero skips; the new General/
 Contents options case passes. A line-start closing raw tag is a separate Markdig
 HTML block; a reproduced correction now retains complete inline title syntax
 across consecutive blocks.598 core tests pass with100% measured line coverage.
-Actual tooltip placement covers a later Contents click; local placement/non-hit-
-testing is corrected. Exact picker1148/Edit exists in owned enumeration despite
+A tooltip appeared during the later Contents click; interception was not proved
+and placement changes did not resolve the failure. Local trim-only tips retain
+the intended full-title UX. Exact picker1148/Edit exists in owned enumeration despite
 the provider lookup failure; local acceptance uses that same owned identity.
 Retain current-focused-b5e519e.log/current-native-b5e519e.log and focused TRX/
 Settings screenshot bundle. Fresh hosted runtime remains required.
@@ -110,3 +111,10 @@ acceptance exceeds the unchanged600-second bound with no final TRX; installed
 lifecycle is not reached. Actual logs/artifacts are retained. Closing all fixture-
 owned windows before FlaUI's unchanged close/kill fallback addresses repeated
 five-second teardown waits; fresh whole-run evidence is required.
+
+The remaining repeated-activation candidate restores the trusted DocumentHeading
+Tag on the new Contents content Grid. ItemClick identifies its clicked native
+FrameworkElement; an already selected row produces no SelectionChanged event.
+The unchanged actual physical source/Contents regression must verify this on the
+next head. Pointer diagnostics are client coordinates, not screen-space bounds;
+the earlier direct coordinate/tooltip-interception inference was not established.

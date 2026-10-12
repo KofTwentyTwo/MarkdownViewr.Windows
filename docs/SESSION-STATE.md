@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Repeat Contents activation identity restored locally - 2026-10-11
+
+Actual retained b2ecc8c pixels show the last Contents row selected while both
+reader/source remain at middle after the repeated physical click. The new native
+row changed content from a heading-tagged TextBlock to a Grid without that Tag.
+ItemClick handles the clicked FrameworkElement's heading identity; selecting an
+already selected row does not raise SelectionChanged. Restore the same trusted
+DocumentHeading Tag on the content Grid. This is a precise metadata candidate,
+not an alteration to source geometry, scroll thresholds or test assertions.
+Existing Source_BidirectionalScroll performs the repeated physical activation and
+must prove the correction on the next exact head. Release/format pass locally.
+
+Correct the earlier input interpretation: InputDiagnostics.GetCurrentPoint(sender)
+reports client coordinates. Do not compare110,307 directly to screen-space row
+bounds318..358; the titlebar/client origin accounts for that difference. Tooltip
+presence alone did not prove interception, and placement changes did not resolve
+the failure. Trim-only full-title tips remain the intended UX refinement; the
+repeat-click identity is the next specific correction to verify.
+
+Pushed1bfab22 exact CI38187115859 is still live. Preserve focused/full/installed
+execution before the next push. Local metadata correction is held; no current
+GUI/runtime/signature or installed acceptance is claimed. No local input,
+preview55472 changes, Azure retry, shared merge, tags or publication.
+
 ## Theme palettes/default controls and fixture cleanup prepared - 2026-10-11
 
 Native theme rows now show five validated palette previews with hexadecimal
@@ -136,8 +160,8 @@ comment/attribute lookalikes and stopping at a new heading/Markdown boundary.
 All598 core tests pass with100% measured line coverage, including CRLF, comments,
 multiline closing syntax and unrelated blocks. Release/format pass.
 
-Owned UI evidence shows the new full-title tooltip covering a subsequent Contents
-click. Place the native tooltip to the right and make it non-hit-testable; retain
+Owned UI evidence showed a tooltip near Contents rows; interception was an
+unconfirmed hypothesis. Place the native tooltip to the right and make it non-hit-testable; retain
 all physical click/alignment assertions. The exact native filename control1148/
 Edit appears in owned enumeration despite the provider condition lookup timing
 out; use that same ID/type in owned enumeration, without broader controls or a
