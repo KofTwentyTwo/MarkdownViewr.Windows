@@ -2,6 +2,34 @@
 
 Updated: 2026-10-11
 
+## Exact9d5c0d1 native acceptance passes; Settings placement corrected locally - 2026-10-11
+
+Exact CI38188145397 focused26/26 and full native106/106 pass, zero failures/skips.
+Actual TRX proves repeated physical Contents/source synchronization, offscreen
+Nord palette/default pixel/save/reopen, future-schema export, trimmed full-title
+hover/click, both Printing cases and raw-inline provenance. Retain current-focused-
+9d5c0d1.log/current-native-9d5c0d1.log and reader-regressions-38188145397 actual
+TRX/screenshots. Full native duration9m45. Installed114614880391 is live; no
+current published/installed/coexistence/signature result inferred.
+
+Inspect actual theme-manager and Printing Settings screenshots. Controls/palettes
+are native and explicit, but default OS cascading position pushes right/bottom
+edges beyond the hosted monitor. FitWindow previously constrained size only;
+MoveAndResize now centers the complete resized window inside its actual monitor
+work area. Extend the existing native layout case with independent virtual-
+desktop containment, preserving its resizing/draft checks. Zero-warning Release
+and full formatting pass locally; fresh runtime/screenshots required. Hold the
+next push until current full installed execution is terminal.
+
+Review gate currently fails because no maintainer-owned automated review record
+exists for the exact head; never fabricate acknowledgement. Shared signing/
+license/inventory/AppKit Help/template Help PRs31/32/36/29/4 remain unmerged drafts
+with no reviews, actual starter remotewindows-app-template. Protected release
+environment has no signing variables. User-selected OS defaults/Explorer, owner
+layout feedback, reviewed shared/license requirements, genuine current-head
+review and deployed Azure/shipped signing remain required. No Azure retry, local
+input, preview55472 changes, shared merge, tags or production publication.
+
 ## Exact1bfab22 terminal evidence retained; corrective candidate ready - 2026-10-11
 
 CI38187115859 is terminal: focused23/26 and native102/106 fail, zero skips.

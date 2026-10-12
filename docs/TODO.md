@@ -1,16 +1,20 @@
 # Development Tasks
 
+- [x] Exact9d5c0d1 full native106/106 and focused26/26 pass, zero skips; retain actual TRX/Settings screenshots and logs.
+- [x] Correct observed offscreen Settings placement by centering size/position in the actual monitor work area; zero-warning build/format pass.
+- [ ] Verify whole-window visibility and inspect complete Settings screenshots on the next exact head; preserve current live installed run before pushing.
+
 - [x] Retain terminal1bfab22 native102/106, focused23/26 and published600-second/no-TRX evidence; same four failures, installed lifecycle not reached.
 
 - [x] Retain exact1bfab22 focused23/26 TRX; long-title tooltip/physical activation passes, offscreen Nord/future-theme lookup and source alignment fail.
 - [x] Prepare native scrolling of the owned virtualized theme list to realize the same exact IDs before unchanged selection/assertions/deadline.
-- [ ] Execute offscreen palette/default and existing future-schema/export acceptance with local49f0556 repeat-heading correction on the next exact pushed head.
+- [x] Exact9d5c0d1 focused26/26/native106/106 prove offscreen palette/default, existing future-schema/export and repeat-heading correction; zero skips.
 
 - [x] Restore trusted heading Tag on the new Contents content Grid so repeat ItemClick can identify the selected row; local zero-warning build/format pass.
-- [ ] Verify the unchanged repeated physical Contents activation/source alignment case on the next exact pushed head; client input coordinates are not screen bounds.
+- [x] Exact9d5c0d1 unchanged repeated physical Contents/source alignment passes; pointer diagnostics use client coordinates.
 
 - [x] Prepare accessible native theme palette previews, state labels and explicit default radio selection with unchanged copied-draft/save semantics.
-- [ ] Execute actual theme palette pixels/default/save/reopen acceptance and inspect its Settings screenshot on the exact next hosted head.
+- [x] Exact9d5c0d1 actual palette pixels/default/save/reopen passes and Settings screenshot inspected; new placement correction remains pending.
 - [x] Retain terminal b2ecc8c focused23/24/native101/102 and published600-second timeout/no TRX; only source alignment fails in completed suites.
 - [x] Prepare fixture-only closure of all owned windows before unchanged FlaUI close/kill fallback; preserve cases/assertions/deadlines.
 - [ ] Verify whole published/installed completion and corrected actual source/tooltip/default status on the next exact head.
@@ -18,7 +22,7 @@
 - [x] Prepare truthful General effective `.md` default status with bounded read-only Windows querying and automatic/manual refresh;7 actual read-only/isolated adapter tests pass.
 - [ ] Verify actual General status/refresh and user-selected OS chooser/Explorer behavior on an installed build; registration alone is not default selection.
 - [x] Exactb2ecc8c focused23/24: both Printing cases/raw-inline/picker/Contents options pass, zero skips; retain remaining physical alignment failure.
-- [ ] Verify trim-only tooltip placement and actual long-title physical activation plus the unchanged source alignment regression on the next exact hosted head.
+- [x] Exact9d5c0d1 trimmed tooltip/physical activation and unchanged source alignment pass in focused/full native suites.
 
 - [x] Retain terminal b5e519e published98/100 TRX: same raw-fold/source-click failures, zero skips; installed lifecycle phase not reached.
 
@@ -58,7 +62,7 @@
 - [x] Update the threat model, renderer attributions and shipped library notices.
 - [x] Verify first-reader hosted browser acceptance: 13 native/UI tests passed on f1756d2.
 - [x] Verify live reload/browser network scenarios and retain actual theme screenshots on head 77dd04d.
-- [ ] Discuss the desired first release and Windows-specific behavior with the owner.
+- [x] Owner authorizes signed stable1.0/dev releases with the requested Windows-specific controls/defaults; publication still requires all gates.
 - [x] Implement/test directory watching and validated relative viewport state for saves/replacements/deletion recovery.
 - [x] Complete actual browser save/lock/replacement/deletion/scroll acceptance (issue #6): hosted native/UI 26/26; published 26/26; installed stable/dev 25/25 each.
 - [x] Port Darin's 20 built-in themes and persistent document selection; validate schema, font escaping and invariant CSS.
@@ -195,7 +199,7 @@ checks below do not substitute for current native/distributed acceptance.
 - [ ] Pass hosted CI on the actual current implementation; retain native/published/installed TRXs, screenshots and real PDFs.
 - [x] Implement gclo-style separate stable/dev package IDs and installed-channel title/data identity;586 core tests/100% measured lines pass.
 - [x] Prepare simultaneous owned stable/dev windows/profiles/registrations, real AppKit updates with a live unchanged sibling, and stable uninstall preserving dev;64 tooling tests/all configured analyzer rules pass.
-- [ ] Verify the new simultaneous phase on a fresh exact hosted head; actual secondary activation/default chooser remain separate requirements.
+- [x] Exact53755ab actual simultaneous windows/profiles/isolated updates/uninstall phase passes; current-head distributed acceptance and OS chooser remain separate requirements.
 - [ ] Diagnose dbda6d4 focused17/20 failures with retained native color/focus/hidden-section evidence; preserve exact assertions and remove temporary debug probes before release.
 - [ ] Adopt the reviewed/published owned-file signing builder; verify actual Azure resource/profile/publisher and repository-bound OIDC/profile-signer permission.
 - [ ] Obtain genuine current-head maintainer review acknowledgement, complete required checks and merge.

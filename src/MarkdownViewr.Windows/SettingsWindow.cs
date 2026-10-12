@@ -85,7 +85,9 @@ internal sealed partial class SettingsWindow : Window
    {
       double scale = this.DpiScale();
       global::Windows.Graphics.RectInt32 area = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary).WorkArea;
-      AppWindow.Resize(new global::Windows.Graphics.SizeInt32(Math.Min((int)(960 * scale), area.Width), Math.Min((int)(720 * scale), area.Height)));
+      int width = Math.Min((int)(960 * scale), area.Width);
+      int height = Math.Min((int)(720 * scale), area.Height);
+      AppWindow.MoveAndResize(new global::Windows.Graphics.RectInt32(area.X + (area.Width - width) / 2, area.Y + (area.Height - height) / 2, width, height));
       if(AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
       {
          presenter.PreferredMinimumWidth = Math.Min((int)(640 * scale), area.Width);

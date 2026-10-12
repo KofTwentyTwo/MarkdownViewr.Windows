@@ -118,3 +118,16 @@ FrameworkElement; an already selected row produces no SelectionChanged event.
 The unchanged actual physical source/Contents regression must verify this on the
 next head. Pointer diagnostics are client coordinates, not screen-space bounds;
 the earlier direct coordinate/tooltip-interception inference was not established.
+
+## Exact current native proof and placement finding
+
+Exact9d5c0d1 / CI38188145397 focused26/26 and native106/106 pass, zero skips.
+Actual repeat-click/source geometry, palette pixels/default/save/reopen, future
+schema export, trimmed tooltip/physical activation, Printing and raw-inline cases
+pass. Retain actual TRX/screenshots under reader-regressions-38188145397 and both
+current native/focused logs. Current distributed acceptance remains live.
+
+Actual Settings screenshots reveal the window extends beyond the monitor despite
+its bounded size. Local FitWindow now centers the resized window in its monitor
+work area; the existing native layout test adds desktop containment. Build/format
+pass; fresh rendered visibility and full runtime acceptance remain required.

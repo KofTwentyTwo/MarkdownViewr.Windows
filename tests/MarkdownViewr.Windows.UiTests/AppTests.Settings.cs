@@ -275,6 +275,9 @@ public partial class AppTests
       Window window = session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow();
       Assert.True(session.MainWindow.IsEnabled);
       Assert.True(window.Patterns.Transform.Pattern.CanResize.Value);
+      var desktop = new System.Drawing.Rectangle(User32.GetSystemMetrics(SystemMetric.SM_XVIRTUALSCREEN), User32.GetSystemMetrics(SystemMetric.SM_YVIRTUALSCREEN),
+         User32.GetSystemMetrics(SystemMetric.SM_CXVIRTUALSCREEN), User32.GetSystemMetrics(SystemMetric.SM_CYVIRTUALSCREEN));
+      Assert.True(desktop.Contains(window.BoundingRectangle), "The complete Settings window must fit on the actual desktop.");
       window.Patterns.Transform.Pattern.Resize(780, 600);
       session.WaitForElement("ReadingAppearanceWidth").Patterns.RangeValue.Pattern.SetValue(320);
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("ReadingAppearanceLimit")) is { IsEnabled: true } control ? control : null, "the immediate width save");
