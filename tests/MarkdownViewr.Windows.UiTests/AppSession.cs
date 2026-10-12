@@ -420,6 +420,31 @@ public sealed class AppSession : IDisposable
 
 
 
+   /// <summary>FlaUI closes only the main HWND; close every fixture-owned window first so intended siblings do not force its exit timeout.</summary>
+   private void CloseOwnedWindows()
+   {
+      if(App is not { HasExited: false })
+      {
+         return;
+      }
+      foreach(AutomationElement window in TopLevelWindows())
+      {
+         try
+         {
+            if(window.Patterns.Window.TryGetPattern(out IWindowPattern? pattern))
+            {
+               pattern.Close();
+            }
+         }
+         catch(Exception exception) when(exception is System.Runtime.InteropServices.COMException or InvalidOperationException or ObjectDisposedException or System.ComponentModel.Win32Exception)
+         {
+            // A sibling can disappear during closure; the unchanged process close/kill fallback remains below.
+         }
+      }
+   }
+
+
+
    /// <summary>Closes the app (killing it if needed), then disposes the automation and deletes the data folder.</summary>
    public void Dispose()
    {
@@ -427,6 +452,7 @@ public sealed class AppSession : IDisposable
       {
          try
          {
+            CloseOwnedWindows();
             App?.Close();
          }
          catch

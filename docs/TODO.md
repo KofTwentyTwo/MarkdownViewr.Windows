@@ -1,5 +1,11 @@
 # Development Tasks
 
+- [x] Prepare accessible native theme palette previews, state labels and explicit default radio selection with unchanged copied-draft/save semantics.
+- [ ] Execute actual theme palette pixels/default/save/reopen acceptance and inspect its Settings screenshot on the exact next hosted head.
+- [x] Retain terminal b2ecc8c focused23/24/native101/102 and published600-second timeout/no TRX; only source alignment fails in completed suites.
+- [x] Prepare fixture-only closure of all owned windows before unchanged FlaUI close/kill fallback; preserve cases/assertions/deadlines.
+- [ ] Verify whole published/installed completion and corrected actual source/tooltip/default status on the next exact head.
+
 - [x] Prepare truthful General effective `.md` default status with bounded read-only Windows querying and automatic/manual refresh;7 actual read-only/isolated adapter tests pass.
 - [ ] Verify actual General status/refresh and user-selected OS chooser/Explorer behavior on an installed build; registration alone is not default selection.
 - [x] Exactb2ecc8c focused23/24: both Printing cases/raw-inline/picker/Contents options pass, zero skips; retain remaining physical alignment failure.

@@ -65,6 +65,64 @@ public partial class AppTests
 
 
 
+   /// <summary>Actual native palette pixels and explicit default/enabled state stay in the copied manager draft until Save.</summary>
+   [Fact]
+   public void Themes_PalettePreviewAndDefaultChoice_PreservesDraftAndPaintsSavedSelection()
+   {
+      using var session = new AppSession(document: "# Native palette preview fixture");
+      session.WaitForElement("mv-heading-0", TimeSpan.FromSeconds(30));
+      string saved = session.ReadSettings();
+      OpenSettingsAction(session, "ManageDocumentThemesMenu");
+      SelectThemeDraft(session, "Nord");
+      AutomationElement choice = session.WaitForElement("ThemeChoice:Nord");
+      choice.Patterns.ScrollItem.Pattern.ScrollIntoView();
+      Assert.Equal("Built-in · Enabled", session.WaitForElement("ThemeState:Nord").Name);
+      Assert.False(session.WaitForElement("ThemeListDefault").Patterns.SelectionItem.Pattern.IsSelected.Value);
+      WaitForThemePaletteColor(session, "Nord", "background", Color.FromArgb(46, 52, 64));
+      Assert.Contains("color #", session.WaitForElement("ThemePalette:Nord:text").Name, StringComparison.Ordinal);
+      Assert.Contains("color #", session.WaitForElement("ThemePalette:Nord:heading1").Name, StringComparison.Ordinal);
+      Assert.Contains("color #", session.WaitForElement("ThemePalette:Nord:heading2").Name, StringComparison.Ordinal);
+      Assert.Contains("color #", session.WaitForElement("ThemePalette:Nord:link").Name, StringComparison.Ordinal);
+      session.WaitForElement("ThemeListEnabled").Patterns.Toggle.Pattern.Toggle();
+      Assert.Equal("Built-in · Disabled", session.WaitForElement("ThemeState:Nord").Name);
+      session.WaitForElement("ThemeListDefault").Patterns.SelectionItem.Pattern.Select();
+      Assert.Equal(ToggleState.On, session.WaitForElement("ThemeListEnabled").Patterns.Toggle.Pattern.ToggleState.Value);
+      Assert.True(session.WaitForElement("ThemeListDefault").Patterns.SelectionItem.Pattern.IsSelected.Value);
+      Assert.Equal("Built-in · Enabled · Default", session.WaitForElement("ThemeState:Nord").Name);
+      Assert.Equal(saved, session.ReadSettings());
+      RetainDocumentWindow(session, session.TopLevelWindows().Single(element => string.Equals(element.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow(), "native-theme-palettes-default-draft");
+      session.ClickButton("Save themes");
+      session.WaitForElementGone("ThemeList");
+      CloseSettings(session);
+      WaitForSavedDocumentTheme(session, "Nord");
+      WaitForDocumentColor(session, Color.FromArgb(46, 52, 64));
+      OpenSettingsAction(session, "ManageDocumentThemesMenu");
+      SelectThemeDraft(session, "Nord");
+      Assert.True(session.WaitForElement("ThemeListDefault").Patterns.SelectionItem.Pattern.IsSelected.Value);
+      Assert.Equal("Built-in · Enabled · Default", session.WaitForElement("ThemeState:Nord").Name);
+      session.ClickButton("Cancel");
+      CloseSettings(session);
+   }
+
+
+
+   /// <summary>Measures an actually visible swatch's painted center rather than only its label or serialized palette.</summary>
+   private static void WaitForThemePaletteColor(AppSession session, string name, string field, Color expected)
+   {
+      session.WaitFor(() =>
+      {
+         AutomationElement swatch = session.WaitForElement("ThemePalette:" + name + ":" + field);
+         if(swatch.IsOffscreen)
+         {
+            return null;
+         }
+         using Bitmap image = swatch.Capture();
+         return image.GetPixel(image.Width / 2, image.Height / 2).ToArgb() == expected.ToArgb() ? swatch : null;
+      }, "the actual native theme palette color " + expected);
+   }
+
+
+
    /// <summary>Saved deletion removes a real choice and updates sibling paint; later local saves cannot resurrect deleted/shared state.</summary>
    [Fact]
    public void Themes_SharedDeleteRestoreAndSiblingSave_RetainsActualCatalog()

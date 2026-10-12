@@ -13,11 +13,12 @@ using Microsoft.UI.Xaml.Controls;
 namespace MarkdownViewr.Windows;
 
 /// <summary>A copied native theme-list draft cannot alter saved choices until the owner presses Save.</summary>
-internal sealed class ThemeManagementDialog
+internal sealed partial class ThemeManagementDialog
 {
    private AppSettings _draft;
    private readonly ListBox _list = new() { Name = "ThemeList", Height = 360 };
    private readonly CheckBox _enabled = new() { Name = "ThemeListEnabled", Content = "Enabled in theme menu and cycling" };
+   private readonly RadioButton _defaultTheme = new() { Name = "ThemeListDefault", Content = "Default document theme", GroupName = "DefaultDocumentTheme" };
    private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap };
    private readonly Grid _content;
    private SettingsWindow? _host;
@@ -41,11 +42,13 @@ internal sealed class ThemeManagementDialog
       var panel = new StackPanel { Spacing = 8 };
       panel.Children.Add(new TextBlock { Text = "Disabled themes stay editable. Deleted built-ins can be restored. Save commits these changes; Cancel discards them.", TextWrapping = TextWrapping.Wrap });
       panel.Children.Add(_enabled);
+      panel.Children.Add(_defaultTheme);
+      panel.Children.Add(new TextBlock { Text = "The saved default is used in new windows and applied to open readers when you save.", TextWrapping = TextWrapping.Wrap, Opacity = 0.7 });
       var editActions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
       editActions.Children.Add(ActionButton("ThemeListNew", "New", () => RequestEdit(ThemeManagement.NewTheme(_draft))));
       editActions.Children.Add(ActionButton("ThemeListCopy", "Copy", () => EditSelected(copy: true)));
       editActions.Children.Add(ActionButton("ThemeListEdit", "Edit", () => EditSelected(copy: false)));
-      editActions.Children.Add(ActionButton("ThemeListDefault", "Use selected", UseSelected));
+
       panel.Children.Add(editActions);
       var transfers = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
       transfers.Children.Add(ActionButton("ThemeListImport", "Import...", () => RequestTransfer(ManagerAction.Import)));
@@ -70,10 +73,25 @@ internal sealed class ThemeManagementDialog
          Grid.SetColumn(panel, narrow ? 0 : 1);
          Grid.SetRow(panel, narrow ? 1 : 0);
       };
+      InitializeSelectionControls();
+      Refresh(ThemeManagement.Active(_draft).Name);
+   }
+
+
+
+   /// <summary>All selected-theme controls edit only the copied manager draft, with guarded refresh events.</summary>
+   private void InitializeSelectionControls()
+   {
       _list.SelectionChanged += (_, _) => Select();
       _enabled.Checked += (_, _) => SetEnabled(true);
       _enabled.Unchecked += (_, _) => SetEnabled(false);
-      Refresh(ThemeManagement.Active(_draft).Name);
+      _defaultTheme.Checked += (_, _) =>
+      {
+         if(!_loading)
+         {
+            UseSelected();
+         }
+      };
    }
 
 
@@ -127,9 +145,13 @@ internal sealed class ThemeManagementDialog
    {
       _loading = true;
       _list.Items.Clear();
+      var editedNames = _draft.UserThemes.Select(ReaderTheme.ParseCompatible).Select(theme => theme.Name).ToHashSet(StringComparer.Ordinal);
       foreach(ReaderTheme theme in ThemeManagement.All(_draft))
       {
-         var item = new ListBoxItem { Content = theme.Name, Tag = theme.Name };
+         bool enabled = !_draft.DisabledThemes.Contains(theme.Name, StringComparer.Ordinal);
+         bool isDefault = enabled && string.Equals(theme.Name, _draft.DocumentTheme, StringComparison.Ordinal);
+         var item = new ListBoxItem { Content = ThemeRow(theme, enabled, isDefault, editedNames.Contains(theme.Name)), Tag = theme.Name, HorizontalContentAlignment = HorizontalAlignment.Stretch };
+         AutomationProperties.SetName(item, theme.Name);
          AutomationProperties.SetAutomationId(item, "ThemeChoice:" + theme.Name);
          _list.Items.Add(item);
          if(string.Equals(selected, theme.Name, StringComparison.Ordinal))
@@ -158,6 +180,12 @@ internal sealed class ThemeManagementDialog
       _selected = (_list.SelectedItem as ListBoxItem)?.Tag as string;
       _enabled.IsEnabled = _selected is not null;
       _enabled.IsChecked = _selected is not null && !_draft.DisabledThemes.Contains(_selected, StringComparer.Ordinal);
+      _defaultTheme.IsEnabled = _selected is not null;
+      _defaultTheme.IsChecked = _enabled.IsChecked == true && string.Equals(_selected, _draft.DocumentTheme, StringComparison.Ordinal);
+      if(_list.SelectedItem is not null)
+      {
+         _list.ScrollIntoView(_list.SelectedItem);
+      }
       _loading = false;
    }
 
@@ -169,6 +197,7 @@ internal sealed class ThemeManagementDialog
       if(!_loading && _selected is not null)
       {
          _draft = ThemeManagement.SetEnabled(_draft, _selected, enabled);
+         Refresh(_selected);
       }
    }
 

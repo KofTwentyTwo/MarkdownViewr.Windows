@@ -137,7 +137,7 @@ public partial class AppTests
       Assert.Equal(original, session.ReadSettings());
       RejectDuplicateThemeRename(session);
       SelectThemeDraft(session, "Nord");
-      session.ClickElement("ThemeListDefault");
+      session.WaitForElement("ThemeListDefault").Patterns.SelectionItem.Pattern.Select();
       Assert.Equal(ToggleState.On, session.WaitForElement("ThemeListEnabled").Patterns.Toggle.Pattern.ToggleState.Value);
       session.ClickButton("Cancel");
       session.WaitForElementGone("ThemeList");

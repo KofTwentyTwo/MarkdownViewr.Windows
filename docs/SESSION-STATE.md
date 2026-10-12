@@ -2,6 +2,45 @@
 
 Updated: 2026-10-11
 
+## Theme palettes/default controls and fixture cleanup prepared - 2026-10-11
+
+Native theme rows now show five validated palette previews with hexadecimal
+accessible names/tooltips, and textual Built-in/edited/Custom, Enabled/Disabled
+and Default state. A native default radio control explicitly enables the selected
+choice; selecting a row alone changes no saved palette. Enable/default changes
+stay inside the copied draft until Save, and Cancel/child edit/import/restore
+semantics remain. Selection scrolls into view. The pinned Mac Default checkbox
+writes ThemeManager.activeThemeName; Windows retains its existing DocumentTheme
+saved-choice contract, with explanatory text that Save applies it to open readers
+and future windows. No second preference or silent migration is introduced.
+
+A new actual native case measures painted Nord palette pixels, checks all five
+accessible swatches/default/enabled state, saves and reopens, and retains a real
+Settings-manager screenshot. It compiles/discovers but has not executed. Release
+build has zero warnings/errors; format passes; seven read-only/isolated Windows
+adapter cases pass.106 native cases discovered; core unchanged598/100% lines.
+
+Exactb2ecc8c CI38185403701 is terminal: focused23/24 and native101/102 fail,
+zero skips, only physical source/reader alignment. Both Printing cases, raw-inline
+folding, picker cancellation and Contents presentation pass in focused/native.
+Published suite reaches unchanged600-second bound without final TRX; retained
+process-15.log reports the same alignment failure. Installed lifecycle is not
+reached. Retain current-native-b2ecc8c.log/current-installed-b2ecc8c.log and actual
+artifacts/current-installed-evidence-38185403701; do not invent distributed counts.
+
+The published log reports ten failed exits. Exact pinned FlaUI NuGet source
+c5e7eb7 confirms CloseMainWindow then a5-second CloseTimeout; independent sibling
+windows intentionally keep the fixture process alive. Teardown now closes every
+fixture PID's native Window pattern before the unchanged process close/kill
+fallback. Cases, assertions, all deadlines and600-second process limit remain;
+cleanup/runtimes need fresh hosted proof. No local GUI input or other-app closure.
+
+Signed local24a464e default status/trim-only tooltip candidate can now be pushed
+with this preparation after old run is terminal. Next: exact-head focused/whole/
+installed acceptance and actual Settings pixels; resolve any remaining source
+alignment from retained mouse/viewport evidence. Owner/chooser/signing/review and
+production publication remain required. No Azure retry, shared merge or tags.
+
 ## Effective Markdown default status prepared - 2026-10-11
 
 General now reports Default/Not default/Unknown/Unregistered for this exact

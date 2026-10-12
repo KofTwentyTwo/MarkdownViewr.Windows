@@ -92,3 +92,21 @@ the same raw-inline fold and physical source-click/alignment failures; installed
 lifecycle phase not reached. Retain its actual published TRX under
 artifacts/current-installed-evidence-38184378762. Signed localec78b50/7fa9f77
 require fresh exact-head native/distributed acceptance after the next push.
+
+## Theme manager and current acceptance
+
+The pinned Mac Default checkbox writes ThemeManager.activeThemeName; its windows
+can keep their own current selection. Windows continues its existing shared saved
+DocumentTheme contract, applying committed choices to open readers and new
+windows. The native manager now makes that behavior explicit through a default
+radio control, five palette previews and textual state labels. No second saved
+preference or silent migration is introduced. Actual native palette-pixel/default/
+save/reopen acceptance is compiled and pending, including a Settings screenshot.
+
+Exactb2ecc8c focused23/24 and native101/102 fail, zero skips; only physical
+source/reader alignment fails. Both Printing cases, raw-inline folding, picker
+cancellation and Contents presentation pass in those completed suites. Published
+acceptance exceeds the unchanged600-second bound with no final TRX; installed
+lifecycle is not reached. Actual logs/artifacts are retained. Closing all fixture-
+owned windows before FlaUI's unchanged close/kill fallback addresses repeated
+five-second teardown waits; fresh whole-run evidence is required.
