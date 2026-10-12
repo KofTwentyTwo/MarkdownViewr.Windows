@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text.Json;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 
 
@@ -64,8 +65,7 @@ public partial class AppTests
    {
       using var session = new AppSession(document: "# Toolbar editor fixture", editorProbe: true, documentFileName: "notes & café $HOME.md");
       session.WaitFor(() => session.FindInApp(cf => cf.ByName("Toolbar editor fixture")), "the actual toolbar editor fixture", TimeSpan.FromSeconds(30));
-      Assert.False(FindToolbarCommand(session, "ToolbarEditorButton").IsEnabled);
-      SendReadingKey(VirtualKeyShort.ESCAPE);
+      AssertDisabledEditorExplanation(session);
       (string fileId, string folderId) = ConfigureToolbarEditors(session);
       ClickToolbarCommand(session, "ToolbarEditorButton");
       session.ClickElement("ToolbarEditor:" + folderId);
@@ -96,7 +96,32 @@ public partial class AppTests
       session.WaitForElementGone("PrintOptionsDialog");
       Assert.Equal(saved, session.ReadSettings());
       Assert.DoesNotContain("notes & café", session.ReadLogs(), StringComparison.Ordinal);
+      Assert.DoesNotContain("Unhandled UI exception", session.ReadLogs(), StringComparison.Ordinal);
       RetainDocumentWindow(session, session.MainWindow, "reference-toolbar-editor-print");
+   }
+
+
+
+   /// <summary>Physical hover exposes the actual disabled-command reason and mouse exit closes it without a UI exception.</summary>
+   private static void AssertDisabledEditorExplanation(AppSession session)
+   {
+      AutomationElement disabledEditor = FindToolbarCommand(session, "ToolbarEditorButton");
+      Assert.False(disabledEditor.IsEnabled);
+      const string Explanation = "No editor is configured. Choose one in File → Settings → Editors.";
+      Assert.Equal(Explanation, disabledEditor.Properties.HelpText.Value);
+      session.MainWindow.SetForeground();
+      Wait.UntilInputIsProcessed();
+      Rectangle target = disabledEditor.BoundingRectangle;
+      NativeMouse.MoveTo(new Point(target.Left + target.Width / 2, target.Top + target.Height / 2));
+      AutomationElement tooltip = session.WaitForElement("EditorUnavailableTip");
+      Assert.False(tooltip.IsOffscreen);
+      Assert.True(string.Equals(tooltip.Name, Explanation, StringComparison.Ordinal) || tooltip.FindFirstDescendant(cf => cf.ByName(Explanation)) is not null, "The actual disabled-command tooltip must show the Settings route.");
+      Assert.DoesNotContain("Unhandled UI exception", session.ReadLogs(), StringComparison.Ordinal);
+      RetainDocumentWindow(session, session.MainWindow, "disabled-editor-native-tooltip");
+      Rectangle document = session.WaitForElement("DocumentView").BoundingRectangle;
+      NativeMouse.MoveTo(new Point(document.Left + 24, document.Top + 24));
+      SendReadingKey(VirtualKeyShort.ESCAPE);
+      session.WaitForElementGone("EditorUnavailableTip");
    }
 
 

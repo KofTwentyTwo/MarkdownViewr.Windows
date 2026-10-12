@@ -30,9 +30,9 @@ public sealed partial class MainWindow
       _editorHoverDelay.Tick += (_, _) =>
       {
          _editorHoverDelay.Stop();
-         if(!_closed && !ToolbarEditorButton.IsEnabled)
+         if(!_closed && !ToolbarEditorButton.IsEnabled && ToolbarEditorButton.IsLoaded && ToolbarEditorButton.XamlRoot is { } root)
          {
-            _editorUnavailableTip.XamlRoot = ReaderToolbar.XamlRoot;
+            _editorUnavailableTip.XamlRoot = root;
             _editorUnavailableTip.IsOpen = true;
          }
       };
@@ -105,11 +105,11 @@ public sealed partial class MainWindow
       ToolbarEditorButton.Tag = editors.Length == 1 ? editors[0].Id : null;
       AutomationProperties.SetName(ToolbarEditorButton, ToolbarEditorButton.Label);
       string explanation = unavailable ?? "Open the document in a configured editor.";
-      ToolTipService.SetToolTip(ToolbarEditorButton, explanation);
+      _editorUnavailableTip.Content = explanation;
+      ToolTipService.SetToolTip(ToolbarEditorButton, _editorUnavailableTip);
       AutomationProperties.SetHelpText(ToolbarEditorButton, explanation);
       AutomationProperties.SetHelpText(OpenEditorMenuItem, explanation);
       ToolTipService.SetToolTip(OpenEditorMenuItem, explanation);
-      _editorUnavailableTip.Content = explanation;
       CloseEditorExplanation();
       ToolbarEditorButton.Flyout = null;
       if(editors.Length > 1)
@@ -151,7 +151,10 @@ public sealed partial class MainWindow
    private void CloseEditorExplanation()
    {
       _editorHoverDelay.Stop();
-      _editorUnavailableTip.IsOpen = false;
+      if(_editorUnavailableTip.IsOpen)
+      {
+         _editorUnavailableTip.IsOpen = false;
+      }
    }
 
 

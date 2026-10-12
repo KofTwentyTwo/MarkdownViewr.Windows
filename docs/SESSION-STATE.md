@@ -2,6 +2,60 @@
 
 Updated: 2026-10-12
 
+## Owner review launched; disabled-editor hover bug prepared - 2026-10-12
+
+User asks to finish the release work and run the latest build. No production1.0
+exists. Fresh self-containedde70220 local1.0.0-dev is running asPID127248 from
+owner-latest-de70220-publish, with Review-latest-de70220.md and its own
+owner-latest-de70220-profile. Preserve this instance, settings and binaries while
+the owner tests. Process/window metadata confirms responding; computer-use helper
+fails its required retry/reset recovery (native pipe/sandbox setup unavailable).
+No local physical-input tests ran. The expanded instruction authorizes remaining
+release actions, subject to unchanged gates and genuine maintainer review; never
+post a human acknowledgement on the owner's behalf.
+
+Owner supplies actual ToolTip.IsOpen NullReferenceException from the hover timer
+(line36 in de70220). App issue32 records sanitized evidence. The manual tooltip
+was a different object from the one registered with ToolTipService. Candidate
+attaches the same object, requires the current loaded target/XamlRoot before
+opening, and closes only an open popup. The original editor/printing case now
+requires actual physical hover/text/mouse exit and no unhandled UI log errors;
+include it in the focused suite (29 cases), retaining every original assertion
+and all111 native/published /110 installed cases and deadlines. No GUI-runtime
+fix is yet claimed. Full isolated Release0 warnings/errors and workflow syntax/
+security, formatting and two-document Markdown lint checks pass; fresh hosted
+acceptance still required.
+
+Temporary timing instrumentation is removed by restoring the exact prior fixture
+code; retainedde70220 all-channel evidence remains below. Final signing authority,
+shared reviews/publication, enrollment/inventory, exact-head acknowledgement and
+owner layout/default-chooser acceptance remain required before production release.
+
+## Exact diagnostics head accepted on every channel - 2026-10-12
+
+Exact signedde70220 / CI38209503930 is terminal success: core677/100% measured
+lines, native/published111/111, focused28/28, installed stable/dev110/110 each,
+fuzz9+2; zero failures/skips. Actual TRXs and lifecycle/update receipts retained
+under current-installed-evidence-38209503930, reader-regressions-38209503930,
+current-fuzz-evidence-38209503440 and current-native-de70220.log. Both actual
+AppKit apply/restart receipts and target SHA256 assertions pass; simultaneous
+windows, distinct profiles, isolated updates, five-extension registration and
+stable uninstall/default preservation all pass. Fixtures remain unsigned.
+Published elapsed572.71 seconds; stable496.38 and dev574.75. All three actual
+Appearance/PDF cases complete; no blocked operation is established. Retain timings
+for comparison, remove temporary DEBUG-ui-timing instrumentation and verify final
+head without changing assertions/cases/deadlines. No production defect is inferred
+from the earlier aggregate timeout.
+
+Current review / automated fails because no maintainer-owned current-head record
+exists. The configuration Apply guard includes that genuine review context, so
+prepared fuzz addition17-to18 remains unapplied, preserving every existing rule.
+Support discussions are enabled; release environment permits only v* tags. Shared
+signing/template/help/inventory/license decisions, actual Best Practices enrollment,
+verified Azure resource/identity/role and final shipped signatures, owner visual/
+scaling/default-chooser review and final-head acknowledgement still remain. No
+production publication or shared merge is claimed.
+
 ## Published acceptance timing investigation - 2026-10-12
 
 Exact d0526ef / CI38207252597 is terminal failure only in installed-updates.

@@ -2,6 +2,13 @@
 
 ## Current release checklist
 
+- [x] Build and launch the requested latest self-containedde70220 review with a fresh isolated profile; protectPID127248. Version1.0.0-dev; no production1.0 exists.
+- [x] Record owner-reported disabled editor ToolTip.IsOpen exception as bug#32; prepare the same attached-tooltip/loaded-target correction and physical-hover/log-error acceptance.
+- [ ] Verify bug#32 on the next exact head: focused29, native/published111 and installed110 per channel with unchanged assertions/deadlines; prepare a separate corrected local review copy.
+- [x] Exactde70220 CI38209503930 terminal success: core677/100%, native/published111, focused28, stable/dev110 each and fuzz9+2, zero skips; actual updates/restarts, coexistence/registration/default preservation pass.
+- [x] Remove temporary timing instrumentation and retain measured evidence; fresh final-head verification remains required with bug#32.
+- [ ] Obtain the genuine final-head review record required by configuration Apply as well as merging; add/read back only the planned Actions-bound fuzzing context, preserving existing policy.
+
 - [x] Pushe6fd281 and verify hosted fuzz9/9 core+2/2 activation,677 core/100% lines, focused28 and full native111, zero skips; retain actual evidence.
 - [x] Exactd052 hosted core677/100%, focused28, native111 and fuzz9+2 pass; published picker cancellation passes, but110/111 hit600 seconds without assertion failure/final TRX. Installed lifecycle not reached.
 - [ ] Measure retained launch/slow-wait/closure/Appearance-PDF timings to diagnose aggregate published runtime versus a blocked final operation; preserve111 cases and every assertion/deadline. Remove temporary timings after verified resolution; required fuzz context remains unapplied.
