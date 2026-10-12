@@ -4,7 +4,7 @@
 
 - [x] Build and launch the requested latest self-containedde70220 review with a fresh isolated profile; protectPID127248. Version1.0.0-dev; no production1.0 exists.
 - [x] Record owner-reported disabled editor ToolTip.IsOpen exception as bug#32; prepare the same attached-tooltip/loaded-target correction and physical-hover/log-error acceptance.
-- [ ] Verify bug#32 on the next exact head: focused29, native/published111 and installed110 per channel with unchanged assertions/deadlines; prepare a separate corrected local review copy.
+- [x] Exact321816c CI38238385482 passes focused29, native/published111 and installed stable/dev110 each, zero failures/skips; actual hover case and lifecycle receipts pass. Corrected isolated local reviewPID48976 is open; production signing remains unproved.
 - [x] Exactde70220 CI38209503930 terminal success: core677/100%, native/published111, focused28, stable/dev110 each and fuzz9+2, zero skips; actual updates/restarts, coexistence/registration/default preservation pass.
 - [x] Remove temporary timing instrumentation and retain measured evidence; fresh final-head verification remains required with bug#32.
 - [ ] Obtain the genuine final-head review record required by configuration Apply as well as merging; add/read back only the planned Actions-bound fuzzing context, preserving existing policy.
@@ -47,7 +47,9 @@ Full product scope remains in PRODUCT.md; unsigned fixtures are not release proo
 - [ ] Complete remaining reference rendering/extension/image/link fidelity review. Preserve pinned document CSS and the explicit native-pane CSS boundary; representative tests do not certify arbitrary documents or CSS.
 - [ ] Obtain the required shared maintainer decisions: standards signing builder PR31, AppKit-only tooling license proposal PR32, inventory PR36 and shared Help PRs AppKit29/windows-app-template4. Prior permission covers draft pushes only.
 - [ ] After signing builder31 is reviewed/published, adopt its published full-SHA pin and required six-file signing catalog; preserve fail-closed publication.
-- [ ] Verify actual deployed Azure subscription tenancy, region/endpoint, Active PublicTrust profile and full publisher subject; configure approved CI identity, exact repository/environment trust, profile-scoped signer permission and release variables. Reuse the existing service. Public directory discovery alone is not resource proof.
+- [x] Authenticated Azure readback verifies actual subscription/tenant, East US endpoint, Active releases/PublicTrust profile and full James Maes subject. Separate secretless CI identity, exact immutable release-environment trust, profile-scoped signer role and all seven protected release variables are configured/read back; existing gclo setup preserved.
+- [x] Local representative321816c six-binary signing test passes SignTool /pa /all /v and strict SHA256/publisher/trust/timestamp checks; owner previews untouched.
+- [ ] Prove the new CI identity through the protected release job; verify final installer/archive signatures after adopting the published reviewed builder.
 - [ ] Obtain genuine final-head maintainer review acknowledgement, complete required checks and merge the application.
 - [ ] Publish signed stable1.0/dev releases only after exact shipped binaries/installers verify publisher/trust/SHA256/RFC3161 timestamps; retain final checksums/metadata and installed acceptance.
 

@@ -70,9 +70,10 @@ must stop publication. For future MSIX packaging, its Publisher must match the
 verified subject. Local signing uses Microsoft's Artifact Signing Client Tools
 and the installed SignTool/dlib paths with an authorized identity.
 
-
 MarkdownViewr-specific verified OIDC claims and the precise remaining Azure
 administrator steps are in [azure-signing-admin.md](azure-signing-admin.md).
 This repository uses immutable owner/repository IDs in its subject; a copied
-name-only trust from gclo would not match. No Azure configuration or successful
-representative signing is claimed until those steps and artifact checks pass.
+name-only trust from gclo would not match. Azure resource/identity/role and protected release variables are verified; the
+representative six-binary local signing test passes. CI OIDC and exact final
+installer/distribution signing still require the protected release integration.
+See the administrator runbook for actual evidence and remaining dependencies.

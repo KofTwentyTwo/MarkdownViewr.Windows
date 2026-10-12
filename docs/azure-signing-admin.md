@@ -1,9 +1,80 @@
 # MarkdownViewr signing administrator actions
 
-No Azure changes have been applied: the available CLI has no signed-in account.
-Reuse the existing subscription/account/validation/profile. Coordinate identity
-changes with gclo and other app owners; retain their applications, credentials and
-role assignments. Never export keys or add administrative passwords to CI.
+Verified on2026-10-12 using authenticated Azure CLI and ARM resource readback.
+The existing account, validation and profile were reused. A separate secretless
+MarkdownViewr CI identity, exact release-environment trust and profile-scoped
+signer assignment are created and independently read back. All seven protected
+GitHub release variables match the verified deployment. gclo's identity,
+credentials and assignments were preserved.
+
+## Verified deployment and local signing proof
+
+| Setting | Verified value |
+| --- | --- |
+| Subscription | `8ef2479e-3346-4cba-93ad-101c6cd237a0` (`Kof22 Signing Account`) |
+| Tenant | `4ebeb0ad-5782-487a-a1b4-5080255774cf` |
+| Account / region | `kof22signing` / `eastus` |
+| Regional endpoint | `https://eus.codesigning.azure.net/` |
+| Profile | `releases`, Active, PublicTrust |
+| Certificate subject | `CN=James Maes, O=James Maes, L=Chester, S=il, C=US` |
+| CI client ID | `8f51ec7a-5d91-45db-a374-c628566fc383` |
+| Application object ID | `1640971f-8e5c-4f3a-802e-8633630e544c` |
+| Service-principal object ID | `4e9e7d2b-5df4-4312-9d01-9845922c4d92` |
+
+The sole CI federation uses the exact immutable subject shown below. Its signer
+role is limited to the `releases` certificate profile; no Owner/Contributor role
+or client secret was added. The protected GitHub environment permits only `v*`
+tags. No tenant security controls changed.
+
+A local representative test signed disposable copies of all six owned binaries
+from `321816c` with Microsoft.ArtifactSigning.Client `1.0.146`, SHA256 and RFC3161
+SHA256 timestamping. The client NuGet package's Microsoft author and NuGet
+repository signatures verify. Each binary passes `signtool verify /pa /all /v`
+with zero warnings/errors, the exact certificate subject above, and Microsoft
+Public RSA Time Stamping Authority. The existing strict signature helper also
+passes all six files, including its SHA256 digest check. Logs, original/final
+hashes and signature receipts are retained locally in
+`artifacts/signing-proof-321816c/`; running owner previews were untouched.
+
+This test uses the authorized interactive administrator's existing signer role.
+It does not prove the new CI identity's OIDC exchange, installer signing or final
+shipped artifacts. Complete standards PR#31 review/publication, adopt the
+published catalog builder, and run the protected release integration before
+claiming production readiness. No stable 1.0 or dev release was published.
+
+## Interactive sign-in when device flow is blocked
+
+The owner-reported Azure CLI error530035 means Security Defaults blocked
+access. [Microsoft's current guidance](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults#block-device-code-flow)
+explicitly states that Security Defaults block device-code authentication. Keep
+those protections enabled. Use normal interactive Windows authentication rather
+than repeating `--use-device-code`:
+
+```powershell
+az login --tenant koftwentytwooutlook.onmicrosoft.com --output none
+```
+
+Complete account selection and MFA personally. Current Azure CLI uses Windows
+[Web Account Manager](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively#sign-in-with-web-account-manager-wam-on-windows)
+by default. If interactive sign-in also fails, inspect that sign-in's actual
+error and Entra sign-in log; do not assume device enrollment or broader resource
+roles will resolve it. Authentication alone still does not establish access to
+the signing account/profile or grant CI signing permission.
+
+If Windows account selection cannot use the administrator's passkey provider,
+use Microsoft's supported browser flow with a process-only environment setting:
+
+```powershell
+$env:AZURE_CORE_ENABLE_BROKER_ON_WINDOWS = 'false'
+az login --tenant koftwentytwooutlook.onmicrosoft.com --output none
+```
+
+Run this in a dedicated PowerShell process; it does not persist CLI settings or
+change tenant policy. Use the owner's browser with the enabled/unlocked
+[1Password extension](https://support.1password.com/save-use-passkeys/) for its
+stored passkey. Complete MFA personally. Do not export passkeys or repeat the
+blocked device-code flow. If browser authentication also fails, inspect its new
+error rather than assuming the passkey or tenant registration is at fault.
 
 ## Verify the deployed resource
 
@@ -14,8 +85,9 @@ Public Microsoft OpenID discovery on2026-10-11 resolves the supplied directory
 returns issuer `https://login.microsoftonline.com/4ebeb0ad-5782-487a-a1b4-5080255774cf/v2.0`.
 This identifies the directory only; it does not establish the signing subscription's
 tenant, regional endpoint, active profile or verified publisher subject. The
-existing CLI context still has no authenticated account. Confirm the deployed
-resource below before setting any CI values; no login retry or Azure change was made.
+authenticated ARM readback above now confirms this directory is the signing
+subscription's actual tenant. The commands below remain the repeatable inspection
+procedure; recheck them if the deployed configuration changes.
 
 With an authorized interactive Azure session, inspect the actual tenant, regional
 account URI and profiles. The account/subscription below are owner-provided setup

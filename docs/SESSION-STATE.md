@@ -2,6 +2,48 @@
 
 Updated: 2026-10-12
 
+## Azure configured and representative local signatures verified - 2026-10-12
+
+Browser login completes successfully. Authenticated account/ARM readback verifies
+the provided subscription, actual tenant4ebeb0ad-5782-487a-a1b4-5080255774cf,
+East US endpoint, existingkof22signing and releases Active/PublicTrust profile.
+Issued certificates expose full subjectCN=James Maes, O=James Maes, L=Chester,
+S=il, C=US. Existing gclo and every preexisting assignment are preserved.
+
+Created separate secretless MarkdownViewr application/client
+`8f51ec7a-5d91-45db-a374-c628566fc383`, its service principal and exact immutable
+release-environment federation. Granted only Certificate Profile Signer at releases scope; readback
+confirms federation and role. Set/read back all seven non-secret GitHub release
+variables; release environment remains v* tags only. No tenant/security/device
+configuration was altered; no administrative credentials or client secrets in CI.
+
+Signed six disposable owned binaries from321816c with verified Microsoft client
+1.0.146 using the administrator's existing Azure CLI signer authority. SHA256 and
+RFC3161 SHA256 timestamps applied. Every binary passes SignTool /pa /all /v with
+zero warnings/errors and the expected publisher/trust/timestamp; strict existing
+helper also verifies SHA256 digests. Retain artifacts/signing-proof-321816c.
+OwnerPID48976/127248 previews and profiles are untouched. This is real local
+signing proof, not CI OIDC, installer/distribution proof or a published release.
+Standards31 reviewed/published builder, final actual CI signing/distribution,
+genuine human final-head review and enrollment/owner acceptance remain required.
+
+## Exact tooltip head accepted on every channel - 2026-10-12
+
+Exact321816c CI38238385482 is terminal success: focused29/native111,
+published111/111, installed stable110/110 and dev110/110, zero failures/skips.
+The strengthened physical-hover/editor/print case passes all three distributed
+variants. Actual AppKit apply/restart receipts, coexisting windows/profiles,
+isolated updates, five-extension registration, stable uninstall/dev preservation
+and existing defaults preservation pass. Retain actual TRXs/receipts under
+artifacts/current-installed-evidence-38238385482; fixtures remain unsigned.
+No local automated mouse/keyboard tests ran; computer-use helper is unavailable.
+
+Authentication recovery is complete: owner explicitly overrides prior deferral
+and requests a retry. Device-code flow receives Security Defaults error530035;
+native account-picker login is canceled after passkey incompatibility. Supported
+browser authentication succeeds with process-only broker setting and owner MFA.
+Do not repeat the denied device flow or weaken tenant protections.
+
 ## Owner review launched; disabled-editor hover bug prepared - 2026-10-12
 
 User asks to finish the release work and run the latest build. No production1.0
