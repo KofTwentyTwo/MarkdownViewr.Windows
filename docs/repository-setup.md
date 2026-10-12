@@ -9,7 +9,7 @@ hooks, and run [CONTRIBUTING.md](../CONTRIBUTING.md)'s checks. Node 24 and Power
 The default command works offline and writes thirteen non-secret API requests:
 
 ```powershell
-./build/Initialize-GitHubRepository.ps1 -Repository KofTwentyTwo/windows-app-template
+./build/Initialize-GitHubRepository.ps1 -Repository KofTwentyTwo/MarkdownViewr.Windows
 Get-Content artifacts/repository-setup.json
 ```
 

@@ -3,58 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-using KofTwentyTwo.AppKit.Logging;
-
 
 namespace MarkdownViewr.Windows.Core.Tests;
-
-/// <summary>A clock fixed at one local time, in a UTC zone so local time equals the given time.</summary>
-internal sealed class FixedTimeProvider(int hour) : TimeProvider
-{
-   /// <summary>Today at the given hour.</summary>
-   public override DateTimeOffset GetUtcNow() => new(2026, 3, 15, hour, 30, 0, TimeSpan.Zero);
-
-
-
-   /// <summary>UTC, so GetLocalNow returns GetUtcNow unchanged.</summary>
-   public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
-}
-
-
-
-/// <summary>An activity log that records entries in memory.</summary>
-internal sealed class RecordingLog : IActivityLog
-{
-   /// <summary>Entries as "LEVEL message".</summary>
-   public List<string> Entries { get; } = [];
-
-
-
-   /// <inheritdoc/>
-   public string LogDirectory => "";
-
-
-
-   /// <inheritdoc/>
-   public string CurrentLogFilePath => "";
-
-
-
-   /// <inheritdoc/>
-   public void Info(string message) => Entries.Add("INFO " + message);
-
-
-
-   /// <inheritdoc/>
-   public void Warning(string message) => Entries.Add("WARN " + message);
-
-
-
-   /// <inheritdoc/>
-   public void Error(string message, Exception? exception = null) => Entries.Add("ERROR " + message);
-}
-
-
 
 /// <summary>A per-test temporary directory, deleted on dispose.</summary>
 internal sealed class TempDirectory : IDisposable

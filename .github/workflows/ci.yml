@@ -18,6 +18,48 @@ concurrency:
 
 jobs:
 
+  reader-regressions:
+    name: reader-regressions
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build locked dependencies
+        shell: pwsh
+        run: |
+          dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify native source, layout, pickers and print regressions
+        shell: pwsh
+        run: >-
+          dotnet test tests/MarkdownViewr.Windows.UiTests --no-build
+          --filter 'FullyQualifiedName~SourceHighlighting|FullyQualifiedName~Settings_NewWindowPanelDefaults|FullyQualifiedName~Settings_ContentsPresentation|FullyQualifiedName~Settings_ContentsTooltip|FullyQualifiedName~Themes_PalettePreviewAndDefaultChoice|FullyQualifiedName~Settings_PrintingDefaults|FullyQualifiedName~Settings_PrintingDraft|FullyQualifiedName~ThemeTransfer_NativePickerCancels|FullyQualifiedName~Print_UserWidthAndBorders|FullyQualifiedName~ReadingKeys_ScrollCommands|FullyQualifiedName~Source_ShowReloadAndHide|FullyQualifiedName~ThemeEditor_AllTypography|FullyQualifiedName~ThemeEditor_NewCustomTheme|FullyQualifiedName~Appearance_WidthCssAndPrint|FullyQualifiedName~Toolbar_ReadingCommandsAndMenus|FullyQualifiedName~Toolbar_EditorAndPrint|FullyQualifiedName~ThemeTransfer_BatchFutureInvalidAndDisabledExport|FullyQualifiedName~ReadingKeys_HeadingSequences|FullyQualifiedName~Source_BidirectionalScroll|FullyQualifiedName~Source_RawHtmlHeadingProvenance|FullyQualifiedName~Extensions_NativePreferences|FullyQualifiedName~Windows_LocalDocumentLinks|FullyQualifiedName~ActivationInboxTests|FullyQualifiedName~Outline_NestedCollapse'
+          --logger 'trx;LogFileName=reader-regressions.trx'
+          --results-directory artifacts/reader-regressions
+      - name: Retain native regression evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reader-regression-results
+          path: |
+            artifacts/reader-regressions/*.trx
+            artifacts/installed-smoke-ui/*.png
+            artifacts/installed-smoke-ui/*.log
+            artifacts/installed-smoke-print/*.pdf
+            artifacts/installed-smoke-print/*.png
+          retention-days: 7
+
   installed-updates:
     name: installed-updates
     runs-on: windows-latest
@@ -50,6 +92,8 @@ jobs:
             artifacts/installed-smoke-*/*.json
             artifacts/installed-smoke-*/*.log
             artifacts/installed-smoke-*/*.trx
+            artifacts/installed-smoke-*/*.png
+            artifacts/installed-smoke-*/*.pdf
           retention-days: 7
   ci:
     uses: KofTwentyTwo/standards/.github/workflows/dotnet.yml@fdf5ed029603c938615a32b1beca3628b8787945 # v0.1.2

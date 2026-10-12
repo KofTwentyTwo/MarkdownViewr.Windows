@@ -1,95 +1,71 @@
-# MarkdownViewr
+# MarkdownViewr for Windows
 
-> In development: a Windows counterpart to [Darin's markdownViewr](https://github.com/darinkelkhoff/markdownViewr), built with AppKit. The application currently shows the starter's greeting screen; Markdown viewing is not implemented yet. See [the feature plan](docs/PRODUCT.md) and [development tasks](docs/TODO.md). No Windows release is available yet.
+Read Markdown comfortably, keep up with changes, and turn your notes into something worth sharing.
 
-A Windows Markdown viewer with live reload, themes and document navigation.
+MarkdownViewr is a dedicated Windows reader for project documentation, notes, and README files. Open a document, choose a look you like, and focus on the words.
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/KofTwentyTwo/MarkdownViewr.Windows/badge)](https://scorecard.dev/viewer/?uri=github.com/KofTwentyTwo/MarkdownViewr.Windows)
+**[Release downloads](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases) · [User guide](docs/user-guide.md) · [Ask a question](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions)**
+
+> The first Windows release is being prepared. There are no published Windows downloads yet; the Releases page will contain the stable installer and development previews when publication completes.
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15417/badge)](https://www.bestpractices.dev/en/projects/15417)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/KofTwentyTwo/MarkdownViewr.Windows/badge)](https://scorecard.dev/viewer/?uri=github.com/KofTwentyTwo/MarkdownViewr.Windows)
 
-| | |
-| --- | --- |
-| **Tier** | Product ([scope](https://github.com/KofTwentyTwo/standards/blob/main/policies/README.md#scope)) |
-| **Standards** | Adopting [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards) (pre-v1.0); built from the KofTwentyTwo Windows app template |
-| **Latest release** | [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest) |
+![MarkdownViewr displaying project notes with the GitHub Light palette](docs/images/reading-light.png)
 
-## Install
+## Make Markdown easier to read
 
-Download `markdownviewr-windows-stable-Setup.exe` from the
-[latest release](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest) and run it. It
-installs per user (no administrator rights needed) and updates itself in place from
-**Help → Check for updates**. `markdownviewr-windows-stable-Portable.zip` is a portable build that
-does not self-update.
+- **Make it your own.** Choose from 20 document palettes, customize typography, and use a light, dark, or system app appearance.
+- **Follow changes as they happen.** Saved edits refresh automatically. The footer shows the loaded file's modification time and flags an unsuccessful reload.
+- **Navigate long documents.** Show Contents, jump between headings, collapse sections, and find text.
+- **See how it is written.** Open the highlighted, read-only source alongside the document. The split starts at 50/50 and resizes by dragging.
+- **Share a finished document.** Print from the toolbar or save a PDF with separate print styling and optional actions to open the result or its folder.
+- **Stay in your workflow.** Open several documents, launch your configured editor, or open the current document's folder in Explorer.
 
-Prerelease tags (`v1.2.3-beta.1`) publish to the `dev` channel
-(`markdownviewr-windows-dev-Setup.exe`); an installation only ever updates within its own channel.
+Contents and Source start hidden. Turn them on when needed, or change their new-window defaults in **File → Settings → General**.
 
-## Usage
+![Dark document palette with highlighted Markdown source in an equal split](docs/images/source-dark.png)
 
-- **Greeting (example feature):** type a name and press **Greet**. The name is remembered
-  for next time. This is the template's example of a feature: logic and state in
-  `MarkdownViewr.Windows.Core`, a thin view in `MarkdownViewr.Windows`.
-- **View:** choose the light, dark, or system theme; turn the startup splash and the
-  startup update check on or off. Choices are saved immediately.
-- **Help → Activity log:** a live view of the app's log, with an errors-only filter and a
-  shortcut to the log folder.
-- **Help → Check for updates** and **Help → About**.
+## Download and install
 
-Settings and logs live in `%LOCALAPPDATA%\markdownviewr-windows`. Set the data-folder environment
-variable the app reports in its log (the app id in capitals, plus `_DATA_DIR`) to use a
-different folder, for example a portable one.
+The planned Windows packages support **Windows 10 version 1809 or later and Windows 11, x64**. Microsoft Edge WebView2 Runtime is required. No .NET SDK is needed to use a release.
 
-## Building from source
+| Edition | Choose it for | Package |
+| --- | --- | --- |
+| Stable | Everyday reading | `markdownviewr-windows-stable-Setup.exe` |
+| Development preview | Trying upcoming changes | `markdownviewr-windows-dev-Setup.exe` |
+| Portable | Running without installation | `markdownviewr-windows-stable-Portable.zip` |
 
-Prerequisites:
+Once available, download a package from [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.
 
-- Windows 10 version 1809 or later, x64 or ARM64
-- .NET 10 SDK (the feature band is pinned by `global.json`)
-- Optionally Visual Studio 2026 (Windows App SDK workload) or Rider
+Installed editions check for updates through **Help → Check for updates**. Stable and development editions keep separate settings and update channels, so they can coexist. Portable copies do not self-update.
 
-```powershell
-# Once after generation, create and commit the NuGet locks locally:
-# dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64
-dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
-dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror
-dotnet test MarkdownViewr.Windows.slnx -p:Platform=x64 --no-build --filter "FullyQualifiedName!~UiTests"
-dotnet test tests/MarkdownViewr.Windows.UiTests --no-build   # launches the app on the desktop
-```
+## Quick start
 
-Package versions are declared in `Directory.Packages.props` and locked in each project's
-`packages.lock.json`. [CONTRIBUTING.md](CONTRIBUTING.md) has the full local workflow,
-including the coverage gate and the format check that CI runs.
+1. Choose **File → Open** or press **Ctrl+O** and select your Markdown file.
+2. Use **Theme** to choose a document palette, **Contents** to navigate, and **Source** to inspect the Markdown.
+3. Save changes in your editor; the viewer refreshes automatically.
+4. Choose **Print** in the toolbar to print or create a PDF.
 
-## Verifying a release
+To open Markdown files in the viewer by default, use an installed copy and choose **File → Settings → General → Choose default file types**. Select MarkdownViewr in Windows Default Apps for your preferred extensions. Windows asks you to make that choice; installation preserves existing defaults.
 
-Every release asset is listed in `SHA256SUMS` and has a build-provenance attestation
-signed by the KofTwentyTwo release workflow:
+See the [user guide](docs/user-guide.md) for settings, shortcuts, printing, and troubleshooting.
 
-```powershell
-# Integrity: the file matches the published checksum
-(Get-FileHash .\markdownviewr-windows-stable-Setup.exe -Algorithm SHA256).Hash   # compare to SHA256SUMS
+## Help and feedback
 
-# Origin: built by the KofTwentyTwo release workflow from this repository
-gh attestation verify .\markdownviewr-windows-stable-Setup.exe --repo KofTwentyTwo/MarkdownViewr.Windows --signer-repo KofTwentyTwo/standards
+Use **Help → Community support** for questions and **Help → Submit an issue** for bugs or feature requests. You can also visit [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions) or [Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues) directly.
 
-# Publisher: Authenticode signature (once code signing is enabled; see SECURITY.md)
-Get-AuthenticodeSignature .\markdownviewr-windows-stable-Setup.exe | Format-List Status, SignerCertificate
-```
+For a bug report, include the version from **Help → About**, your Windows version, and steps to reproduce. Remove private information from logs and screenshots. Report security vulnerabilities privately using [SECURITY.md](SECURITY.md).
 
-## Support
+## Developers and contributors
 
-The latest minor release receives fixes; see [SECURITY.md](SECURITY.md#supported-versions)
-for the full support policy.
+Want to help? Start with [CONTRIBUTING.md](CONTRIBUTING.md). Build commands, tests, architecture, and release verification are in [DEVELOPERS.md](DEVELOPERS.md).
 
-## Security
+This is a Product-tier project adopting the [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards), built with AppKit and WinUI 3. OpenSSF enrollment is active; registration does not mean a passing badge has been earned.
 
-Report vulnerabilities privately; see [SECURITY.md](SECURITY.md). The app's attack
-surface is described in its [threat model](docs/security/threat-model.md).
+## Credits and license
 
-## Contributing
+Based on [Darin Kelkhoff's original macOS markdownViewr](https://github.com/darinkelkhoff/markdownViewr). Visit [Darin's website](https://kelkhoff.com/). The Windows app also credits the open-source libraries it uses in **Help → About → Components**.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-[MIT](LICENSE). Copyright (c) 2026 James Maes.
+Free and open source under the [MIT License](LICENSE). Original-author and dependency notices are preserved in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -20,6 +20,31 @@ public class AppIdentityTests
       Assert.EndsWith("_DATA_DIR", AppIdentity.Info.DataDirectoryVariable, StringComparison.Ordinal);
       Assert.NotNull(AppIdentity.Info.RepositoryUrl);
       Assert.NotEmpty(AppIdentity.Info.Attributions);
+      Assert.DoesNotContain("Darin", AppIdentity.Info.Description, StringComparison.Ordinal);
+      Assert.Equal("https://github.com/darinkelkhoff/markdownViewr", AppIdentity.OriginalRepositoryUrl.AbsoluteUri);
+      Assert.Equal("https://kelkhoff.com/", AppIdentity.OriginalAuthorWebsite.AbsoluteUri);
+      Assert.DoesNotContain(AppIdentity.Info.Attributions, credit => credit.Name.Contains("Darin Kelkhoff", StringComparison.Ordinal));
+      Assert.Equal(AppIdentity.Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/issues/new/choose", AppIdentity.IssuesUrl.AbsoluteUri);
+      Assert.Equal(AppIdentity.Info.RepositoryUrl.AbsoluteUri.TrimEnd('/') + "/discussions", AppIdentity.SupportUrl.AbsoluteUri);
+   }
+
+
+
+   /// <summary>Development channel metadata cannot reuse stable titles, settings variables or service identities.</summary>
+   [Theory]
+   [InlineData(null, "markdownviewr-windows", "MarkdownViewr")]
+   [InlineData("stable", "markdownviewr-windows", "MarkdownViewr")]
+   [InlineData("dev", "markdownviewr-windows-dev", "MarkdownViewr (dev)")]
+   [InlineData("unknown", "markdownviewr-windows", "MarkdownViewr")]
+   public void ForChannel_InstalledEdition_SelectsIsolatedIdentity(string? channel, string id, string displayName)
+   {
+      KofTwentyTwo.AppKit.AppInfo info = AppIdentity.ForChannel(channel);
+      Assert.Equal(id, info.Id);
+      Assert.Equal(displayName, info.DisplayName);
+      Assert.Equal(id.ToUpperInvariant().Replace('-', '_') + "_DATA_DIR", info.DataDirectoryVariable);
+      Assert.Equal(AppIdentity.Info.RepositoryUrl, info.RepositoryUrl);
+      Assert.NotEqual(AppIdentity.ForChannel("stable").DataDirectoryVariable, AppIdentity.ForChannel("dev").DataDirectoryVariable, StringComparer.Ordinal);
+      Assert.Equal("markdownviewr-windows", AppIdentity.Info.Id);
    }
 
 
@@ -49,25 +74,27 @@ public class AppIdentityTests
 /// <summary>Tests of the app's settings.</summary>
 public class AppSettingsTests
 {
-   /// <summary>Sanitize: a null name from JSON becomes empty, and the shell settings are repaired too.</summary>
+   /// <summary>Sanitize: invalid shell preferences fall back to their supported defaults.</summary>
    [Fact]
-   public void Sanitize_RepairsNullsAndShellSettings()
+   public void Sanitize_RepairsShellSettings()
    {
-      var settings = new AppSettings { LastName = null!, Theme = "Purple" };
+      var settings = new AppSettings { Theme = "Purple" };
       settings.Sanitize();
-      Assert.Equal("", settings.LastName);
       Assert.Equal("System", settings.Theme);
    }
 
 
 
-   /// <summary>Round trip: the name survives a save and a load.</summary>
+   /// <summary>Round trip: the shell theme survives a save and a load.</summary>
    [Fact]
-   public void SaveAndLoad_KeepTheName()
+   public void SaveAndLoad_KeepsTheTheme()
    {
       using var temp = new TempDirectory();
       var store = new KofTwentyTwo.AppKit.Settings.SettingsStore<AppSettings>(temp.File("settings.json"), AppSettingsContext.Default.AppSettings);
-      Assert.True(store.Save(new AppSettings { LastName = "Ada" }));
-      Assert.Equal("Ada", store.Load().LastName);
+      Assert.True(store.Save(new AppSettings { Theme = "Dark", DocumentTheme = "GitHub Light", Frontmatter = "Metadata", UserThemes = [Themes.ThemeCatalog.Find("GitHub Light").Json] }));
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal("GitHub Light", store.Load().DocumentTheme);
+      Assert.Equal(Documents.FrontmatterMode.Metadata, store.Load().FrontmatterKind);
+      Assert.Equal(Themes.ThemeCatalog.Find("GitHub Light").Json, Assert.Single(store.Load().UserThemes));
    }
 }

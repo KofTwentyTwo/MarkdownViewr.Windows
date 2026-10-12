@@ -2,50 +2,223 @@
 <Window
    x:Class="MarkdownViewr.Windows.MainWindow"
    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+   xmlns:local="using:MarkdownViewr.Windows"
+   xmlns:primitives="using:Microsoft.UI.Xaml.Controls.Primitives">
 
    <Window.SystemBackdrop>
       <MicaBackdrop />
    </Window.SystemBackdrop>
 
-   <Grid x:Name="RootGrid">
+   <Grid x:Name="RootGrid" SizeChanged="ReadingArea_SizeChanged" KeyboardAcceleratorPlacementMode="Hidden">
+      <Grid.KeyboardAccelerators>
+         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="Find_Invoked" />
+         <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="Print_Invoked" />
+      </Grid.KeyboardAccelerators>
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
          <RowDefinition Height="*" />
+         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <MenuBar>
-         <MenuBarItem Title="File">
-            <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
-         </MenuBarItem>
-         <MenuBarItem Title="View">
-            <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
-            <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
-            <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />
-            <MenuFlyoutSeparator />
-            <ToggleMenuFlyoutItem x:Name="SplashToggle" Text="Show splash at startup" Click="Splash_Click" />
-            <ToggleMenuFlyoutItem x:Name="UpdateCheckToggle" Text="Check for updates at startup" Click="UpdateCheck_Click" />
-         </MenuBarItem>
-         <MenuBarItem Title="Help">
-            <MenuFlyoutItem x:Name="CheckForUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
-            <MenuFlyoutItem x:Name="ActivityLogMenuItem" Text="Activity log" Click="ActivityLog_Click" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutItem x:Name="AboutMenuItem" Text="About MarkdownViewr" Click="About_Click" />
-         </MenuBarItem>
-      </MenuBar>
+      <Grid>
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+         <MenuBar>
+            <MenuBarItem Title="File" AccessKey="F">
+               <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="New window" Click="NewWindow_Click">
+                  <MenuFlyoutItem.KeyboardAccelerators>
+                     <KeyboardAccelerator Key="N" Modifiers="Control" />
+                  </MenuFlyoutItem.KeyboardAccelerators>
+               </MenuFlyoutItem>
+               <MenuFlyoutItem x:Name="OpenMenuItem" Text="Open..." Click="Open_Click">
+                  <MenuFlyoutItem.KeyboardAccelerators>
+                     <KeyboardAccelerator Key="O" Modifiers="Control" />
+                  </MenuFlyoutItem.KeyboardAccelerators>
+               </MenuFlyoutItem>
+               <MenuFlyoutSubItem x:Name="RecentDocumentsMenu" Text="Recent files" />
+               <MenuFlyoutItem x:Name="ReloadMenuItem" Text="Reload" Click="Reload_Click" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="PrintMenuItem" Text="Print..." Click="Print_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+P" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="OpenEditorMenuItem" Text="Open in editor" Click="OpenEditor_Click" IsEnabled="False" />
+               <MenuFlyoutSubItem x:Name="OpenEditorChoices" Text="Open in editor" Visibility="Collapsed" />
+               <MenuFlyoutItem x:Name="SettingsMenuItem" Text="Settings…" AccessKey="S" Click="Settings_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="CloseWindowMenuItem" Text="Close window" Click="CloseWindow_Click">
+                  <MenuFlyoutItem.KeyboardAccelerators>
+                     <KeyboardAccelerator Key="W" Modifiers="Control" />
+                  </MenuFlyoutItem.KeyboardAccelerators>
+               </MenuFlyoutItem>
+               <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="Exit_Click" />
+            </MenuBarItem>
+            <MenuBarItem Title="Edit">
+               <MenuFlyoutItem x:Name="FindMenuItem" Text="Find..." Click="Find_Click" KeyboardAcceleratorTextOverride="Ctrl+F" />
+            </MenuBarItem>
+            <MenuBarItem Title="View">
+               <MenuFlyoutItem x:Name="ZoomInMenu" Text="Zoom in" Tag="ZoomIn" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl++" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="ZoomOutMenu" Text="Zoom out" Tag="ZoomOut" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl+-" IsEnabled="False" />
+               <MenuFlyoutItem x:Name="ZoomResetMenu" Text="Actual size" Tag="ZoomReset" Click="Zoom_Click" KeyboardAcceleratorTextOverride="Ctrl+0" IsEnabled="False" />
+               <MenuFlyoutSeparator />
+               <ToggleMenuFlyoutItem x:Name="SourceToggle" Text="Markdown source" Click="Source_Click" />
+               <ToggleMenuFlyoutItem x:Name="OutlineToggle" Text="Table of contents" Click="Outline_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutSubItem x:Name="DocumentThemesMenu" Text="Document theme" />
+               <MenuFlyoutItem x:Name="NextDocumentThemeMenu" Text="Next document theme" Click="NextDocumentTheme_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+Down" />
+               <MenuFlyoutItem x:Name="PreviousDocumentThemeMenu" Text="Previous document theme" Click="PreviousDocumentTheme_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+Up" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutSubItem x:Name="MarkdownExtensionsMenu" Text="Markdown extensions">
+                  <ToggleMenuFlyoutItem x:Name="HighlightExtension" Text="Highlight (==text==)" Tag="Highlight" Click="MarkdownExtension_Click" />
+                  <ToggleMenuFlyoutItem x:Name="SuperscriptExtension" Text="Superscript (^text^)" Tag="Superscript" Click="MarkdownExtension_Click" />
+                  <ToggleMenuFlyoutItem x:Name="SubscriptExtension" Text="Subscript (~text~)" Tag="Subscript" Click="MarkdownExtension_Click" />
+                  <ToggleMenuFlyoutItem x:Name="UnderlineExtension" Text="Underline (++text++)" Tag="Underline" Click="MarkdownExtension_Click" />
+               </MenuFlyoutSubItem>
+               <MenuFlyoutSubItem x:Name="FrontmatterMenu" Text="Frontmatter">
+                  <RadioMenuFlyoutItem x:Name="FrontmatterHide" Text="Hide" GroupName="Frontmatter" Tag="Hide" Click="Frontmatter_Click" />
+                  <RadioMenuFlyoutItem x:Name="FrontmatterMetadata" Text="Show as metadata" GroupName="Frontmatter" Tag="Metadata" Click="Frontmatter_Click" />
+                  <RadioMenuFlyoutItem x:Name="FrontmatterMarkdown" Text="Show as Markdown" GroupName="Frontmatter" Tag="Markdown" Click="Frontmatter_Click" />
+               </MenuFlyoutSubItem>
+               <MenuFlyoutSeparator />
+               <RadioMenuFlyoutItem x:Name="ThemeSystem" Text="System theme" GroupName="Theme" Tag="System" Click="Theme_Click" />
+               <RadioMenuFlyoutItem x:Name="ThemeLight" Text="Light theme" GroupName="Theme" Tag="Light" Click="Theme_Click" />
+               <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />
+            </MenuBarItem>
+            <MenuBarItem Title="Help" AccessKey="H">
+               <MenuFlyoutItem Text="View on GitHub" AccessKey="G" AutomationProperties.AutomationId="MenuGitHub" Click="GitHub_Click" />
+               <MenuFlyoutItem Text="Submit an issue…" AccessKey="I" AutomationProperties.AutomationId="MenuSubmitIssue" ToolTipService.ToolTip="Report a bug or request a feature on GitHub" Click="SubmitIssue_Click" />
+               <MenuFlyoutItem Text="Community support…" AccessKey="S" AutomationProperties.AutomationId="MenuCommunitySupport" ToolTipService.ToolTip="Ask a question or share tips in GitHub Discussions" Click="CommunitySupport_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="CheckForUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
+               <MenuFlyoutItem x:Name="ActivityLogMenuItem" Text="Activity log" Click="ActivityLog_Click" />
+               <MenuFlyoutSeparator />
+               <MenuFlyoutItem x:Name="AboutMenuItem" Text="About MarkdownViewr" Click="About_Click" />
+            </MenuBarItem>
+         </MenuBar>
+      </Grid>
 
-      <!-- The example feature, bound to GreetingViewModel in MarkdownViewr.Windows.Core. Replace it with
-           the app's real content. -->
-      <StackPanel Grid.Row="1" Spacing="12" Padding="32" MaxWidth="560" HorizontalAlignment="Left">
-         <TextBlock Text="MarkdownViewr" Style="{ThemeResource TitleTextBlockStyle}" />
-         <TextBlock TextWrapping="Wrap" Text="A Windows Markdown viewer with live reload, themes and document navigation." />
-         <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBox x:Name="NameBox" Width="260" PlaceholderText="Your name" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <Button x:Name="GreetButton" Content="Greet" Command="{x:Bind ViewModel.GreetCommand}" />
+      <CommandBar x:Name="ReaderToolbar" Grid.Row="1" Height="48" Margin="12,4,12,4" HorizontalAlignment="Left" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True" AutomationProperties.Name="Document toolbar">
+         <CommandBar.Content>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="0,0,8,0">
+               <ToggleButton x:Name="ToolbarOutlineButton" Height="48" Padding="12,0" VerticalAlignment="Center" Click="ToolbarOutline_Click" AutomationProperties.Name="Table of contents" ToolTipService.ToolTip="Show table of contents">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                     <SymbolIcon Symbol="Bullets" />
+                     <TextBlock Text="Contents" VerticalAlignment="Center" />
+                  </StackPanel>
+               </ToggleButton>
+               <Button x:Name="ToolbarPrintButton" Height="48" Padding="12,0" VerticalAlignment="Center" Click="Print_Click" IsEnabled="False" AutomationProperties.Name="Print" ToolTipService.ToolTip="Print document">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                     <SymbolIcon Symbol="Print" />
+                     <TextBlock Text="Print" VerticalAlignment="Center" />
+                  </StackPanel>
+               </Button>
+            </StackPanel>
+         </CommandBar.Content>
+         <AppBarToggleButton x:Name="ToolbarSourceButton" Icon="Document" Label="Source" Click="ToolbarSource_Click" AutomationProperties.Name="Markdown source" ToolTipService.ToolTip="Show Markdown source" />
+         <AppBarSeparator />
+         <AppBarButton x:Name="ZoomOutButton" Icon="ZoomOut" Label="Zoom out" Tag="ZoomOut" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Zoom out" ToolTipService.ToolTip="Zoom out (Ctrl+-)" />
+         <AppBarButton x:Name="ZoomResetButton" Icon="Refresh" Label="100%" Tag="ZoomReset" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Actual size" ToolTipService.ToolTip="Actual size (Ctrl+0)" />
+         <AppBarButton x:Name="ZoomInButton" Icon="ZoomIn" Label="Zoom in" Tag="ZoomIn" Click="Zoom_Click" IsEnabled="False" AutomationProperties.Name="Zoom in" ToolTipService.ToolTip="Zoom in (Ctrl++)" />
+         <AppBarSeparator />
+         <AppBarButton x:Name="ToolbarThemeButton" Label="Theme" MaxWidth="220" ToolTipService.ToolTip="Document theme">
+            <AppBarButton.Icon>
+               <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE790;" />
+            </AppBarButton.Icon>
+            <AppBarButton.Flyout>
+               <MenuFlyout x:Name="ToolbarThemeFlyout" />
+            </AppBarButton.Flyout>
+         </AppBarButton>
+         <AppBarButton x:Name="ToolbarEditorButton" Icon="Edit" Label="Open in editor" Click="ToolbarEditor_Click" IsEnabled="False" AutomationProperties.Name="Open in editor" ToolTipService.ToolTip="Configure an editor in File → Settings → Editors" />
+      </CommandBar>
+
+      <Grid x:Name="FindBar" Grid.Row="2" Visibility="Collapsed" Margin="16,8" ColumnSpacing="8">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+         <TextBox x:Name="FindText" PlaceholderText="Find in document and source" MaxLength="256" TextChanged="FindText_Changed" KeyDown="FindText_KeyDown" AutomationProperties.Name="Find in document and source" />
+         <TextBlock x:Name="FindCountText" Grid.Column="1" Text="0 of 0" VerticalAlignment="Center" AutomationProperties.Name="{Binding Text, ElementName=FindCountText}" AutomationProperties.LiveSetting="Polite" />
+         <Button x:Name="FindPreviousButton" Grid.Column="2" Content="Previous" Click="FindPrevious_Click" IsEnabled="False" />
+         <Button x:Name="FindNextButton" Grid.Column="3" Content="Next" Click="FindNext_Click" IsEnabled="False" />
+         <Button x:Name="FindCloseButton" Grid.Column="4" Content="Close find" Click="FindClose_Click" />
+      </Grid>
+      <Grid x:Name="DocumentFooter" Grid.Row="4" Margin="16,4" ColumnSpacing="12">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+         <TextBlock x:Name="StatusText" Margin="0,4" VerticalAlignment="Center" Text="Starting the document surface..." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.AutomationId="StatusText" AutomationProperties.Name="{Binding Text, ElementName=StatusText}" AutomationProperties.AccessibilityView="Content" AutomationProperties.LiveSetting="Polite" />
+         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="FileModifiedText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="Collapsed" AutomationProperties.AutomationId="FileModifiedText" AutomationProperties.Name="{Binding Text, ElementName=FileModifiedText}" />
+            <HyperlinkButton x:Name="FileStaleButton" Padding="0,4" Visibility="Collapsed" Click="Reload_Click" AutomationProperties.AutomationId="FileStaleButton" AutomationProperties.LiveSetting="Polite" />
+            <HyperlinkButton x:Name="OpenDocumentFolderButton" Content="Open folder" Padding="0,4" IsEnabled="False" Click="OpenDocumentFolder_Click" AutomationProperties.AutomationId="OpenDocumentFolderButton" ToolTipService.ToolTip="Open this file's containing folder in Explorer" />
          </StackPanel>
-         <TextBlock x:Name="GreetingText" Text="{x:Bind ViewModel.Message, Mode=OneWay}" Style="{ThemeResource SubtitleTextBlockStyle}" />
-         <Button x:Name="ThrowButton" Content="Throw an unhandled exception" Click="Throw_Click" />
-         <TextBlock x:Name="StatusText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-      </StackPanel>
+      </Grid>
+      <Grid Grid.Row="3">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="OutlineColumn" Width="0" />
+            <ColumnDefinition x:Name="OutlineDividerColumn" Width="0" />
+            <ColumnDefinition x:Name="DocumentColumn" Width="*" />
+            <ColumnDefinition x:Name="SourceDividerColumn" Width="0" />
+            <ColumnDefinition x:Name="SourceColumn" Width="0" />
+         </Grid.ColumnDefinitions>
+         <Grid x:Name="OutlinePanel" Visibility="Collapsed" Padding="8">
+            <Grid.RowDefinitions>
+               <RowDefinition Height="Auto" />
+               <RowDefinition Height="*" />
+               <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Spacing="8">
+               <TextBlock Text="Table of contents" Style="{ThemeResource SubtitleTextBlockStyle}" />
+               <ComboBox x:Name="OutlineDepth" Header="Heading depth" HorizontalAlignment="Stretch" SelectionChanged="OutlineDepth_Changed" AutomationProperties.AutomationId="OutlineDepth">
+                  <ComboBoxItem Content="Level 1" />
+                  <ComboBoxItem Content="Levels 1–2" />
+                  <ComboBoxItem Content="Levels 1–3" />
+                  <ComboBoxItem Content="Levels 1–4" />
+                  <ComboBoxItem Content="Levels 1–5" />
+                  <ComboBoxItem Content="Levels 1–6" />
+               </ComboBox>
+            </StackPanel>
+            <ListView x:Name="OutlineList" Grid.Row="1" Margin="0,8" SelectionChanged="OutlineSelection_Changed" IsItemClickEnabled="True" ItemClick="Outline_ItemClick" AutomationProperties.Name="Document headings" />
+            <StackPanel Grid.Row="2" Spacing="8">
+               <Button x:Name="ToggleSection" Content="Collapse / expand section" HorizontalAlignment="Stretch" Click="ToggleSection_Click" IsEnabled="False" />
+               <Button x:Name="CollapseSections" Content="Collapse all" HorizontalAlignment="Stretch" Click="CollapseSections_Click" />
+               <Button x:Name="ExpandSections" Content="Expand all" HorizontalAlignment="Stretch" Click="ExpandSections_Click" />
+            </StackPanel>
+         </Grid>
+         <primitives:Thumb x:Name="OutlineDivider" Grid.Column="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" DragDelta="OutlineDivider_DragDelta" DragCompleted="OutlineDivider_DragCompleted" AutomationProperties.Name="Resize table of contents">
+            <primitives:Thumb.Template>
+               <ControlTemplate TargetType="primitives:Thumb">
+                  <Border Background="{TemplateBinding Background}" />
+               </ControlTemplate>
+            </primitives:Thumb.Template>
+         </primitives:Thumb>
+         <primitives:Thumb x:Name="SourceDivider" Grid.Column="3" Background="{ThemeResource DividerStrokeColorDefaultBrush}" DragDelta="SourceDivider_DragDelta" KeyDown="SourceDivider_KeyDown" AutomationProperties.Name="Resize Markdown source" AutomationProperties.HelpText="Use Left and Right arrow keys to resize; Home restores equal document and source widths.">
+            <primitives:Thumb.Template>
+               <ControlTemplate TargetType="primitives:Thumb">
+                  <Border x:Name="SourceGrip" Background="{TemplateBinding Background}" BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}">
+                     <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="FocusStates">
+                           <VisualState x:Name="Unfocused" />
+                           <VisualState x:Name="PointerFocused" />
+                           <VisualState x:Name="Focused">
+                              <VisualState.Setters>
+                                 <Setter Target="SourceGrip.BorderThickness" Value="2" />
+                              </VisualState.Setters>
+                           </VisualState>
+                        </VisualStateGroup>
+                     </VisualStateManager.VisualStateGroups>
+                  </Border>
+               </ControlTemplate>
+            </primitives:Thumb.Template>
+         </primitives:Thumb>
+         <local:SourceTextView x:Name="SourceText" Grid.Column="4" Visibility="Collapsed" IsReadOnly="True" TextWrapping="NoWrap" FontFamily="Consolas" Padding="12" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Markdown source" />
+         <WebView2 x:Name="DocumentView" Grid.Column="2" Loaded="DocumentView_Loaded" AutomationProperties.Name="Markdown document" />
+      </Grid>
    </Grid>
 </Window>

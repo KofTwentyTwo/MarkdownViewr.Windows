@@ -9,7 +9,7 @@
 #   - Environment `release` (Settings -> Environments) with a deployment rule that allows
 #     only tags matching v*.
 #   - Configure verified Azure signing variables and a repository/environment-bound
-#     OIDC identity; pin the published reviewed builder, enable sign and declare
+#     OIDC identity; pin the reviewed builder, enable sign and declare
 #     the owned-file catalog. See docs/release-signing.md. Unsigned publication is blocked.
 #   - winget (optional, stable releases only): the package must already exist in
 #     microsoft/winget-pkgs. Submit it once by hand with
@@ -87,9 +87,15 @@ jobs:
     permissions:
       contents: read
 
+  fuzzing:
+    needs: verify
+    uses: ./.github/workflows/fuzz.yml
+    permissions:
+      contents: read
+
   release:
-    needs: [verify, gates, security, codeql, scripts]
-    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@fdf5ed029603c938615a32b1beca3628b8787945 # v0.1.2
+    needs: [verify, gates, security, codeql, scripts, fuzzing]
+    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@93b1d6163a4c466ae443e98b62786fc4d80d33bd # v1.1.0
     permissions:
       contents: write      # create and publish the GitHub release
       id-token: write      # sign attestations; Azure OIDC when signing
@@ -97,7 +103,8 @@ jobs:
     with:
       solution: MarkdownViewr.Windows.slnx
       app-project: src/MarkdownViewr.Windows/MarkdownViewr.Windows.csproj
-      app-id: markdownviewr-windows
+      # Separate package IDs install side by side; the installed channel selects its title/data root.
+      app-id: ${{ contains(github.ref_name, '-') && 'markdownviewr-windows-dev' || 'markdownviewr-windows' }}
       main-exe: MarkdownViewr.Windows.exe
       icon: src/MarkdownViewr.Windows/Assets/Brand/app.ico
       platform: x64
@@ -105,7 +112,14 @@ jobs:
       coverage-packages: MarkdownViewr.Windows.Core
       test-projects: |
         tests/MarkdownViewr.Windows.Core.Tests
-      sign: false # Preflight blocks publication until the reviewed signing builder is published and configured.
+      sign: true
+      signing-files: |
+        app/MarkdownViewr.Windows.exe
+        app/MarkdownViewr.Windows.dll
+        app/MarkdownViewr.Windows.Core.dll
+        app/KofTwentyTwo.AppKit.dll
+        app/KofTwentyTwo.AppKit.Updates.dll
+        app/KofTwentyTwo.AppKit.WinUI.dll
 
   # winget lives here, not in the shared workflow, because its token belongs to this
   # repository's `release` environment. It runs only for stable releases, and only when

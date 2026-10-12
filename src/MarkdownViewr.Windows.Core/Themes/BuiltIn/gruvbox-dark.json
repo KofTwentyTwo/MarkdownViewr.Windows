@@ -1,0 +1,37 @@
+{
+    "name": "Gruvbox Dark",
+    "colors": {
+        "background": "#282828",
+        "text": "#ebdbb2",
+        "heading1": "#fb4934",
+        "heading2": "#83a598",
+        "heading3": "#b8bb26",
+        "heading4": "#fabd2f",
+        "heading5": "#d3869b",
+        "heading6": "#8ec07c",
+        "link": "#83a598",
+        "codeBackground": "#1d2021",
+        "codeText": "#b8bb26",
+        "blockquoteBorder": "#d65d0e",
+        "blockquoteBackground": "#32302f",
+        "highlightBackground": "#fabd2f",
+        "highlightText": "#282828"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

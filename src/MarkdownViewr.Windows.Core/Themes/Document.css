@@ -1,0 +1,260 @@
+/*
+ * Copyright (c) 2026 Darin Kelkhoff
+ * Copyright (c) 2026 James Maes
+ * SPDX-License-Identifier: MIT
+ * Document rules adapted from markdownViewr template.html at
+ * 6d08bc9d27d7d7b2c2fa95bb282da330b8cf9021.
+ * TOC/source/resizers are native WinUI controls; print rules are owned by PrintStyles.
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text) 30%, var(--bg));
+    border: 3px solid var(--bg);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--text) 45%, var(--bg));
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg);
+}
+
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body-font);
+    font-size: var(--base-font-size);
+    line-height: var(--line-height);
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: flex-start;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#content {
+    flex: 1;
+    min-width: 0;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#content-inner {
+    padding: 32px 48px;
+}
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--heading-font); font-weight: 600; cursor: pointer; user-select: none; scroll-margin-top: 1rem; }
+h1 .collapse-arrow, h2 .collapse-arrow, h3 .collapse-arrow,
+h4 .collapse-arrow, h5 .collapse-arrow, h6 .collapse-arrow {
+    display: inline-block;
+    width: 0.6em;
+    font-size: 0.6em;
+    margin-right: 10px;
+    transition: transform 0.15s ease;
+    opacity: 0.4;
+    vertical-align: middle;
+}
+h1:hover .collapse-arrow, h2:hover .collapse-arrow, h3:hover .collapse-arrow,
+h4:hover .collapse-arrow, h5:hover .collapse-arrow, h6:hover .collapse-arrow {
+    opacity: 0.8;
+}
+h1.collapsed .collapse-arrow, h2.collapsed .collapse-arrow, h3.collapsed .collapse-arrow,
+h4.collapsed .collapse-arrow, h5.collapsed .collapse-arrow, h6.collapsed .collapse-arrow {
+    transform: rotate(-90deg);
+}
+h1 { color: var(--h1); font-size: var(--h1-size); margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid color-mix(in srgb, var(--text) 20%, transparent); }
+h2 { color: var(--h2); font-size: var(--h2-size); margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent); }
+h3 { color: var(--h3); font-size: var(--h3-size); margin: 18px 0 10px 0; }
+h4 { color: var(--h4); font-size: var(--h4-size); margin: 16px 0 8px 0; }
+h5 { color: var(--h5); font-size: var(--h5-size); margin: 14px 0 6px 0; }
+h6 { color: var(--h6); font-size: var(--h6-size); margin: 14px 0 6px 0; }
+
+h1:first-child, h2:first-child, h3:first-child { margin-top: 0; }
+
+p {
+    margin: 0 0 16px 0;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+pre {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 0 0 16px 0;
+    overflow-x: auto;
+}
+
+pre code {
+    font-family: var(--code-font);
+    font-size: var(--code-font-size);
+    color: var(--code-text);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+code {
+    font-family: var(--code-font);
+    font-size: 0.9em;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+blockquote {
+    border-left: 3px solid var(--blockquote-border);
+    padding: 8px 16px;
+    margin: 0 0 16px 0;
+    background: color-mix(in srgb, var(--blockquote-bg) 50%, transparent);
+    border-radius: 0 8px 8px 0;
+}
+
+blockquote blockquote {
+    background: color-mix(in srgb, var(--blockquote-bg) 75%, transparent);
+}
+
+blockquote blockquote blockquote {
+    background: var(--blockquote-bg);
+}
+
+blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+ul, ol {
+    padding-left: 24px;
+    margin: 0 0 16px 0;
+}
+
+li {
+    margin-bottom: 4px;
+}
+
+li.task-list-item {
+    list-style: none;
+}
+
+li.task-list-item > input[type="checkbox"] {
+    margin: 0 0.4em 0.15em -1.4em;
+    vertical-align: middle;
+}
+
+li > ul, li > ol {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+    margin: 24px 0;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 0 16px 0;
+}
+
+th, td {
+    border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+th {
+    background: var(--code-bg);
+    font-weight: 600;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+del {
+    opacity: 0.6;
+}
+
+mark {
+    background-color: var(--highlight-bg);
+    color: var(--highlight-text);
+    border-radius: 2px;
+    padding: 0 2px;
+}
+
+.frontmatter {
+    margin: 0 0 24px 0;
+    padding: 12px 16px;
+    background: var(--blockquote-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--blockquote-border);
+    font-size: 0.85em;
+}
+
+.frontmatter table {
+    width: auto;
+    border: none;
+    margin: 0;
+}
+
+.frontmatter td {
+    border: none;
+    padding: 2px 12px 2px 0;
+    vertical-align: top;
+}
+
+.frontmatter .fm-key {
+    color: var(--link);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Generated collapse sections retain the spacing of the original flat document. */
+#content-inner section > h1 { margin-top: 24px; }
+#content-inner section > h2 { margin-top: 20px; }
+#content-inner section > h3 { margin-top: 18px; }
+#content-inner > section:first-child > h1,
+#content-inner > section:first-child > h2,
+#content-inner > section:first-child > h3 { margin-top: 0; }
+
+/* Windows keeps accessible metadata row headings and literal overflow safe. */
+#content-inner { overflow-wrap: anywhere; }
+.frontmatter th { border: none; padding: 2px 12px 2px 0; vertical-align: top; background: none; }
+kbd { font-family: var(--code-font); color: var(--code-text); }
+ins { text-decoration: underline; }
+::selection { background: var(--highlight-bg); color: var(--highlight-text); }

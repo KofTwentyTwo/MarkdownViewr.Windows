@@ -1,0 +1,37 @@
+{
+    "name": "One Light",
+    "colors": {
+        "background": "#fafafa",
+        "text": "#383a42",
+        "heading1": "#e45649",
+        "heading2": "#4078f2",
+        "heading3": "#a626a4",
+        "heading4": "#c18401",
+        "heading5": "#50a14f",
+        "heading6": "#0184bc",
+        "link": "#4078f2",
+        "codeBackground": "#f0f0f0",
+        "codeText": "#50a14f",
+        "blockquoteBorder": "#a626a4",
+        "blockquoteBackground": "#f0f0f0",
+        "highlightBackground": "#ffd700",
+        "highlightText": "#383a42"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

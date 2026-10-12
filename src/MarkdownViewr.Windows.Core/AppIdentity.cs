@@ -22,7 +22,7 @@ public static class AppIdentity
    {
       Id = "markdownviewr-windows",
       DisplayName = "MarkdownViewr",
-      Tagline = "Built on the KofTwentyTwo Windows app template",
+      Tagline = "A Windows Markdown reader",
       Description = "A Windows Markdown viewer with live reload, themes and document navigation.",
       RepositoryUrl = new Uri("https://github.com/KofTwentyTwo/MarkdownViewr.Windows"),
       Author = "James Maes",
@@ -30,25 +30,45 @@ public static class AppIdentity
       // Keep the gradient in step with the mark (regenerate both with AppKit's BrandTool).
       Brand = new AppBrand
       {
-         GradientStart = "#0F766E",
-         GradientEnd = "#134E4A",
+         GradientStart = "#1A2B4D",
+         GradientEnd = "#0C1836",
          IconSvgPath = "Assets/Brand/app-icon.svg",
          IconIcoPath = "Assets/Brand/app.ico",
       },
-      Attributions =
-      [
-         new("KofTwentyTwo.AppKit", "MIT License"),
-         new("CommunityToolkit.Mvvm", "MIT License"),
-         new("Velopack", "MIT License"),
-         new("Windows App SDK / WinUI 3", "MIT License, with Microsoft binary components"),
-         new(".NET Runtime", "MIT License"),
-      ],
+      Attributions = AboutComponents.Runtime.Select(component => new Attribution(component.Name, component.License)).ToArray(),
    };
+
+
+
+   /// <summary>Installed package channels select a separate development identity; loose builds retain the stable identity.</summary>
+   public static AppInfo ForChannel(string? channel) => string.Equals(channel, "dev", StringComparison.Ordinal)
+      ? Info with { Id = "markdownviewr-windows-dev", DisplayName = "MarkdownViewr (dev)" }
+      : Info;
 
 
 
    /// <summary>Where the app keeps its per-user data; honors the data-folder override variable.</summary>
    public static AppPaths Paths { get; } = new(Info);
+
+
+
+   /// <summary>Darin Kelkhoff's original macOS viewer, credited without changing Windows support destinations.</summary>
+   public static Uri OriginalRepositoryUrl { get; } = new("https://github.com/darinkelkhoff/markdownViewr");
+
+
+
+   /// <summary>The original author's website, verified against his GitHub profile.</summary>
+   public static Uri OriginalAuthorWebsite { get; } = new("https://kelkhoff.com/");
+
+
+
+   /// <summary>The app's bug/feature templates, independent of any upstream project credited in About.</summary>
+   public static Uri IssuesUrl { get; } = new(Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/issues/new/choose");
+
+
+
+   /// <summary>Community questions and tips in the app's own repository.</summary>
+   public static Uri SupportUrl { get; } = new(Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/discussions");
 
 
 

@@ -18,6 +18,10 @@ internal static class Program
    /// <summary>Records the installed channel, update offer and requests; optionally downloads and applies it.</summary>
    private static async Task<int> Main(string[] args)
    {
+      if(Environment.GetEnvironmentVariable("MARKDOWNVIEWR_EDITOR_PROBE_RESULT") is { Length: > 0 } editorResult)
+      {
+         return WriteEditorResult(editorResult, args);
+      }
       VelopackStartup.Run();
       if(args.Length != 3 || args[2] is not ("check" or "apply"))
       {
@@ -71,6 +75,20 @@ internal static class Program
             throw new InvalidOperationException(applyError);
          }
       }
+      return 0;
+   }
+
+
+
+   /// <summary>Records only the owned fixture's actual process arguments; it never opens or reads the document.</summary>
+   private static int WriteEditorResult(string resultPath, string[] args)
+   {
+      if(args.Length != 1)
+      {
+         throw new ArgumentException("The editor fixture expects one literal document argument.", nameof(args));
+      }
+      File.WriteAllText(resultPath + ".tmp", JsonSerializer.Serialize(new { Arguments = args, WorkingDirectory = Environment.CurrentDirectory }));
+      File.Move(resultPath + ".tmp", resultPath, overwrite: true);
       return 0;
    }
 }

@@ -1,0 +1,37 @@
+{
+    "name": "Solarized Dark",
+    "colors": {
+        "background": "#002b36",
+        "text": "#839496",
+        "heading1": "#b58900",
+        "heading2": "#268bd2",
+        "heading3": "#268bd2",
+        "heading4": "#2aa198",
+        "heading5": "#2aa198",
+        "heading6": "#2aa198",
+        "link": "#268bd2",
+        "codeBackground": "#073642",
+        "codeText": "#859900",
+        "blockquoteBorder": "#b58900",
+        "blockquoteBackground": "#073642",
+        "highlightBackground": "#b58900",
+        "highlightText": "#002b36"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

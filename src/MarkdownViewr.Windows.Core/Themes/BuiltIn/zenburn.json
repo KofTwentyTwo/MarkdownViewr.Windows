@@ -1,0 +1,37 @@
+{
+    "name": "Zenburn",
+    "colors": {
+        "background": "#3f3f3f",
+        "text": "#dcdccc",
+        "heading1": "#cc9393",
+        "heading2": "#7cb8bb",
+        "heading3": "#8cd0d3",
+        "heading4": "#f0dfaf",
+        "heading5": "#dfaf8f",
+        "heading6": "#c3bf9f",
+        "link": "#93e0e3",
+        "codeBackground": "#2b2b2b",
+        "codeText": "#7f9f7f",
+        "blockquoteBorder": "#cc9393",
+        "blockquoteBackground": "#4f4f4f",
+        "highlightBackground": "#f0dfaf",
+        "highlightText": "#3f3f3f"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

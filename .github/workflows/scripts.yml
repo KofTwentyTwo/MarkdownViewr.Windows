@@ -51,10 +51,28 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Scope CurrentUser -Force
           Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0
-          # Analyze each file separately: recursive analysis can crash inside 1.25.0.
+          # Negative fixtures prove neither partition can silently lose its rules.
+          $casingFixture = @(Invoke-ScriptAnalyzer -ScriptDefinition "get-content -literalpath 'fixture.txt'" -Settings ./PSScriptAnalyzerSettings.psd1 -IncludeRule PSUseCorrectCasing)
+          if('PSUseCorrectCasing' -notin $casingFixture.RuleName) { throw 'The casing pass did not detect incorrect casing.' }
+          $remainingFixture = @(Invoke-ScriptAnalyzer -ScriptDefinition "Write-Host 'fixture'" -Settings ./PSScriptAnalyzerSettings.psd1 -ExcludeRule PSUseCorrectCasing)
+          if('PSAvoidUsingWriteHost' -notin $remainingFixture.RuleName) { throw 'The remaining-rule pass did not detect Write-Host.' }
+          # Keep casing in its own pass: command metadata races other rules in 1.25.0.
+          # https://github.com/PowerShell/PSScriptAnalyzer/issues/1708
           foreach($script in Get-ChildItem -LiteralPath build -Recurse -File | Where-Object Extension -In '.ps1', '.psm1', '.psd1')
           {
-             $findings = @(Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1)
+             Write-Output "Analyzing $($script.Name)"
+             try
+             {
+                $findings = @(
+                   Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -IncludeRule PSUseCorrectCasing
+                   Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -ExcludeRule PSUseCorrectCasing
+                )
+             }
+             catch
+             {
+                Write-Output $_.Exception.ToString()
+                throw
+             }
              if($findings.Count -gt 0) { $findings | Format-Table; throw "Script analysis failed: $($script.Name)" }
           }
       - name: Verify script boundary tests

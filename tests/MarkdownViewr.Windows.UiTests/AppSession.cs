@@ -32,7 +32,7 @@ public sealed class AppSession : IDisposable
 
 
    /// <summary>Launches the app against a fresh temporary data folder and waits for its main window.</summary>
-   public AppSession(bool showSplash = false)
+   public AppSession(bool showSplash = false, string? document = null, bool editorProbe = false, string documentFileName = "document.md", IReadOnlyDictionary<string, byte[]>? documentAssets = null, IReadOnlyDictionary<string, string>? additionalDocuments = null)
    {
       ExePath = ResolveExePath();
       DataDirectory = Path.Combine(Path.GetTempPath(), AppIdentity.Info.Id + "-uitests", Guid.NewGuid().ToString("N"));
@@ -41,8 +41,32 @@ public sealed class AppSession : IDisposable
           Path.Combine(DataDirectory, "settings.json"),
           $$"""{ "ShowSplashScreen": {{(showSplash ? "true" : "false")}}, "CheckForUpdatesOnStartup": false }""");
 
+      foreach((string name, byte[] bytes) in documentAssets ?? new Dictionary<string, byte[]>(StringComparer.Ordinal))
+      {
+         File.WriteAllBytes(Path.Combine(DataDirectory, name), bytes);
+      }
+
       var startInfo = new ProcessStartInfo(ExePath) { WorkingDirectory = Path.GetDirectoryName(ExePath) ?? "" };
-      startInfo.Environment[AppIdentity.Info.DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment[AppIdentity.ForChannel("stable").DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment[AppIdentity.ForChannel("dev").DataDirectoryVariable] = DataDirectory;
+      startInfo.Environment["MARKDOWNVIEWR_INPUT_TRACE"] = "1";
+      if(editorProbe)
+      {
+         startInfo.Environment["MARKDOWNVIEWR_EDITOR_PROBE_RESULT"] = Path.Combine(DataDirectory, "editor-result.json");
+      }
+      if(document is not null)
+      {
+         string path = Path.Combine(DataDirectory, documentFileName);
+         File.WriteAllText(path, document);
+         startInfo.ArgumentList.Add(path);
+      }
+
+      foreach((string name, string markdown) in additionalDocuments ?? new Dictionary<string, string>(StringComparer.Ordinal))
+      {
+         string path = Path.Combine(DataDirectory, name);
+         File.WriteAllText(path, markdown);
+         startInfo.ArgumentList.Add(path);
+      }
 
       _dpi = new DpiAwarenessScope();
       try
@@ -63,6 +87,12 @@ public sealed class AppSession : IDisposable
    public string ExePath { get; }
 
    public string DataDirectory { get; }
+
+
+
+   /// <summary>The smoke harness declares the channel being tested; actual native titles must match that edition. Loose runs use stable.
+   /// </summary>
+   public string DisplayName { get; } = AppIdentity.ForChannel(Environment.GetEnvironmentVariable("K22_UITEST_CHANNEL")).DisplayName;
 
    public UIA3Automation Automation { get; }
 
@@ -87,6 +117,20 @@ public sealed class AppSession : IDisposable
           : "";
    }
 
+
+
+   /// <summary>Retains only this fixture window and its accessibility tree when document status acceptance fails.</summary>
+   public string DescribeDocumentStatus()
+   {
+      string directory = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? DataDirectory, "artifacts", "installed-smoke-ui");
+      Directory.CreateDirectory(directory);
+      string name = Guid.NewGuid().ToString("N");
+      MainWindow.CaptureToFile(Path.Combine(directory, name + ".png"));
+      string tree = string.Join(Environment.NewLine, MainWindow.FindAllDescendants().Take(200).Select(element =>
+         $"Id={element.Properties.AutomationId.ValueOrDefault}; Name={element.Properties.Name.ValueOrDefault}; Type={element.Properties.ControlType.ValueOrDefault}; Bounds={element.Properties.BoundingRectangle.ValueOrDefault}; Offscreen={element.Properties.IsOffscreen.ValueOrDefault}"));
+      File.WriteAllText(Path.Combine(directory, name + ".log"), tree);
+      return tree;
+   }
 
 
    /// <summary>The settings file as the app last saved it.</summary>
@@ -169,9 +213,16 @@ public sealed class AppSession : IDisposable
             Invoke(menu);
          }
          Wait.UntilInputIsProcessed();
-         item = Retry.WhileNull(() => FindInApp(cf => cf.ByAutomationId(itemAutomationId)), timeout: TimeSpan.FromSeconds(3), interval: s_pollInterval, ignoreException: true).Result;
+         item = Retry.WhileNull(
+            () => TopLevelWindows().Prepend(MainWindow).SelectMany(root => root.FindAllDescendants(cf => cf.ByAutomationId(itemAutomationId))).FirstOrDefault(candidate => !candidate.IsOffscreen),
+            timeout: TimeSpan.FromSeconds(3), interval: s_pollInterval, ignoreException: true).Result;
       }
       Invoke(item ?? throw new TimeoutException($"Menu item '{itemAutomationId}' never appeared under '{menuName}'. (app exited: {App.HasExited})"));
+      if(string.Equals(menuName, "View", StringComparison.Ordinal) && !item.Patterns.ExpandCollapse.IsSupported)
+      {
+         menu.Patterns.ExpandCollapse.Pattern.Collapse();
+         Wait.UntilInputIsProcessed();
+      }
    }
 
 
@@ -216,11 +267,36 @@ public sealed class AppSession : IDisposable
             return hitProcess == App.ProcessId && element.IsEnabled && !element.IsOffscreen ? element : null;
          },
          $"an unobscured mouse target '{automationId}'");
-      element.Click();
+      // Move directly: an animated path across parent-menu rows can close the target submenu.
+      AssertMouseTarget(element);
+      Mouse.Down(MouseButton.Left);
+      Wait.UntilInputIsProcessed();
+      Mouse.Up(MouseButton.Left);
       Wait.UntilInputIsProcessed();
       LastMouseInput += $" Mouse after={Mouse.Position}; hit PID={Automation.FromPoint(Mouse.Position).Properties.ProcessId.ValueOrDefault}.";
    }
 
+
+
+   /// <summary>Moves once to the current target and verifies the pointer is over it or one of its children.</summary>
+   private void AssertMouseTarget(AutomationElement element)
+   {
+      if(!element.TryGetClickablePoint(out System.Drawing.Point point))
+      {
+         throw new InvalidOperationException("The native mouse target no longer has a clickable point.");
+      }
+      NativeMouse.MoveTo(point);
+      Wait.UntilInputIsProcessed();
+      AutomationElement? hit = Automation.FromPoint(Mouse.Position);
+      for(int depth = 0; hit is not null && depth < 8; depth++, hit = hit.Parent)
+      {
+         if(hit.Equals(element))
+         {
+            return;
+         }
+      }
+      throw new InvalidOperationException("The pointer is not over the requested native control. " + LastMouseInput);
+   }
 
 
    /// <summary>Invokes the element carrying <paramref name="automationId"/> (a button, for example).</summary>
@@ -251,14 +327,18 @@ public sealed class AppSession : IDisposable
 
 
 
-   /// <summary>Invokes an element through UI Automation, falling back to a mouse click.</summary>
+   /// <summary>Uses the supported native Invoke or Toggle action, falling back to a verified physical click.</summary>
    private void Invoke(AutomationElement element)
    {
-      MainWindow.SetForeground();
       if(element.Patterns.Invoke.TryGetPattern(out IInvokePattern? invoke))
       {
          LastInvocation = $"UIA Invoke: {element.Properties.AutomationId.ValueOrDefault}.";
          invoke.Invoke();
+      }
+      else if(element.Patterns.Toggle.TryGetPattern(out ITogglePattern? toggle))
+      {
+         LastInvocation = $"UIA Toggle: {element.Properties.AutomationId.ValueOrDefault}; before={toggle.ToggleState.Value}.";
+         toggle.Toggle();
       }
       else
       {
@@ -340,6 +420,31 @@ public sealed class AppSession : IDisposable
 
 
 
+   /// <summary>FlaUI closes only the main HWND; close every fixture-owned window first so intended siblings do not force its exit timeout.</summary>
+   private void CloseOwnedWindows()
+   {
+      if(App is not { HasExited: false })
+      {
+         return;
+      }
+      foreach(AutomationElement window in TopLevelWindows())
+      {
+         try
+         {
+            if(window.Patterns.Window.TryGetPattern(out IWindowPattern? pattern))
+            {
+               pattern.Close();
+            }
+         }
+         catch(Exception exception) when(exception is System.Runtime.InteropServices.COMException or InvalidOperationException or ObjectDisposedException or System.ComponentModel.Win32Exception)
+         {
+            // A sibling can disappear during closure; the unchanged process close/kill fallback remains below.
+         }
+      }
+   }
+
+
+
    /// <summary>Closes the app (killing it if needed), then disposes the automation and deletes the data folder.</summary>
    public void Dispose()
    {
@@ -347,6 +452,7 @@ public sealed class AppSession : IDisposable
       {
          try
          {
+            CloseOwnedWindows();
             App?.Close();
          }
          catch

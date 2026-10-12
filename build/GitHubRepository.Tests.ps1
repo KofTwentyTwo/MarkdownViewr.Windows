@@ -29,11 +29,11 @@ Describe 'Offline setup preview location' `
 
 Describe 'Required checks match standalone workflow jobs' `
 {
-   It 'requires the actual check names from both CI and script workflows' `
+   It 'requires the actual check names from CI, script and fuzz workflows' `
    {
       $plan = Get-GitHubRepositoryPlan -Repository 'Example/Notes'
       $workflowRoot = Join-Path (Split-Path -Parent $PSScriptRoot) '.github/workflows'
-      foreach($workflow in @('ci.yml', 'scripts.yml'))
+      foreach($workflow in @('ci.yml', 'scripts.yml', 'fuzz.yml'))
       {
          $names = @(Select-String -LiteralPath (Join-Path $workflowRoot $workflow) -Pattern '^    name: ')
          $names.Count | Should -BeGreaterThan 0

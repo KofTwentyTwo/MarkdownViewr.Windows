@@ -42,8 +42,12 @@ Set-Content -LiteralPath $idFile -Value $packageId
 Set-Content -LiteralPath (Join-Path $outputRoot 'build-directory.txt') -Value $buildRoot
 $fixtureRoot = Join-Path $outputRoot 'fixture'
 $dataVariable = $AppId.ToUpperInvariant().Replace('-', '_') + '_DATA_DIR'
+$devDataVariable = ($AppId + '-dev').ToUpperInvariant().Replace('-', '_') + '_DATA_DIR'
 $oldDataDirectory = [Environment]::GetEnvironmentVariable($dataVariable)
+$oldDevDataDirectory = [Environment]::GetEnvironmentVariable($devDataVariable)
+$oldUiChannel = $env:K22_UITEST_CHANNEL
 $oldUiExe = $env:K22_UITEST_EXE
+$oldUiInstalled = $env:K22_UITEST_INSTALLED
 $versions = @(
    @{ channel = 'stable'; version = '0.1.0'; target = '0.4.0' },
    @{ channel = 'stable'; version = '0.4.0'; target = $null },
@@ -51,6 +55,92 @@ $versions = @(
    @{ channel = 'dev'; version = '0.3.0-beta.2'; target = $null }
 )
 $script:smokeProcessNumber = 0
+
+<#
+.SYNOPSIS
+Reads Windows default choices without changing them or retaining their private hashes in evidence.
+#>
+function Get-SmokeDefaultChoiceSnapshot
+{
+   param([Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser)
+   foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+   {
+      $choice = "$($RegistryRoot.Name)\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$extension\UserChoice"
+      [ordered]@{
+         Extension        = $extension
+         ExtensionDefault = [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension", '', $null)
+         ProgId           = [Microsoft.Win32.Registry]::GetValue($choice, 'ProgId', $null)
+         Hash             = [Microsoft.Win32.Registry]::GetValue($choice, 'Hash', $null)
+      }
+   }
+}
+
+
+
+<#
+.SYNOPSIS
+Requires actual installer-owned Open With and Default Apps registration for all five advertised extensions.
+#>
+function Get-SmokeFileRegistration
+{
+   param(
+      [Parameter(Mandatory)][string]$Exe,
+      [Parameter(Mandatory)][ValidateSet('stable', 'dev')][string]$Channel,
+      [Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser
+   )
+   $Exe = [IO.Path]::GetFullPath($Exe)
+   $applications = $RegistryRoot.OpenSubKey('Software\RegisteredApplications')
+   $found = @()
+   try
+   {
+      if($null -ne $applications)
+      {
+         foreach($identity in $applications.GetValueNames())
+         {
+            if(-not $identity.StartsWith("KofTwentyTwo.MarkdownViewr.$Channel.", [StringComparison]::Ordinal)) { continue }
+            $command = [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$identity\shell\open\command", '', $null)
+            if($command -cne ('"' + $Exe + '" "%1"')) { continue }
+            $capabilities = $applications.GetValue($identity)
+            if($capabilities -cne "Software\KofTwentyTwo\MarkdownViewr\FileAssociations\$identity\Capabilities") { throw 'The installed Default Apps capabilities are incorrect.' }
+            foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+            {
+               if([Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\$capabilities\FileAssociations", $extension, $null) -cne $identity) { throw 'An installed Default Apps extension is missing or incorrect.' }
+               if($null -eq [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension\OpenWithProgids", $identity, $null)) { throw 'An installed Open With extension is missing.' }
+            }
+            $found += [pscustomobject]@{ ProgId = $identity; Capabilities = $capabilities; ExtensionsVerified = 5 }
+         }
+      }
+   }
+   finally { if($null -ne $applications) { $applications.Dispose() } }
+   if($found.Count -ne 1) { throw 'Expected exactly one file registration for this installed executable and channel.' }
+   return $found[0]
+}
+
+
+
+<#
+.SYNOPSIS
+Requires uninstall to remove only the recorded installation's file-type registrations.
+#>
+function Assert-SmokeFileRegistrationRemoved
+{
+   param(
+      [Parameter(Mandatory)][object]$Registration,
+      [Microsoft.Win32.RegistryKey]$RegistryRoot = [Microsoft.Win32.Registry]::CurrentUser
+   )
+   foreach($path in @("Software\Classes\$($Registration.ProgId)", $Registration.Capabilities))
+   {
+      $key = $RegistryRoot.OpenSubKey($path)
+      if($null -ne $key) { $key.Dispose(); throw 'An uninstalled file-type registration remains.' }
+   }
+   if($null -ne [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\RegisteredApplications", $Registration.ProgId, $null)) { throw 'An uninstalled Default Apps entry remains.' }
+   foreach($extension in @('.md', '.markdown', '.mdown', '.mkd', '.txt'))
+   {
+      if($null -ne [Microsoft.Win32.Registry]::GetValue("$($RegistryRoot.Name)\Software\Classes\$extension\OpenWithProgids", $Registration.ProgId, $null)) { throw 'An uninstalled Open With entry remains.' }
+   }
+}
+
+
 
 <#
 .SYNOPSIS
@@ -77,15 +167,17 @@ function Invoke-SmokeProcess
    $stderr = $process.StandardError.ReadToEndAsync()
    try
    {
-      if(-not $process.WaitForExit($TimeoutSeconds * 1000))
+      $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+      if($timedOut)
       {
          $process.Kill($true)
-         throw "Process timed out: $File"
+         if(-not $process.WaitForExit(10000)) { throw "Timed-out process did not terminate: $File" }
       }
       $script:smokeProcessNumber++
       $log = Join-Path $outputRoot "process-$script:smokeProcessNumber.log"
       $text = $stdout.GetAwaiter().GetResult() + $stderr.GetAwaiter().GetResult()
       Set-Content -LiteralPath $log -Value $text
+      if($timedOut) { throw "Process timed out: $File. Log: $log" }
       if($process.ExitCode -ne 0) { throw "Process failed ($($process.ExitCode)): $File. Log: $log`n$text" }
    }
    finally { $process.Dispose() }
@@ -142,12 +234,170 @@ function Stop-SmokeApp
    }
 }
 
+<#
+.SYNOPSIS
+Waits for a real window from the exact owned executable, optionally with an exact document title.
+#>
+function Get-SmokeReaderWindow
+{
+   param([string]$Exe, [string]$Title)
+   $deadline = [DateTime]::UtcNow.AddSeconds(30)
+   do
+   {
+      foreach($process in @(Get-Process -Name $name -ErrorAction SilentlyContinue))
+      {
+         try
+         {
+            if($process.Path -eq $Exe -and $process.MainWindowHandle -ne 0 -and ([string]::IsNullOrEmpty($Title) -or $process.MainWindowTitle -ceq $Title))
+            {
+               return [pscustomobject]@{ ProcessId = $process.Id; Title = $process.MainWindowTitle }
+            }
+         }
+         finally { $process.Dispose() }
+      }
+      Start-Sleep -Milliseconds 250
+   } while([DateTime]::UtcNow -lt $deadline)
+   throw 'The exact installed reader did not show its expected native window.'
+}
+
+
+
+<#
+.SYNOPSIS
+Requires manifest identity and the resolved artifact boundary before any owned uninstall.
+#>
+function Assert-SmokeInstallationOwner
+{
+   param([string]$Install, [string]$PackageIdentity, [string]$ArtifactRoot)
+   $resolved = [IO.Path]::GetFullPath($Install)
+   $boundary = [IO.Path]::GetFullPath($ArtifactRoot).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+   if(-not $resolved.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) { throw 'Refusing to uninstall outside the smoke artifact boundary.' }
+   $manifest = [xml](Get-Content -LiteralPath (Join-Path $resolved 'current/sq.version') -Raw -ErrorAction Stop)
+   if($manifest.package.metadata.id -cne $PackageIdentity) { throw 'Refusing to uninstall an unexpected application.' }
+}
+
+
+
+<#
+.SYNOPSIS
+Uninstalls only a verified owned fixture and requires its registration cleanup without changing user defaults.
+#>
+function Remove-SmokeInstallation
+{
+   [CmdletBinding(SupportsShouldProcess)]
+   param([object]$State, [string]$DefaultChoices)
+   if(-not (Test-Path -LiteralPath $State.Install)) { return }
+   Assert-SmokeInstallationOwner -Install $State.Install -PackageIdentity $State.PackageId -ArtifactRoot $allowedRoot
+   if(-not $PSCmdlet.ShouldProcess($State.Install, 'Uninstall owned simultaneous-channel fixture')) { return }
+   Stop-SmokeApp -Exe $State.Exe -Confirm:$false
+   Invoke-SmokeProcess -File (Join-Path $State.Install 'Update.exe') -Arguments @('--silent', '--rootDir', $State.Install, 'uninstall')
+   $deadline = [DateTime]::UtcNow.AddSeconds(10)
+   while((Test-Path -LiteralPath $State.Install) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 200 }
+   if(Test-Path -LiteralPath $State.Install) { throw 'The owned simultaneous-channel installation remains after uninstall.' }
+   if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$($State.PackageId)") { throw 'The owned uninstall registry entry remains.' }
+   if($null -ne $State.Registration) { Assert-SmokeFileRegistrationRemoved -Registration $State.Registration }
+   if($DefaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Simultaneous-channel uninstall changed Windows defaults.' }
+}
+
+
+
+<#
+.SYNOPSIS
+Keeps both real editions installed and open while updating and uninstalling each without disturbing its sibling.
+#>
+function Test-SmokeCoexistingChannel
+{
+   $states = [Collections.Generic.List[object]]::new()
+   $defaultChoices = Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress
+   try
+   {
+      foreach($initial in @($versions[0], $versions[2]))
+      {
+         $channel = $initial.channel
+         $install = Join-Path $outputRoot "coexisting-$channel"
+         $data = Join-Path $outputRoot "coexisting-data-$channel"
+         if((Test-Path -LiteralPath $install) -or (Test-Path -LiteralPath $data)) { throw 'Simultaneous-channel fixtures must be fresh.' }
+         New-Item -ItemType Directory -Path $data | Out-Null
+         [ordered]@{ ShowSplashScreen = $false; CheckForUpdatesOnStartup = $false; DocumentTheme = $(if($channel -eq 'dev') { 'GitHub Light' } else { 'Catppuccin Mocha' }) } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $data 'settings.json')
+         [Environment]::SetEnvironmentVariable($(if($channel -eq 'dev') { $devDataVariable } else { $dataVariable }), $data)
+         $state = [pscustomobject]@{ Channel = $channel; Install = $install; Data = $data; PackageId = "$packageId-$channel"; Exe = (Join-Path $install "current/$mainExe"); Target = $initial.target; Registration = $null; Window = $null }
+         $states.Add($state)
+         $setup = Join-Path $fixtureRoot "$($initial.version)/$($state.PackageId)-$channel-Setup.exe"
+         Invoke-SmokeProcess -File $setup -Arguments @('--silent', '--installto', $install, '--log', (Join-Path $outputRoot "coexisting-install-$channel.log"))
+         $state.Registration = Get-SmokeFileRegistration -Exe $state.Exe -Channel $channel
+         Assert-SmokeInstallationOwner -Install $install -PackageIdentity $state.PackageId -ArtifactRoot $allowedRoot
+      }
+      if($states[0].Registration.ProgId -ceq $states[1].Registration.ProgId) { throw 'Stable and dev share a file-type owner.' }
+      foreach($state in $states)
+      {
+         Stop-SmokeApp -Exe $state.Exe -Confirm:$false
+         $document = Join-Path $state.Data "$($state.Channel).md"
+         '# Simultaneous channel fixture' | Set-Content -LiteralPath $document
+         $start = [Diagnostics.ProcessStartInfo]::new($state.Exe)
+         $start.UseShellExecute = $false
+         $start.ArgumentList.Add($document)
+         $process = [Diagnostics.Process]::Start($start)
+         $process.Dispose()
+         $displayName = if($state.Channel -eq 'dev') { 'MarkdownViewr (dev)' } else { 'MarkdownViewr' }
+         $state.Window = Get-SmokeReaderWindow -Exe $state.Exe -Title ("$($state.Channel).md " + [char]0x2014 + " $displayName")
+         $logPrefix = if($state.Channel -eq 'dev') { "$AppId-dev" } else { $AppId }
+         $logs = @(Get-ChildItem -LiteralPath (Join-Path $state.Data 'logs') -Filter "$logPrefix-*.log")
+         if($logs.Count -eq 0 -or -not ((Get-Content -LiteralPath $logs.FullName -Raw) -match 'Opened a Markdown document')) { throw 'The actual reader did not use its own edition profile/log prefix.' }
+      }
+      if($states[0].Window.ProcessId -eq $states[1].Window.ProcessId) { throw 'Stable and dev incorrectly share one process.' }
+      foreach($state in $states)
+      {
+         $sibling = @($states | Where-Object Channel -NE $state.Channel)[0]
+         $siblingWindow = Get-SmokeReaderWindow -Exe $sibling.Exe
+         $siblingHash = (Get-FileHash -LiteralPath (Join-Path $sibling.Install "current/$name.dll") -Algorithm SHA256).Hash
+         $siblingSettings = (Get-FileHash -LiteralPath (Join-Path $sibling.Data 'settings.json') -Algorithm SHA256).Hash
+         Stop-SmokeApp -Exe $state.Exe -Confirm:$false
+         $before = Get-SmokeResult -Exe (Join-Path $state.Install "current/$probeExe") -ResultPath (Join-Path $outputRoot "coexisting-$($state.Channel)-before.json") -Mode 'apply'
+         if($before.Channel -cne $state.Channel -or $before.UpdateVersion -cne $state.Target) { throw 'The simultaneous edition received an incorrect update offer.' }
+         $deadline = [DateTime]::UtcNow.AddSeconds(90)
+         do
+         {
+            Start-Sleep -Milliseconds 300
+            $manifestPath = Join-Path $state.Install 'current/sq.version'
+            $manifest = if(Test-Path -LiteralPath $manifestPath) { [xml](Get-Content -LiteralPath $manifestPath -Raw) } else { $null }
+         } while(($null -eq $manifest -or $manifest.package.metadata.version -cne $state.Target) -and [DateTime]::UtcNow -lt $deadline)
+         if($null -eq $manifest -or $manifest.package.metadata.version -cne $state.Target) { throw 'The simultaneous edition did not install its target update.' }
+         Assert-SmokeInstallationOwner -Install $state.Install -PackageIdentity $state.PackageId -ArtifactRoot $allowedRoot
+         $state.Window = Get-SmokeReaderWindow -Exe $state.Exe
+         $targetHash = (Get-FileHash -LiteralPath (Join-Path $buildRoot "publish/$($state.Target)/$name.dll") -Algorithm SHA256).Hash
+         if((Get-FileHash -LiteralPath (Join-Path $state.Install "current/$name.dll") -Algorithm SHA256).Hash -cne $targetHash) { throw 'The simultaneous target bytes do not match the published assembly.' }
+         $registration = Get-SmokeFileRegistration -Exe $state.Exe -Channel $state.Channel
+         if($registration.ProgId -cne $state.Registration.ProgId) { throw 'The simultaneous update changed its file-type identity.' }
+         $after = Get-SmokeResult -Exe (Join-Path $state.Install "current/$probeExe") -ResultPath (Join-Path $outputRoot "coexisting-$($state.Channel)-after.json")
+         if($after.Channel -cne $state.Channel -or $after.Version -cne $state.Target -or $after.AppKitVersion -cne $state.Target -or $null -ne $after.UpdateVersion) { throw 'The simultaneous edition has an incorrect post-update identity.' }
+         if((Get-SmokeReaderWindow -Exe $sibling.Exe).ProcessId -ne $siblingWindow.ProcessId -or (Get-FileHash -LiteralPath (Join-Path $sibling.Install "current/$name.dll") -Algorithm SHA256).Hash -cne $siblingHash -or (Get-FileHash -LiteralPath (Join-Path $sibling.Data 'settings.json') -Algorithm SHA256).Hash -cne $siblingSettings) { throw 'Updating an edition disturbed its live sibling or preferences.' }
+         if((Get-SmokeFileRegistration -Exe $sibling.Exe -Channel $sibling.Channel).ProgId -cne $sibling.Registration.ProgId) { throw 'Updating an edition changed its sibling registration.' }
+         if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Simultaneous installation/update changed Windows defaults.' }
+      }
+      $devWindow = Get-SmokeReaderWindow -Exe $states[1].Exe
+      Remove-SmokeInstallation -State $states[0] -DefaultChoices $defaultChoices -Confirm:$false
+      if((Get-SmokeReaderWindow -Exe $states[1].Exe).ProcessId -ne $devWindow.ProcessId -or (Get-SmokeFileRegistration -Exe $states[1].Exe -Channel 'dev').ProgId -cne $states[1].Registration.ProgId) { throw 'Uninstalling stable disturbed the installed running dev edition.' }
+      [ordered]@{ SimultaneousWindows = $true; DistinctProfiles = $true; IsolatedUpdates = $true; StableUninstallPreservedDev = $true; ExistingDefaultsPreserved = $true; Editions = @($states | Select-Object Channel, PackageId, Target, Registration, Window) } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $outputRoot 'coexisting-channels.json')
+   }
+   finally
+   {
+      $cleanupFailures = [Collections.Generic.List[string]]::new()
+      foreach($state in $states)
+      {
+         try { Remove-SmokeInstallation -State $state -DefaultChoices $defaultChoices -Confirm:$false }
+         catch { $cleanupFailures.Add($_.Exception.Message) }
+      }
+      if($cleanupFailures.Count -gt 0) { throw ($cleanupFailures -join '; ') }
+   }
+}
+
 $records = [Collections.Generic.List[object]]::new()
 try
 {
    foreach($release in $versions)
    {
       $version = $release.version
+      $releasePackageId = $packageId + '-' + $release.channel
       Write-Output "Packaging $version ($($release.channel))"
       $publish = Join-Path $buildRoot "publish/$version"
       $probe = Join-Path $buildRoot "probe/$version"
@@ -165,8 +415,8 @@ try
          $versionOutput = Get-Content -LiteralPath (Join-Path $outputRoot "process-$script:smokeProcessNumber.log") -Raw
          Assert-SmokeCliVersion -Output $versionOutput -Version $version
       }
-      Invoke-SmokeProcess -File $vpk -Arguments @('pack', '--runtime', 'win-x64', '--packId', $packageId, '--packVersion', $version, '--packDir', $publish, '--mainExe', $mainExe, '--channel', $release.channel, '--outputDir', (Join-Path $fixtureRoot $version), '--shortcuts', 'None', '--delta', 'None', '--skip-updates', '--yes') -TimeoutSeconds 300
-      & "$PSScriptRoot/Assert-PackageBytes.ps1" -PublishDirectory $publish -PortableArchive (Join-Path $fixtureRoot "$version/$packageId-$($release.channel)-Portable.zip") -FullPackage (Join-Path $fixtureRoot "$version/$packageId-$version-$($release.channel)-full.nupkg")
+      Invoke-SmokeProcess -File $vpk -Arguments @('pack', '--runtime', 'win-x64', '--packId', $releasePackageId, '--packVersion', $version, '--packDir', $publish, '--mainExe', $mainExe, '--channel', $release.channel, '--outputDir', (Join-Path $fixtureRoot $version), '--shortcuts', 'None', '--delta', 'None', '--skip-updates', '--yes') -TimeoutSeconds 300
+      & "$PSScriptRoot/Assert-PackageBytes.ps1" -PublishDirectory $publish -PortableArchive (Join-Path $fixtureRoot "$version/$releasePackageId-$($release.channel)-Portable.zip") -FullPackage (Join-Path $fixtureRoot "$version/$releasePackageId-$version-$($release.channel)-full.nupkg")
    }
    $releases = foreach($release in $versions)
    {
@@ -182,12 +432,15 @@ try
    $loose = Get-SmokeResult -Exe (Join-Path $buildRoot "publish/0.1.0/$probeExe") -ResultPath (Join-Path $outputRoot 'loose.json')
    if($loose.Installed -or $loose.AppKitSupported -or $null -ne $loose.Version) { throw 'Loose publish output unexpectedly supports updates.' }
    $records.Add(@{ kind = 'loose'; result = $loose })
+   $env:K22_UITEST_CHANNEL = 'stable'
+   $env:K22_UITEST_INSTALLED = '0'
    $env:K22_UITEST_EXE = Join-Path $buildRoot "publish/0.1.0/$mainExe"
-   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 180
+   Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--logger', 'console;verbosity=normal', '--logger', 'trx;LogFileName=published-ui.trx', '--results-directory', $outputRoot) -TimeoutSeconds 600
    foreach($initial in @($versions[0], $versions[2]))
    {
+      $initialPackageId = $packageId + '-' + $initial.channel
       $portableDirectory = Join-Path $outputRoot "portable-$($initial.channel)"
-      [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $fixtureRoot "$($initial.version)/$packageId-$($initial.channel)-Portable.zip"), $portableDirectory)
+      [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $fixtureRoot "$($initial.version)/$initialPackageId-$($initial.channel)-Portable.zip"), $portableDirectory)
       $portable = Get-SmokeResult -Exe (Join-Path $portableDirectory "current/$probeExe") -ResultPath (Join-Path $outputRoot "$($initial.channel)-portable.json")
       if(-not $portable.Installed -or -not $portable.IsPortable -or -not $portable.AppKitSupported -or $portable.Channel -ne $initial.channel -or $portable.UpdateVersion -ne $initial.target) { throw 'Portable bundle identity/update behavior is incorrect.' }
       $records.Add(@{ kind = 'portable'; result = $portable })
@@ -195,17 +448,25 @@ try
    foreach($initial in @($versions[0], $versions[2]))
    {
       $channel = $initial.channel
+      $initialPackageId = $packageId + '-' + $channel
+      $env:K22_UITEST_CHANNEL = $channel
       $install = Join-Path $outputRoot "installed-$channel"
       if(Test-Path -LiteralPath $install) { throw "Existing installation requires investigation: $install" }
-      $setup = Join-Path $fixtureRoot "$($initial.version)/$packageId-$channel-Setup.exe"
+      $setup = Join-Path $fixtureRoot "$($initial.version)/$initialPackageId-$channel-Setup.exe"
       $data = Join-Path $outputRoot "data-$channel"
       New-Item -ItemType Directory -Path $data -Force | Out-Null
       '{"ShowSplashScreen":false,"CheckForUpdatesOnStartup":false}' | Set-Content -LiteralPath (Join-Path $data 'settings.json')
       [Environment]::SetEnvironmentVariable($dataVariable, $data)
+      [Environment]::SetEnvironmentVariable($devDataVariable, $data)
+      $defaultChoices = Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress
+      $registration = $null
       Invoke-SmokeProcess -File $setup -Arguments @('--silent', '--installto', $install, '--log', (Join-Path $outputRoot "install-$channel.log"))
       try
       {
          $currentExe = Join-Path $install "current/$mainExe"
+         $registration = Get-SmokeFileRegistration -Exe $currentExe -Channel $channel
+         if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Installation changed existing Windows default choices.' }
+         $registration | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-before.json")
          $installedProbe = Join-Path $install "current/$probeExe"
          $before = Get-SmokeResult -Exe $installedProbe -ResultPath (Join-Path $outputRoot "$channel-before.json") -Mode 'apply'
          if(-not $before.Installed -or -not $before.AppKitSupported -or $before.IsPortable -or $before.Version -ne $initial.version -or $before.AppKitVersion -ne $initial.version -or $before.Channel -ne $channel -or $before.UpdateVersion -ne $initial.target -or $before.IncludePrereleases -ne ($channel -eq 'dev')) { throw "Incorrect $channel installed update offer." }
@@ -233,8 +494,13 @@ try
          Stop-SmokeApp -Exe $currentExe -Confirm:$false
          $after = Get-SmokeResult -Exe $installedProbe -ResultPath (Join-Path $outputRoot "$channel-after.json")
          if($after.Version -ne $initial.target -or $after.Channel -ne $channel -or $null -ne $after.UpdateVersion -or $after.AppKitVersion -ne $initial.target) { throw 'Post-upgrade identity or channel is incorrect.' }
+         $updatedRegistration = Get-SmokeFileRegistration -Exe $currentExe -Channel $channel
+         if($updatedRegistration.ProgId -cne $registration.ProgId) { throw 'Update changed the stable file-type owner identity.' }
+         if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Update changed existing Windows default choices.' }
+         $updatedRegistration | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-after.json")
+         $env:K22_UITEST_INSTALLED = '1'
          $env:K22_UITEST_EXE = $currentExe
-         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 180
+         Invoke-SmokeProcess -File 'dotnet' -Arguments @('test', "$repositoryRoot/tests/$name.UiTests", '--no-build', '--filter', 'FullyQualifiedName!~CheckForUpdates_InALooseBuild', '--logger', 'console;verbosity=normal', '--logger', "trx;LogFileName=installed-$channel-ui.trx", '--results-directory', $outputRoot) -TimeoutSeconds 600
          $records.Add(@{ kind = 'installed'; channel = $channel; before = $before; after = $after; restarted = $true; appSha256 = $installedHash })
       }
       finally
@@ -243,22 +509,30 @@ try
          $updater = Join-Path $install 'Update.exe'
          if(Test-Path -LiteralPath $updater)
          {
-            $manifestPath = Join-Path $install 'current/sq.version'
-            $manifestValue = [xml](Get-Content -LiteralPath $manifestPath -Raw)
-            if(-not $install.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase) -or $manifestValue.package.metadata.id -ne $packageId) { throw 'Refusing to uninstall an unexpected application.' }
+            Assert-SmokeInstallationOwner -Install $install -PackageIdentity $initialPackageId -ArtifactRoot $allowedRoot
             Invoke-SmokeProcess -File $updater -Arguments @('--silent', '--rootDir', $install, 'uninstall')
             $deadline = [DateTime]::UtcNow.AddSeconds(10)
             while((Test-Path -LiteralPath $install) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 200 }
             if(Test-Path -LiteralPath $install) { throw "Smoke installation was not removed: $install" }
-            if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$packageId") { throw 'Smoke uninstall registry entry remains.' }
+            if(Test-Path -LiteralPath "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/$initialPackageId") { throw 'Smoke uninstall registry entry remains.' }
+            if($null -ne $registration)
+            {
+               Assert-SmokeFileRegistrationRemoved -Registration $registration
+               if($defaultChoices -cne (Get-SmokeDefaultChoiceSnapshot | ConvertTo-Json -Depth 3 -Compress)) { throw 'Uninstall changed existing Windows default choices.' }
+               [ordered]@{ ProgId = $registration.ProgId; Removed = $true; ExistingDefaultsPreserved = $true } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot "$channel-registration-removed.json")
+            }
          }
       }
    }
+   Test-SmokeCoexistingChannel
    ConvertTo-Json -InputObject @($records) -Depth 10 | Set-Content -LiteralPath (Join-Path $outputRoot 'results.json')
    Write-Output "Installed stable/dev smoke passed: $outputRoot/results.json"
 }
 finally
 {
    [Environment]::SetEnvironmentVariable($dataVariable, $oldDataDirectory)
+   [Environment]::SetEnvironmentVariable($devDataVariable, $oldDevDataDirectory)
+   $env:K22_UITEST_CHANNEL = $oldUiChannel
    $env:K22_UITEST_EXE = $oldUiExe
+   $env:K22_UITEST_INSTALLED = $oldUiInstalled
 }

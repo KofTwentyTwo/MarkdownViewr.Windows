@@ -1,0 +1,37 @@
+{
+    "name": "Catppuccin Mocha",
+    "colors": {
+        "background": "#1e1e2e",
+        "text": "#cdd6f4",
+        "heading1": "#cba6f7",
+        "heading2": "#89b4fa",
+        "heading3": "#89b4fa",
+        "heading4": "#74c7ec",
+        "heading5": "#74c7ec",
+        "heading6": "#74c7ec",
+        "link": "#89dceb",
+        "codeBackground": "#181825",
+        "codeText": "#a6e3a1",
+        "blockquoteBorder": "#cba6f7",
+        "blockquoteBackground": "#24243a",
+        "highlightBackground": "#f9e2af",
+        "highlightText": "#1e1e2e"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

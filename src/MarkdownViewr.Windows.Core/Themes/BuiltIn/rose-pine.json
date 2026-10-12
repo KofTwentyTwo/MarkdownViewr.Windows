@@ -1,0 +1,37 @@
+{
+    "name": "Ros\u00e9 Pine",
+    "colors": {
+        "background": "#191724",
+        "text": "#e0def4",
+        "heading1": "#eb6f92",
+        "heading2": "#9ccfd8",
+        "heading3": "#c4a7e7",
+        "heading4": "#f6c177",
+        "heading5": "#31748f",
+        "heading6": "#ebbcba",
+        "link": "#9ccfd8",
+        "codeBackground": "#1f1d2e",
+        "codeText": "#9ccfd8",
+        "blockquoteBorder": "#c4a7e7",
+        "blockquoteBackground": "#1f1d2e",
+        "highlightBackground": "#f6c177",
+        "highlightText": "#191724"
+    },
+    "fonts": {
+        "body": "System",
+        "heading": "System",
+        "code": "SF Mono"
+    },
+    "sizes": {
+        "baseFontSize": 14,
+        "h1Size": 28,
+        "h2Size": 23,
+        "h3Size": 20,
+        "h4Size": 18,
+        "h5Size": 16,
+        "h6Size": 15,
+        "codeFontSize": 13,
+        "lineHeight": 1.7
+    },
+    "customCSS": ""
+}

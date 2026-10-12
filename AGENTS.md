@@ -2,7 +2,7 @@
 
 ## Purpose and Structure
 
-MarkdownViewr.Windows is a Windows Markdown viewer built with AppKit and WinUI 3. Read `docs/PRODUCT.md`, `docs/TODO.md` and `docs/SESSION-STATE.md` before continuing. The initial greeting is scaffold content; do not claim the viewer is implemented until its requirements pass.
+MarkdownViewr.Windows is a Windows Markdown viewer built with AppKit and WinUI 3. Read `docs/PRODUCT.md`, `docs/TODO.md` and `docs/SESSION-STATE.md` before continuing. The first reader is implemented; full parity and desktop acceptance remain pending. Do not claim requirements passed without evidence.
 
 `src/MarkdownViewr.Windows.Core/` contains testable logic and view models. `src/MarkdownViewr.Windows/` contains WinUI views and Windows adapters; brand assets are in `Assets/Brand/`. Unit, desktop UI and installed-update probes live under `tests/`. `build/` contains coverage, packaging, setup and release validation tools.
 
