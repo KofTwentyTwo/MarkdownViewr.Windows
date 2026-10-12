@@ -182,7 +182,31 @@ public partial class AppTests
 
 
 
-   /// <summary>Native selection loads the actual copied manager choice, including disabled entries.</summary>
+   /// <summary>Scrolls the owned virtualized theme list until its exact native item is realized, then selects that copied-draft choice.</summary>
    private static void SelectThemeDraft(AppSession session, string name)
-      => session.WaitForElement("ThemeChoice:" + name).Patterns.SelectionItem.Pattern.Select();
+   {
+      AutomationElement list = session.WaitForElement("ThemeList");
+      AutomationElement item = session.WaitFor(() =>
+      {
+         AutomationElement? candidate = list.FindFirstDescendant(cf => cf.ByAutomationId("ThemeChoice:" + name));
+         if(candidate is not null)
+         {
+            return candidate;
+         }
+         FlaUI.Core.Patterns.IScrollPattern scroll = list.Patterns.Scroll.Pattern;
+         if(scroll.VerticallyScrollable.Value)
+         {
+            if(scroll.VerticalScrollPercent.Value >= 100)
+            {
+               scroll.SetScrollPercent(-1, 0);
+            }
+            else
+            {
+               scroll.Scroll(ScrollAmount.NoAmount, ScrollAmount.LargeIncrement);
+            }
+         }
+         return null;
+      }, "the realized native theme " + name);
+      item.Patterns.SelectionItem.Pattern.Select();
+   }
 }

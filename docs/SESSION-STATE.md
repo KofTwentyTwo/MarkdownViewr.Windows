@@ -2,6 +2,29 @@
 
 Updated: 2026-10-11
 
+## Native theme realization helper corrected locally - 2026-10-11
+
+Exact1bfab22 CI38187115859 focused23/26 fails, zero skips. New palette/default
+case cannot find ThemeChoice:Nord; existing future-schema/export case cannot find
+ThemeChoice:Owned future. Taller native preview rows leave those items virtualized
+offscreen. The selection helper now scrolls the owned ThemeList with its native
+Scroll pattern until the same exact automation ID is realized, then uses the same
+SelectionItem action. The existing10-second deadline and every value/assertion/
+case remain. Release/format pass; fresh hosted proof is required.
+
+The third focused failure remains physical source/reader alignment. Both Printing
+cases, Contents presentation, raw-inline folding, picker cancellation and new
+full-title tooltip/physical activation pass. Retain current-focused-1bfab22.log
+and actual focused TRX at artifacts/reader-regressions-38187115859. Signed local
+49f0556 preserves the heading Tag on the new Contents content Grid; its unchanged
+repeat-click regression awaits the next pushed head.
+
+Full native114611732252 and installed114611732224 remain live. Keep these local
+corrections unpushed until terminal; no installed/signature outcomes inferred.
+Cached ContentView/SettingsView/ThemeManager source matches immutable reference
+blobs970a8d6/c89b75c/7d81920 after BOM/newline normalization, confirming the default
+semantics audit. No local input, owner preview changes, Azure retry or release.
+
 ## Repeat Contents activation identity restored locally - 2026-10-11
 
 Actual retained b2ecc8c pixels show the last Contents row selected while both

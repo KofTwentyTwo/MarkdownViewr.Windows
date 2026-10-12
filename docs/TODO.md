@@ -1,5 +1,9 @@
 # Development Tasks
 
+- [x] Retain exact1bfab22 focused23/26 TRX; long-title tooltip/physical activation passes, offscreen Nord/future-theme lookup and source alignment fail.
+- [x] Prepare native scrolling of the owned virtualized theme list to realize the same exact IDs before unchanged selection/assertions/deadline.
+- [ ] Execute offscreen palette/default and existing future-schema/export acceptance with local49f0556 repeat-heading correction on the next exact pushed head.
+
 - [x] Restore trusted heading Tag on the new Contents content Grid so repeat ItemClick can identify the selected row; local zero-warning build/format pass.
 - [ ] Verify the unchanged repeated physical Contents activation/source alignment case on the next exact pushed head; client input coordinates are not screen bounds.
 
