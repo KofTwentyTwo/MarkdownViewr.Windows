@@ -1,5 +1,7 @@
 # Development Tasks
 
+- [x] Retain terminal1bfab22 native102/106, focused23/26 and published600-second/no-TRX evidence; same four failures, installed lifecycle not reached.
+
 - [x] Retain exact1bfab22 focused23/26 TRX; long-title tooltip/physical activation passes, offscreen Nord/future-theme lookup and source alignment fail.
 - [x] Prepare native scrolling of the owned virtualized theme list to realize the same exact IDs before unchanged selection/assertions/deadline.
 - [ ] Execute offscreen palette/default and existing future-schema/export acceptance with local49f0556 repeat-heading correction on the next exact pushed head.

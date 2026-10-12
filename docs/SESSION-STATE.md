@@ -2,6 +2,24 @@
 
 Updated: 2026-10-11
 
+## Exact1bfab22 terminal evidence retained; corrective candidate ready - 2026-10-11
+
+CI38187115859 is terminal: focused23/26 and native102/106 fail, zero skips.
+Failures are offscreen Nord palette/default and copied-draft lookups, Owned future
+import/export lookup, and repeated physical source/Contents activation. Published
+process hits unchanged600-second limit without final TRX; actual process log has
+the same four failures. Installed lifecycle phase is not reached. Retain
+current-installed-1bfab22.log and actual artifact bundle at
+artifacts/current-installed-evidence-38187115859, plus focused/native logs/TRX.
+
+Signed local49f0556 restores the trusted heading identity on the native row's
+content Grid for repeated ItemClick. Signed localb1f8af7 scrolls the owned native
+list until exact offscreen theme IDs are realized before unchanged selection and
+assertions. Release/format/hooks pass; cases/deadlines remain. Prior full run is
+terminal, so the next authorized push can proceed without cancelling evidence.
+Current-head focused/full/distributed proof, actual Settings pixels, owner/chooser/
+review/signing and production publication remain required. No local GUI input.
+
 ## Native theme realization helper corrected locally - 2026-10-11
 
 Exact1bfab22 CI38187115859 focused23/26 fails, zero skips. New palette/default
