@@ -9,7 +9,10 @@
 - [x] Reproduce signing dependency conflict; standards PR44 real package bootstrap and40 signing tests pass locally.
 - [x] Measure stable retry110/111 without reported test failures before600-second limit; prepare bounded900-second suite budget with unchanged assertions/deadlines.
 - [ ] Obtain genuine reviews, pass exact-head hosted checks and merge the release fixes.
-- [ ] Update the app caller to the reviewed fixed builder's immutable SHA.
+- [x] Owner personally reviewed standards PR44; merge the signing fix and version-only PR42 through normal protections, then push signedstandards1.1.1.
+- [x] Update the app caller to fixed builder96cbdf2; preserve caller NuGet mapping and strict signing verification.
+- [x] Keep the exactjkg assertion while awaiting native text processing within its existing deadline; add the case to focused hosted regressions.
+- [ ] Verify fresh full hosted acceptance and obtain genuine final-head app review before merge.
 - [ ] Publish stable/dev EXE and ZIP candidates; verify exact distributed signatures, timestamps, hashes, SBOMs and attestations (#33).
 - [ ] Update user download links only after actual verified publication.
 - [ ] Deliver signed and acceptance-tested MSI installers in the next release (#36), following the owner's latest decision.

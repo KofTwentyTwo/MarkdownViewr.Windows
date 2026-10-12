@@ -79,7 +79,8 @@ function Get-GitHubRepositoryPlan
             # Exact container actions used by the published v0.1.2 security builder.
             patterns_allowed = @('KofTwentyTwo/standards/*@*',
                'docker://ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f',
-               'docker://ghcr.io/aquasecurity/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa')
+               'docker://ghcr.io/aquasecurity/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa',
+               'docker://ghcr.io/anchore/syft:v1.54.1@sha256:3eb5379ba7b409c3f4069b686110527af0c47df993fa5c10d13e7cf34f49b1aa')
          }
       },
       @{ Method = 'PUT'; Path = "$root/environments/release"; Body = @{ deployment_branch_policy = @{ protected_branches = $false; custom_branch_policies = $true } } },

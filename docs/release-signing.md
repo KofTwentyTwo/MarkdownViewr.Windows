@@ -35,8 +35,8 @@ signing service. Never export a PFX or put administrative passwords in CI.
 
 ## Enable the reviewed builder
 
-The release caller pins standards v1.1.0 at
-`93b1d6163a4c466ae443e98b62786fc4d80d33bd`. Its reviewed builder supports the
+The release caller pins standards v1.1.1 at
+`96cbdf208a15c9c524676bd15ff9e323228a952b`. Its reviewed builder supports the
 explicit ownership catalog and verifies final shipped bytes/signatures. The
 configured catalog is:
 

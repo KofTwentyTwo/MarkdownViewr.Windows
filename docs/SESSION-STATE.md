@@ -4,6 +4,21 @@ Updated: 2026-10-12
 
 ## Release blockers after main merge - 2026-10-12
 
+Standards PR44 was personally reviewed by the owner and merged atb3e4b49.
+Its version/changelog-only release PR42 merged at96cbdf2; signedv1.1.1 was pushed
+and release CI38322016784 is running. The app caller now pins that exact builder.
+No new Azure administration or credentials are required.
+
+App PR37's first hosted run completed111 published tests:110 passed, one literal
+keyboard assertion observedjk instead ofjkg. The test now waits for the exactjkg
+value within its existing10-second deadline before retaining the same assertion.
+FlaUI5.0.0's UntilInputIsProcessed is only a100ms sleep, not an acknowledgement.
+The exact test is also included in the focused hosted regression job. Builds and
+formatting pass; hosted verification remains required. Local baseline and changed
+runs both stopped earlier at missing FindText, so they do not verify thejkg fix.
+Temporary diagnostics were removed. Original preview processes/profiles remain
+untouched. Fresh exact-head hosted acceptance must pass before merge/publication.
+
 The owner-reviewed application merged through PR35 at38dd5c1. Main CI38294895221
 passed; retained published111 and installed stable/dev110 reports have zero
 failures/skips. OpenSSF project15417 assessment is saved at70%, not passing.
