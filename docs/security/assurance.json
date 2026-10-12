@@ -2,8 +2,8 @@
    "schemaVersion": 1,
    "badge": {
       "applicability": "required",
-      "reason": "MarkdownViewr.Windows is a public open-source Product. Enrollment and maintainer attestation are required; no real project ID has been established.",
-      "projectUrl": null,
+      "reason": "Public open-source Product enrolled as project 15417. Evidence-backed maintainer assessment remains required; enrollment does not establish passing status.",
+      "projectUrl": "https://www.bestpractices.dev/en/projects/15417",
       "evidence": "docs/security/best-practices.md"
    },
    "fuzzing": {

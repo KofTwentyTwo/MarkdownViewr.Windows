@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: User guide
+    url: https://github.com/KofTwentyTwo/MarkdownViewr.Windows/blob/main/docs/user-guide.md
+    about: Opening files, themes, printing, default apps, and troubleshooting.
+  - name: Community support
+    url: https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions
+    about: Ask usage questions or discuss ideas with the community.
   - name: Report a security vulnerability
     url: https://github.com/KofTwentyTwo/MarkdownViewr.Windows/security/advisories/new
     about: Please report security issues privately, never as a public issue.

@@ -74,7 +74,7 @@ payloads, using final-byte hashes and verified provenance. Follow the
    ```
 
 4. Watch the **release** workflow, then verify the release as described in the
-   [README](../README.md#verifying-a-release).
+   [developer guide](../DEVELOPERS.md#releases-and-verification).
 5. Open a pull request that bumps `VersionPrefix` in `Directory.Build.props`.
 
 ## When something fails

@@ -2,57 +2,23 @@
 
 ## Current release checklist
 
-- [x] Build and launch the requested latest self-containedde70220 review with a fresh isolated profile; protectPID127248. Version1.0.0-dev; no production1.0 exists.
-- [x] Record owner-reported disabled editor ToolTip.IsOpen exception as bug#32; prepare the same attached-tooltip/loaded-target correction and physical-hover/log-error acceptance.
-- [x] Exact321816c CI38238385482 passes focused29, native/published111 and installed stable/dev110 each, zero failures/skips; actual hover case and lifecycle receipts pass. Corrected isolated local reviewPID48976 is open; production signing remains unproved.
-- [x] Exactde70220 CI38209503930 terminal success: core677/100%, native/published111, focused28, stable/dev110 each and fuzz9+2, zero skips; actual updates/restarts, coexistence/registration/default preservation pass.
-- [x] Remove temporary timing instrumentation and retain measured evidence; fresh final-head verification remains required with bug#32.
-- [ ] Obtain the genuine final-head review record required by configuration Apply as well as merging; add/read back only the planned Actions-bound fuzzing context, preserving existing policy.
+- [x] Correct the disabled-editor tooltip exception; accepted application code321816c.
+- [x] Final signing caller b1dc874 / CI38276579007 passes all hosted checks, including published111 and stable/dev110 acceptance each, zero failures/skips.
+- [x] Verify actual update/restart, registrations, preserved defaults, and channel coexistence receipts.
+- [x] Publish/verify standards1.1.0 signing builder and merge owner-reviewed inventory PR36.
+- [x] Verify Azure configuration and representative local final signing/distribution proof; existing gclo configuration preserved.
+- [x] Register Windows OpenSSF project15417 and record its real progress badge; passing assessment remains incomplete.
+- [x] Prepare user-first README, real light/source screenshots, user guide, DEVELOPERS.md, and current support/contribution links (#34).
+- [x] Verify final documentation: six Markdown files pass lint, all33 local links resolve, static conformance has no FAIL; clear-desktop screenshots are inspected.
+- [ ] Commit/push the documentation candidate and pass required exact-head hosted checks.
+- [ ] Obtain the genuine final-head maintainer review record; apply/read back only the planned Actions-bound fuzzing context.
+- [ ] Merge the application and complete release checklist#33.
+- [ ] Prove production CI OIDC signing, then publish1.0.0-beta.1/dev and1.0.0/stable.
+- [ ] Verify downloaded final signatures/publisher/trust/timestamps, hashes, SBOMs, and attestations.
+- [ ] Complete the evidence-backed OpenSSF provider assessment with the maintainer's actual operating-practice attestations.
 
-- [x] Pushe6fd281 and verify hosted fuzz9/9 core+2/2 activation,677 core/100% lines, focused28 and full native111, zero skips; retain actual evidence.
-- [x] Exactd052 hosted core677/100%, focused28, native111 and fuzz9+2 pass; published picker cancellation passes, but110/111 hit600 seconds without assertion failure/final TRX. Installed lifecycle not reached.
-- [ ] Measure retained launch/slow-wait/closure/Appearance-PDF timings to diagnose aggregate published runtime versus a blocked final operation; preserve111 cases and every assertion/deadline. Remove temporary timings after verified resolution; required fuzz context remains unapplied.
-
-- [x] Exact82256f3 CI38201379210 passes668 core/100% lines, focused28, native/published109 and installed108 per channel, zero skips; actual lifecycle artifacts/logs retained.
-- [x] Prepare current-standard assurance record, five seeded parser/property targets and honest unenrolled Best Practices assessment (#30/#31).
-- [x] Run local long campaigns:80000 core inputs plus minimized oracle regression,20000 activation envelopes,677 core tests/100% measured lines, zero-warning Release/format and23 setup tests.
-- [ ] Exact82256f3 CI38201379210 is terminal green; push the reviewed assurance/campaign delta; verify hosted fuzzing plus all native/published/installed gates and add/read back its required check.
-- [ ] Enroll this exact Windows public Product in Best Practices; use its real URL/README badge and maintainer-attested assessment. Do not approve an enrollment exception or fabricate passing criteria.
-
-- [x] Exactb542dcd all-channel CI38197169201 passes native/published109/109, focused28/28 and installed stable/dev108/108 each, zero skips; actual TRXs/lifecycle JSON retained.
-- [x] Resolve full-review finding: prefix reserved COM/LPT superscript theme-export names;668 core tests/100% measured lines and format pass.
-- [x] Finish application-source review:105 C# files plus markup/project configuration and relevant CI/release/installed paths; blob inventory and precise scope retained. Settings theme/editor edits already use pages.
-- [ ] Push the reviewed filename correction/checkpoint and verify fresh exact-head hosted gates; complete production-signing/owner acceptance and genuine final-head maintainer assessment.
-
-- [x] Exact4d34656 / CI38193736344 terminal success: focused27/27, native/published106/106, installed stable/dev105/105 each; actual authored-code/raw-heading browser and channel lifecycle cases pass, zero skips.
-- [x] Complete local-document link implementation through scoped native windows, with662 core/100% measured lines,10 actual filesystem tests and zero-warning Release/format.
-- [x] Exactb542 hosted proof: physical local-link/duplicate/watcher/junction-reload case,109 native/published and108 per installed channel pass; original cases/deadlines retained.
-
-The detailed checkpoints below preserve historical tasks. This section supersedes
-old "prepared/not run" statuses where the completed evidence now proves acceptance.
-Full product scope remains in PRODUCT.md; unsigned fixtures are not release proof.
-
-- [x] Exact9d5c0d1 / CI38188145397: core598/100% measured lines; focused26/26, native/published106/106, installed stable/dev105/105 each, zero failures/skips.
-- [x] Actual source colors through hover/focus/theme/reload/copy, fold/find/raw-heading provenance and physical bidirectional Contents synchronization pass in published and both installed editions (#10/#16/#27).
-- [x] Actual independent windows, multiple-file picker/cancel, recent files, editor file/folder launches, IPC/profile boundaries, reload/deletion/locked-save recovery and snapshot footer pass (#6/#11/#14/#26).
-- [x] Native toolbar/menu synchronization, narrowed overflow, Print handoff/cancellation, real PDF glyph/pixel/layout output, width/CSS and theme editing/transfer/cancellation/sibling persistence pass (#7/#12/#13/#18/#22/#23).
-- [x] General pane defaults/Contents controls, Printing Apply/Restore and sibling drafts, palette/default controls, About runtime credits/Contributions and startup settings pass (#19/#21/#24/#25).
-- [x] Actual AppKit updates/restarts, target hashes, five-extension registration lifecycle and simultaneous stable/dev isolation with sibling-preserving uninstall pass. Retain actual TRXs and coexisting-channels.json.
-- [x] Pushedc3c735e focused26/26 passes; inspected complete native theme-manager and Printing screenshots confirm the window now fits the hosted monitor.
-- [x] Exactc3c735e full native106/106 passes, zero skips, including independent whole-desktop containment; retained current-native-c3c735e.log.
-- [x] Exactc3c735e CI38190828814 terminal success: published106/106, installed stable/dev105/105 each, zero skips; actual registration/coexistence/update JSON and TRXs retained.
-- [x] Reproduce/correct authored inline-code extension corruption and raw visible-text/metadata parity;642 core tests/100% measured lines, zero-warning Release/format pass.
-- [ ] Push the renderer correction after the preceding terminal run and verify the extended actual browser case plus all native/published/installed suites.
-- [ ] Obtain owner acceptance of the toolbar, icon and native Settings layout, including Windows11 scaling. Actual user-selected Default Apps/Open With/Explorer behavior remains unverified; read-only status/registration tests do not replace it.
-- [ ] Complete remaining reference rendering/extension/image/link fidelity review. Preserve pinned document CSS and the explicit native-pane CSS boundary; representative tests do not certify arbitrary documents or CSS.
-- [x] Owner review and release authority supplied for standards signing31, reference correction39 and analyzer fix41; all merged and builder1.1.0 published.
-- [ ] Obtain the prepared inventory PR36 human review for registration. AppKit-only tooling license32 and shared Help AppKit29/windows-app-template4 remain separate follow-ups.
-- [x] Standards1.1.0 is actually published/verified at93b1d616; final caller enables signing and its required six-file catalog, retaining fail-closed verification.
-- [x] Authenticated Azure readback verifies actual subscription/tenant, East US endpoint, Active releases/PublicTrust profile and full James Maes subject. Separate secretless CI identity, exact immutable release-environment trust, profile-scoped signer role and all seven protected release variables are configured/read back; existing gclo setup preserved.
-- [x] Local representative321816c six-binary signing test passes SignTool /pa /all /v and strict SHA256/publisher/trust/timestamp checks; owner previews untouched.
-- [ ] Prove the new CI identity through the protected release job; verify final installer/archive signatures after adopting the published reviewed builder.
-- [ ] Obtain genuine final-head maintainer review acknowledgement, complete required checks and merge the application.
-- [ ] Publish signed stable1.0/dev releases only after exact shipped binaries/installers verify publisher/trust/SHA256/RFC3161 timestamps; retain final checksums/metadata and installed acceptance.
+The historical checkpoints below retain previous evidence and superseded tasks.
+Original owner preview processes/profiles must remain untouched.
 
 ## Historical checkpoints
 

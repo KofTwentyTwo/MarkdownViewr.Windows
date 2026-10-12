@@ -1,40 +1,30 @@
 # OpenSSF Best Practices assessment
 
-## Scope and ownership
+## Scope and enrollment
 
-MarkdownViewr.Windows is a public open-source Product; K22-REPO-12 requires real
-enrollment and an evidence-backed assessment. This is the Windows repository,
-not Darin Kelkhoff's original macOS project. Maintainer: @KofTwentyTwo (James Maes).
-Prepared 2026-10-11 by Codex; maintainer/provider assessment has not been completed.
-Reassess by 2027-01-09, and before each MINOR/MAJOR release.
+MarkdownViewr.Windows is a public open-source Product; K22-REPO-12 requires real enrollment and an evidence-backed assessment. Maintainer: @KofTwentyTwo (James Maes). This entry covers the Windows repository, separately from Darin Kelkhoff's macOS project.
 
-No project URL/ID is established. `assurance.json` correctly records required
-scope and a null project URL; the README has no invented Best Practices badge.
-Enrollment remains a failing requirement, not an exception or passing badge.
+Registered on 2026-10-12 as [project 15417](https://www.bestpractices.dev/en/projects/15417), with repository and home page both pointing to this GitHub repository. The Metal passing assessment was initially **18% complete** after provider import. Registration and a progress badge do not establish passing status.
 
-## Evidence prepared for enrollment
+Reassess by 2027-01-10 and before each MINOR/MAJOR release. The maintainer must confirm actual operating practices and incomplete criteria.
 
-| Area | Repository evidence and precise limit |
+## Evidence
+
+| Area | Evidence and limits |
 | --- | --- |
-| Identity/license | README, LICENSE (MIT), CONTRIBUTING, public source and retained Darin/vendor notices. Shared inventory entry is proposed in standards PR #36, not merged. |
-| Documentation/change control | PRODUCT/ADRs, usage/build/replay commands, linked feature/bug issues and signed/DCO topic commits in PR #3. Final-head maintainer acknowledgement remains required. |
-| Security reporting | SECURITY.md supplies private GitHub vulnerability reporting, response targets and supported-version policy. Threat model records browser/filesystem/IPC/editor/update boundaries. Maintainer must attest actual operating practices. |
-| Build/test | Locked dependencies, zero-warning build, formatter/analyzers, core coverage, hosted native/published/installed acceptance and the prepared parser fuzzing gate. Unsigned fixture tests do not prove signatures or arbitrary document coverage. |
-| Supply chain | Full-SHA action pins, dependency review/audit, secret/workflow/CodeQL scans, linked component credits and bundled license notices. |
-| Releases/crypto | Stable/dev update isolation and byte checks pass synthetic installed acceptance. Real Azure signing authority, final shipped signature/timestamp verification and signed 1.0/dev releases remain incomplete. |
-| Governance | Single-maintainer policy is explicit. Automated review does not constitute independent human review; every current-head finding/acknowledgement must be genuine. |
+| Identity/license | README, MIT LICENSE, CONTRIBUTING, retained author/vendor notices; standards inventory merged in PR #36. |
+| Documentation/change control | User/developer guides, PRODUCT/ADRs, linked issues, signed/DCO commits in app PR #3. Final-head human acknowledgement remains required. |
+| Security reporting | SECURITY.md, private GitHub reporting, response/support policy, and threat model. Actual response practices require maintainer attestation. |
+| Build/test | Locked restore, zero-warning build, analyzers, 100% measured core coverage, parser campaigns, native/published/installed acceptance. Tests do not certify arbitrary documents. |
+| Supply chain | Full-SHA action pins, dependency review/audit, secret/workflow/CodeQL scans, component credits, bundled notices. |
+| Releases/crypto | Current installed fixture updates/coexistence pass. Local signing/distribution proof passes; production CI OIDC signing and published stable/dev assets remain pending. |
+| Governance | Single-maintainer policy is explicit. Automated review is not independent human review; acknowledgements must be genuine. |
 
-## Maintainer actions
+## Remaining assessment actions
 
-1. Sign into [OpenSSF Best Practices](https://www.bestpractices.dev/en) and create
-   the project for `https://github.com/KofTwentyTwo/MarkdownViewr.Windows`, named
-   MarkdownViewr for Windows. Preserve any existing project if enrollment already
-   exists; verify its repository identity instead of creating a duplicate.
-2. Supply the actual returned project URL/ID. Set `badge.projectUrl` in
-   [assurance.json](assurance.json), then link its real badge from README.
-3. Review every current criterion against the evidence above and actual operations.
-   Record incomplete items honestly; registration alone is not a passing assessment.
-   Update this document with the assessed URL/date and remaining criterion actions.
-4. Resolve signing/release and other required criteria before claiming conformance.
-   An enrollment obstacle needs a reviewed dated standards exception; no exception
-   is approved by this document or by an agent posting a proposed draft.
+1. Review each provider criterion against repository evidence and actual operations; mark incomplete items honestly.
+2. Confirm security-response and review practices personally.
+3. Complete production release verification before claiming release-related criteria.
+4. Save the evidence-backed assessment on the provider, with any required agreement confirmed by the maintainer.
+
+No passing badge, approved exception, independent reviewer, or completed production release is claimed by this document.

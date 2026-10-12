@@ -1,151 +1,45 @@
 # Contributing to MarkdownViewr
 
-Thanks for helping. This project follows the
-[KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards); this page is the
-short version of what they ask of a contribution.
+Questions, bug reports, documentation improvements, and code contributions are welcome. For everyday use, start with the [user guide](docs/user-guide.md). For build commands and tests, use [DEVELOPERS.md](DEVELOPERS.md).
 
 ## Before you start
 
-For anything beyond a small fix, open an issue first so the approach can be agreed
-before you invest time. Questions and proposals are welcome in
-[Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues).
+For a substantial change, open an [issue](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose) first to agree on the approach. Ask usage questions in [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions).
 
-## Setup
+Report security vulnerabilities privately according to [SECURITY.md](SECURITY.md). Do not include private documents, credentials, or personal information in reports, screenshots, or test fixtures.
 
-Prerequisites: Windows 10 1809 or later, the .NET 10 SDK (`global.json` pins the feature
-band), and optionally Visual Studio 2026 or Rider. The
-[workstation setup](https://github.com/KofTwentyTwo/standards#set-up-your-machine)
-installs everything, including the git hooks' tools. The commands below are exactly what
-CI runs; run them before pushing.
+## Development workflow
 
-```powershell
-dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
-dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror
+This Product follows the [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards).
 
-# Unit tests, then the 100% line-coverage gate over every measured assembly
-dotnet test MarkdownViewr.Windows.slnx -p:Platform=x64 --no-build --filter "FullyQualifiedName!~UiTests" --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory TestResults
-./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
+1. Branch from `main` using `<type>/<short-description>`, for example `fix/source-highlighting`.
+2. Follow the [developer guide](DEVELOPERS.md), install both pre-commit and commit-msg hooks, and run the relevant quality gates.
+3. Make signed, signed-off [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/): `git commit -S -s`.
+4. Open a pull request targeting `main` with a Conventional Commit title. PRs are squash merged.
+5. Resolve all review threads and required checks before merging.
 
-# End-to-end UI tests: FlaUI launches the app (needs an interactive desktop)
-dotnet test tests/MarkdownViewr.Windows.UiTests
+## Pull request checklist
 
-# Style gate (Kingsrook layout, analyzers, naming)
-dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
+- Explain the problem, resulting behavior, and linked issues.
+- Report the checks you actually ran and any limitations.
+- Include screenshots for UI changes and update user documentation.
+- Retain zero-warning builds, clean formatting, and 100% measured core line coverage.
+- Add regression tests for fixes; exercise native and installed behavior where relevant.
+- Justify dependency changes and commit regenerated locks.
+- Update the [threat model](docs/security/threat-model.md) for attack-surface changes.
+- Preserve original MIT notices and dependency credits.
+- Disclose substantial AI assistance and include a `Co-Authored-By:` trailer naming the model.
 
-# PowerShell tooling gate (install PSScriptAnalyzer 1.25.0 once)
-Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0
-# Load repository command metadata; keep casing separate from other analyzer rules.
-Import-Module ./build/GitHubRepository.psm1 -Force
-foreach($script in Get-ChildItem build -File | Where-Object Extension -In '.ps1', '.psm1', '.psd1') {
-   $findings = @(
-      Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -IncludeRule PSUseCorrectCasing
-      Invoke-ScriptAnalyzer -Path $script.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -ExcludeRule PSUseCorrectCasing
-   )
-   if($findings.Count -ne 0) { $findings | Format-Table; throw 'Script analysis failed.' }
-}
-Import-Module Pester -RequiredVersion 5.7.1
-Invoke-Pester -Path build/*.Tests.ps1 -CI
-```
+Required CI covers build/coverage/style, reader and installed-update acceptance, parser fuzzing, tooling tests, dependency/secret/workflow scans, CodeQL, PR title, and DCO.
 
-`dotnet format` (without `--verify-no-changes`) fixes layout, `var` use, usings, and
-line endings. Two Kingsrook rules it cannot apply are checked in review: three blank
-lines between members, and a header comment on every type and method (Rider and
-ReSharper apply the blank lines from `.editorconfig`). Changing a package version means
-updating `Directory.Packages.props` and committing the regenerated `packages.lock.json`
-files (`dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --force-evaluate`).
+Under the single-maintainer policy, `review / automated` also requires a genuine current-commit acknowledgement from the configured human maintainer. An agent cannot provide that acknowledgement. See [repository setup](docs/repository-setup.md).
 
-Install the git hooks once per clone (the hook configuration comes from
-[KofTwentyTwo/standards](https://github.com/KofTwentyTwo/standards/tree/main/configs/pre-commit)):
+## Sign-off and license
 
-```sh
-pre-commit install --hook-type pre-commit --hook-type commit-msg
-```
-
-## Workflow
-
-1. Branch from `main` with a short-lived topic branch named `<type>/<short-description>`,
-   for example `feat/export` or `fix/42-splash-never-dismisses`.
-2. Commit with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-   (`feat: ...`, `fix(settings): ...`). Every commit is **signed** and **signed off**:
-   `git commit -S -s` (see *Sign-off* below).
-3. Open a pull request against `main`. Its title must itself be a Conventional Commit
-   header: pull requests are **squash-merged**, so the title becomes the commit message on
-   `main`.
-4. Every required check must pass, and every review thread must be resolved, before the
-   pull request merges.
-
-## What makes a contribution acceptable
-
-- The build has **zero warnings**, and the format gate is clean.
-- New behavior has tests; a bug fix has a test that fails without the fix.
-- Line coverage of `MarkdownViewr.Windows.Core` stays at **100%**. Logic goes in `MarkdownViewr.Windows.Core`; the
-  WinUI project holds views and framework plumbing only
-  ([ADR-0001](docs/adr/0001-adopt-the-windows-desktop-reference-architecture.md)).
-- User-visible changes update the docs in the same pull request; attack-surface changes
-  update the [threat model](docs/security/threat-model.md).
-- No secrets, credentials, or personal data, ever.
-- New dependencies are justified in the pull request description.
-
-## Checks that gate a merge
-
-| Check | What it verifies |
-| --- | --- |
-| `pr / title` | The PR title is a Conventional Commit header |
-| `pr / dco` | Every commit is signed off |
-| `pr / dependency-review` | Added dependencies have no known vulnerabilities and an allowed license |
-| `fuzzing` | Repeatable parser security properties; longer weekly and release campaigns |
-| `security / secrets`, `security / sca`, `security / workflows` | No secrets, no vulnerable or malicious dependencies, safe workflows |
-| `codeql / analyze (csharp)`, `codeql / analyze (actions)` | No high-severity static analysis findings |
-| `ci / build-test` | Locked restore, zero-warning build, unit tests, 100% coverage gate |
-| `ci / format` | `dotnet format --verify-no-changes --severity warn` |
-| `ci / ui-tests` | FlaUI end-to-end tests of the app |
-| `installed-updates` | Real stable/dev installers, upgrades, restart and published-output UI smoke |
-| `powershell`, `javascript` | Tool lint, setup/coverage boundary tests, review tests and dependency signatures |
-| `codeql / analyze (javascript-typescript)` | Static analysis of repository review tooling |
-| `review / automated` (single maintainer) | Current-commit automated review acknowledged by the configured human maintainer |
-
-Run `npm ci --ignore-scripts`, `npm run lint` and `npm test` for repository JavaScript.
-CI checks `PSUseCorrectCasing` alone, then all remaining rules, using the unchanged
-settings and failing on every finding or engine exception. This avoids the observed
-1.25.0 command-metadata race; neither pass disables a required rule. Negative fixtures
-verify both partitions still report violations. For the same local workaround, supply
-`-IncludeRule PSUseCorrectCasing` and then `-ExcludeRule PSUseCorrectCasing` in two
-sequential `Invoke-ScriptAnalyzer` calls; evaluate findings from both.
-Run PSScriptAnalyzer with `PSScriptAnalyzerSettings.psd1` and Pester against
-`build/*.Tests.ps1`. New owners follow [repository setup](docs/repository-setup.md).
-
-## Parser campaigns
-
-Run the [seeded parser targets](docs/security/fuzzing.md) when changing document,
-source, URL, theme-import or activation boundaries. The required `fuzzing` check
-runs PR/main budgets; weekly and release gates use longer campaigns. Retain and
-minimize failing synthetic inputs into regression cases. Never execute generated
-content or use private files/profiles as a corpus. Best Practices enrollment and
-actual signing remain separate maintainer requirements.
-
-## Sign-off (Developer Certificate of Origin)
-
-By signing off a commit you certify the
-[Developer Certificate of Origin 1.1](https://developercertificate.org/): that you wrote
-the change, or otherwise have the right to submit it under the project's license.
-`git commit -s` appends the sign-off:
+Signing off certifies the [Developer Certificate of Origin 1.1](https://developercertificate.org/): you wrote the contribution or have the right to submit it under the project's license. `git commit -s` adds:
 
 ```text
 Signed-off-by: Your Name <your.email@example.com>
 ```
 
-The name and email must match the commit author. To add missing sign-offs to a branch,
-run `git rebase --signoff main` and force-push the branch.
-
-## AI-assisted contributions
-
-AI coding tools are welcome. You remain the author: you must understand, test, and be
-able to explain every line you submit, and you sign it off as your own. Note substantial
-AI assistance in the pull request description.
-Include a Co-Authored-By trailer naming the model for significant AI contributions
-(K22-AGENT-40 / K22-AI-02).
-
-## License
-
-By contributing, you agree that your contributions are licensed under the project's
-[MIT License](LICENSE).
+The sign-off must match the commit author. Contributions are licensed under the project's [MIT License](LICENSE). AI assistance does not remove your responsibility to understand, test, and explain the change.

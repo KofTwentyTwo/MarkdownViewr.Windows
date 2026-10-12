@@ -4,30 +4,33 @@ Updated: 2026-10-12
 
 ## Current release status - 2026-10-12
 
-Owner explicitly authorizes publication and confirms review/resolved findings for
-standards PR31/e3aaed4, PR39/0f46568 and PR41/1e2179a. All are merged. The
-reproduced PSScriptAnalyzer metadata race is fixed without dropping rules/tests
-or deadlines: 20 fresh-process probes and every hosted signing gate pass.
-Standards1.1.0 is published immutably at93b1d6163a4c466ae443e98b62786fc4d80d33bd,
-releaseCI38275622522 green. All five asset attestations, checksums and exact
-reviewed builder/module/composite bytes verify; evidence remains in AppKit/
-artifacts/standards-1.1.0-93b1d61. Checklist40 shipping proof is prepared.
+Standards 1.1.0 is published immutably at
+93b1d6163a4c466ae443e98b62786fc4d80d33bd; release CI38275622522 succeeds.
+All five asset attestations, checksums, and reviewed builder bytes verify.
+Standards inventory PR36 is merged at089a94ac following genuine owner review.
 
-The app's final delta enables signing with the published SHA and explicit six-file
-catalog. Nine preflight tests, actual protected-variable preflight and workflow
-syntax/online security pass. Tested application code remains321816c: current
-313d258 acceptance passes published111, stable/dev110 each with zero skips,
-actual updates/restarts, registrations, default preservation and coexistence.
-Local final installer/portable/update signatures and payload checks pass;
-production CI OIDC and 1.0/dev publication still need the release run.
+App signing caller/catalog b1dc874 passes every hosted check in CI38276579007.
+Actual application code remains321816c. Retained published111 and installed
+stable/dev110 TRXs each have zero failures/skips; update/restart receipts,
+registrations, preserved defaults, and coexistence verify. Core677 tests and
+100% measured core line coverage pass. Local representative final signing and
+distribution proof pass; production CI OIDC signing and publication remain pending.
 
-Keep scope to publication: no redesign, new feature work or repeated unchanged
-acceptance runs. Owner previews/profiles remain untouched. Final app review record,
-actual Windows OpenSSF URL and prepared inventory PR36 review remain required.
-The process-only Scorecard assessment is explicit; no invented badge, reviewer,
-90-day history or vulnerability statement. Final caller/docs commit will run the
-required unchanged CI; avoid additional commits while it runs unless a real failure
-or required owner enrollment result changes the candidate.
+Owner explicitly requested a user-first product README, real screenshots, usage
+documentation, separate developer guide, and public repository presentation.
+Issue34 tracks that batch. Two actual isolated preview screenshots were captured
+after the owner reserved a clear desktop; no private documents or background apps
+are included. Original owner processes/profiles remain untouched.
+
+OpenSSF Metal project15417 is registered for this Windows repository, initially
+18% complete after provider import. Actual URL and progress badge are recorded;
+no passing badge or completed operating-practice assessment is claimed.
+
+Next: finish this documentation candidate, obtain genuine final-head app review
+record, pass required checks, apply/read back the planned fuzzing context, merge,
+and publish signed1.0.0-beta.1/dev plus1.0.0/stable with exact asset verification.
+Issue33 is the release checklist. No new features or repeated unchanged local
+acceptance are needed. Existing publication authorization remains valid.
 
 ## Azure configured and representative local signatures verified - 2026-10-12
 
