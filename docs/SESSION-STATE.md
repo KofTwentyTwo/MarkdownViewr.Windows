@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Complete distributed checkpoint; placement fix pushed - 2026-10-11
+
+Exact9d5c0d1 CI38188145397 is terminal success. Actual TRX: native/published106/106,
+focused26/26, installed stable/dev105/105 each; zero failures/skips. Retain actual
+installed TRXs/results/coexisting-channels JSON under
+artifacts/current-installed-evidence-38188145397. Both real AppKit updates restart
+at the expected target with verified application hashes. Concurrent stable/dev
+windows, distinct profiles, isolated updates, five registered extensions and
+sibling-preserving uninstall pass. Fixtures are unsigned; OS chooser/Explorer and
+production signing are still not established.
+
+Signed/DCO c3c735e now pushed: centers the bounded Settings window in its actual
+monitor work area and adds independent desktop containment to the existing layout
+case. Exact CI38190828814 is running. Inspect complete Settings screenshots and
+retain fresh distributed results; do not push more changes while it is live.
+Public Microsoft OpenID discovery resolves the supplied directory to GUID
+4ebeb0ad-5782-487a-a1b4-5080255774cf, but signing-resource tenancy/profile/subject
+still require authenticated Azure inspection. No login retry/configuration change.
+
+Shared draft PRs and the license exception need their required maintainer decision;
+current-head review requires a genuine acknowledgement. No shared merges, local GUI
+input, preview55472 changes, tags or release publication. Latest snapshot below is
+historical where superseded by this checkpoint.
+
 ## Exact9d5c0d1 native acceptance passes; Settings placement corrected locally - 2026-10-11
 
 Exact CI38188145397 focused26/26 and full native106/106 pass, zero failures/skips.

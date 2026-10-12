@@ -7,6 +7,16 @@ role assignments. Never export keys or add administrative passwords to CI.
 
 ## Verify the deployed resource
 
+Public Microsoft OpenID discovery on2026-10-11 resolves the supplied directory
+`koftwentytwooutlook.onmicrosoft.com` to tenant GUID
+`4ebeb0ad-5782-487a-a1b4-5080255774cf`. Its
+[discovery metadata](https://login.microsoftonline.com/koftwentytwooutlook.onmicrosoft.com/v2.0/.well-known/openid-configuration)
+returns issuer `https://login.microsoftonline.com/4ebeb0ad-5782-487a-a1b4-5080255774cf/v2.0`.
+This identifies the directory only; it does not establish the signing subscription's
+tenant, regional endpoint, active profile or verified publisher subject. The
+existing CLI context still has no authenticated account. Confirm the deployed
+resource below before setting any CI values; no login retry or Azure change was made.
+
 With an authorized interactive Azure session, inspect the actual tenant, regional
 account URI and profiles. The account/subscription below are owner-provided setup
 values; the returned resource must confirm them before configuration.

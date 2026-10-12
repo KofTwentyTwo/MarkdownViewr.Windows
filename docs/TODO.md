@@ -2,7 +2,7 @@
 
 - [x] Exact9d5c0d1 full native106/106 and focused26/26 pass, zero skips; retain actual TRX/Settings screenshots and logs.
 - [x] Correct observed offscreen Settings placement by centering size/position in the actual monitor work area; zero-warning build/format pass.
-- [ ] Verify whole-window visibility and inspect complete Settings screenshots on the next exact head; preserve current live installed run before pushing.
+- [ ] Verify whole-window visibility and inspect complete Settings screenshots on pushedc3c735e / CI38190828814; preserve its live execution.
 
 - [x] Retain terminal1bfab22 native102/106, focused23/26 and published600-second/no-TRX evidence; same four failures, installed lifecycle not reached.
 
@@ -17,7 +17,7 @@
 - [x] Exact9d5c0d1 actual palette pixels/default/save/reopen passes and Settings screenshot inspected; new placement correction remains pending.
 - [x] Retain terminal b2ecc8c focused23/24/native101/102 and published600-second timeout/no TRX; only source alignment fails in completed suites.
 - [x] Prepare fixture-only closure of all owned windows before unchanged FlaUI close/kill fallback; preserve cases/assertions/deadlines.
-- [ ] Verify whole published/installed completion and corrected actual source/tooltip/default status on the next exact head.
+- [x] Exact9d5c0d1 published106/106 and installed stable/dev105/105 pass with zero skips, including source/tooltip/default status; retain actual TRXs and coexistence JSON.
 
 - [x] Prepare truthful General effective `.md` default status with bounded read-only Windows querying and automatic/manual refresh;7 actual read-only/isolated adapter tests pass.
 - [ ] Verify actual General status/refresh and user-selected OS chooser/Explorer behavior on an installed build; registration alone is not default selection.
@@ -51,7 +51,7 @@
 - [x] Reproduce multiline raw-header loss in core tests and correct parser token end spans;589 core/100% measured lines, zero-warning Release/format pass.
 - [x] Exactbd3d72a: raw-HTML correction passes focused21/21 and native99/99; retain published process log with two real initial print-fixture failures and600-second outer timeout/no TRX.
 - [ ] Diagnose actual published print startup failures using owned logs/tree/screenshots and per-case progress; preserve deadlines/assertions.
-- [ ] Verify full published/installed suites and new registration lifecycle/coexistence readbacks on the next exact head.
+- [x] Exact9d5c0d1 full published/installed suites and actual registration lifecycle/coexistence readbacks pass; unsigned fixtures are not production-signature proof.
 
 - [x] Generate and publish the GUI-only AppKit application with the approved identity.
 - [x] Configure/read back repository protections and establish the initial hosted CI baseline.
