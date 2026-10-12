@@ -389,3 +389,16 @@ and acknowledgements with a controlled continuation schedule: its pre-fix next
 connection times out; after the cleanup correction it recovers. Four cases and
 25runs/100tests pass locally. Exact hosted published/installed proof remains
 required. No protocol, caller privileges or document/native capability expands.
+
+## Authored HTML extension boundary
+
+Source identities/ranges are captured before visible raw-text formatting. Actual
+HTML tokenizer spans delimit candidate text; attributes, comments and code/pre
+content are not rewritten. Each selected reference pattern has a one-second
+regex limit, and the existing document-size guard applies before parsing. Metadata
+retains the original body-only subscript preprocessing boundary. Every result
+still passes the unchanged tag/attribute/scheme sanitizer and browser CSP; these
+passive formatting tags provide no scripts, host messages or native capabilities.
+Core regressions exercise all16 preference combinations, protected inline/block
+code, comments/attribute lookalikes, entities and exact CRLF/Unicode source ranges.
+Fresh hosted browser/distributed acceptance is required for this correction.

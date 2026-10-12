@@ -2,6 +2,30 @@
 
 Updated: 2026-10-11
 
+## Authored HTML fidelity corrected locally; preceding run fully green - 2026-10-11
+
+Exactc3c735e / CI38190828814 is terminal success. Actual TRX native/published106/106,
+focused26/26, installed stable/dev105/105 each, zero failures/skips. Both AppKit
+updates/restarts/target hashes and actual concurrent-channel registration/profile/
+isolation/sibling-preserving uninstall pass; retain
+artifacts/current-installed-evidence-38190828814 actual TRXs and JSON. Unsigned
+fixtures do not establish chooser/Explorer or production signatures.
+
+Immutable original MarkdownDocument/MarkdownExtensions/ImageInliner blobs are
+Git-hash verified. Four actual pre-fix cases reproduce authored inline code being
+formatted. Existing boundary handling now tracks true code/pre tags and real
+closing tags across blocks. Raw block extensions apply only to tokenizer-visible
+text after source positions are recorded, preserving attributes/comments/code and
+entity spelling; metadata matches body-only subscript preprocessing.642 core
+cases/100% measured lines and isolated-output zero-warning Release/full format
+pass. Original MIT attribution retained and renderer boundary documented. Extended
+existing actual browser case/focused filter is compiled; fresh runtime required.
+
+Prior CI is terminal, so the next authorized push may include the held signed docs
+and this correction without cancelling evidence. Shared signing31 approval request
+still pending; no reply or merge assumed. Protected Azure variables remain empty;
+no login retry, local GUI input, owner preview55472 change, tag or publication.
+
 ## Placement screenshots verified; shared builder decision requested - 2026-10-11
 
 Read-only gclo v1.1.0 reference archive matches published SHA256SUMS. Extracted

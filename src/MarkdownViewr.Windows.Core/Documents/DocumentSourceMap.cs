@@ -57,7 +57,7 @@ internal sealed class DocumentSourceMap
 
 
    /// <summary>AST headings include Setext and exclude fences; raw HTML uses parser tokens and original line slices.</summary>
-   public string Render(string markdown, MarkdownPipeline pipeline, int offset)
+   public string Render(string markdown, MarkdownPipeline pipeline, int offset, Func<MarkdownDocument, string> render)
    {
       MarkdownDocument document = Markdown.Parse(markdown, pipeline);
       foreach(MarkdownObject node in document.Descendants())
@@ -75,7 +75,7 @@ internal sealed class DocumentSourceMap
             AnnotateInlineHeadings(leaf, offset);
          }
       }
-      return Markdown.ToHtml(document, pipeline);
+      return render(document);
    }
 
 

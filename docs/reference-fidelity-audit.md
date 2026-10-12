@@ -131,3 +131,28 @@ Actual Settings screenshots reveal the window extends beyond the monitor despite
 its bounded size. Local FitWindow now centers the resized window in its monitor
 work area; the existing native layout test adds desktop containment. Build/format
 pass; fresh rendered visibility and full runtime acceptance remain required.
+
+## Authored HTML extension correction
+
+The immutable MarkdownDocument.swift blob212caf9e8fcffdc7bb7e78c739402cd8d6449562
+confirms protected pre/code regions, visible raw-text post-render extensions and
+the body-only subscript preprocessing boundary. MarkdownExtensions.swift
+c6a2d3f9931580eaab1fdef17661632f6e9c71d0 and ImageInliner.swift
+5d7263613ebf96c43565a8f793d8f2dc6917e846 were also retrieved and Git-hash verified.
+
+Four pre-fix core cases reproduce extension formatting inside authored inline
+code. The existing literal-boundary pass now protects actual code/pre tags and
+restores formatting after real closing tags across HTML blocks. Raw block visible
+text receives enabled formatting after source annotation; tokenizer spans preserve
+attributes/comments/code and entity spelling. Windows protects all four syntax
+families in authored code, including subscript that the original body preprocessor
+can rewrite before its HTML code guard. Metadata matches the reference
+post-render/body-only subscript distinction.642 core tests pass with100% measured
+lines, zero-warning Release and full format pass. The existing browser extension
+case now checks distinct inline/block code peers and a raw-heading label through
+preference changes; focused CI also includes this case. Runtime remains pending.
+
+The preceding exactc3c735e / CI38190828814 is terminal success: native/published
+106/106, focused26/26, installed stable/dev105/105 each, zero skips. Actual
+complete Settings screenshots and coexistence/registration/update evidence are
+retained. Those results predate the new renderer correction and do not certify it.

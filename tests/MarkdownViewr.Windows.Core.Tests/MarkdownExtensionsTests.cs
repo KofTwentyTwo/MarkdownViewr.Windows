@@ -59,6 +59,72 @@ public sealed class MarkdownExtensionsTests
 
 
 
+   /// <summary>Raw block text follows the reference options while attributes and authored code remain unchanged.</summary>
+   [Theory]
+   [InlineData(0)]
+   [InlineData(1)]
+   [InlineData(2)]
+   [InlineData(3)]
+   [InlineData(4)]
+   [InlineData(5)]
+   [InlineData(6)]
+   [InlineData(7)]
+   [InlineData(8)]
+   [InlineData(9)]
+   [InlineData(10)]
+   [InlineData(11)]
+   [InlineData(12)]
+   [InlineData(13)]
+   [InlineData(14)]
+   [InlineData(15)]
+   public void Render_RawHtmlBlockOptions_PreservesAttributesAndCode(int mask)
+   {
+      const string Syntax = "==Highlight== ^Power^ H~2~O ++Underline++";
+      const string Markdown = "<div title='==attribute== ^attribute^ ~attribute~ ++attribute++'>\n" + Syntax + "\n<code>" + Syntax + "</code>\n<pre>" + Syntax + "</pre>\n</div>";
+      var options = new MarkdownExtensions((mask & 1) != 0, (mask & 2) != 0, (mask & 4) != 0, (mask & 8) != 0);
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer(options).Render(Markdown));
+      Assert.Equal("==attribute== ^attribute^ ~attribute~ ++attribute++", document.QuerySelector("div")!.GetAttribute("title"));
+      Assert.Equal(Syntax, document.QuerySelector("code")!.TextContent);
+      Assert.Equal(Syntax, document.QuerySelector("pre")!.TextContent);
+      Assert.Equal(options.Highlight ? 1 : 0, document.QuerySelectorAll("mark").Length);
+      Assert.Equal(options.Superscript ? 1 : 0, document.QuerySelectorAll("sup").Length);
+      Assert.Equal(options.Subscript ? 1 : 0, document.QuerySelectorAll("sub").Length);
+      Assert.Equal(options.Underline ? 1 : 0, document.QuerySelectorAll("ins").Length);
+   }
+
+
+
+   /// <summary>Reference metadata receives post-render extensions but keeps the body-only subscript preprocessing boundary.</summary>
+   [Theory]
+   [InlineData(0)]
+   [InlineData(1)]
+   [InlineData(2)]
+   [InlineData(3)]
+   [InlineData(4)]
+   [InlineData(5)]
+   [InlineData(6)]
+   [InlineData(7)]
+   [InlineData(8)]
+   [InlineData(9)]
+   [InlineData(10)]
+   [InlineData(11)]
+   [InlineData(12)]
+   [InlineData(13)]
+   [InlineData(14)]
+   [InlineData(15)]
+   public void Render_MetadataExtensions_PreservesReferencePreprocessingBoundary(int mask)
+   {
+      var options = new MarkdownExtensions((mask & 1) != 0, (mask & 2) != 0, (mask & 4) != 0, (mask & 8) != 0);
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer(options).Render("---\ntitle: ==Highlight== ^Power^ H~2~O ++Underline++\n---\n\nBody", FrontmatterMode.Metadata));
+      Assert.Equal(options.Highlight ? 1 : 0, document.QuerySelectorAll("mark").Length);
+      Assert.Equal(options.Superscript ? 1 : 0, document.QuerySelectorAll("sup").Length);
+      Assert.Equal(options.Underline ? 1 : 0, document.QuerySelectorAll("ins").Length);
+      Assert.Empty(document.QuerySelectorAll("sub"));
+      Assert.Contains("H~2~O", document.QuerySelector(".fm-value")!.TextContent, StringComparison.Ordinal);
+   }
+
+
+
    /// <summary>Inline, fenced and indented code remain literal even though all four extensions are enabled.</summary>
    [Fact]
    public void Render_CodeAndEscapes_PreservesLiteralSyntax()
@@ -70,6 +136,40 @@ public sealed class MarkdownExtensionsTests
       Assert.Equal(3, document.QuerySelectorAll("code").Length);
       Assert.All(document.QuerySelectorAll("code"), code => Assert.Equal(Syntax, code.TextContent.TrimEnd('\n')));
       Assert.Contains("==escaped== ^escaped^ ~escaped~ ++escaped++", document.Body!.TextContent, StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>Authored HTML code and delimiters spanning it remain literal, like protected inline/fenced code.</summary>
+   [Theory]
+   [InlineData("Before <code>==Highlight== x^Power^ H~2~O ++Underline++</code> after.")]
+   [InlineData("Before <CODE class='language-md'>==Highlight== x^Power^ H~2~O ++Underline++</CODE> after.")]
+   [InlineData("==<code>Highlight</code>==")]
+   [InlineData("++<code>Underline</code>++")]
+   public void Render_AuthoredCode_PreservesLiteralExtensionBoundaries(string markdown)
+   {
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer().Render(markdown));
+      Assert.Empty(document.QuerySelectorAll("mark,sup,sub,ins"));
+      Assert.NotNull(document.QuerySelector("code"));
+      using AngleSharp.Html.Dom.IHtmlDocument literal = new HtmlParser().ParseDocument(markdown);
+      Assert.Equal(literal.Body!.TextContent, document.Body!.TextContent.TrimEnd('\n'));
+   }
+
+
+
+   /// <summary>Actual closing tags across HTML blocks restore formatting without granting code-like tag names protection.</summary>
+   [Theory]
+   [InlineData("Before <code>==Literal==\n\n==Protected==\n</code>\n\n==Outside==")]
+   [InlineData("<pre>==Literal==</pre>\n\n==Outside==")]
+   [InlineData("Before </code> ==Outside==")]
+   [InlineData("Before <code-other>==Ignored==</code-other> ==Outside==")]
+   [InlineData("Before <a title='<code>'>==Outside==</a>")]
+   [InlineData("Before <!--<code>-->==Outside==")]
+   public void Render_AuthoredCodeClosingAndLookalikes_RestoresOutsideExtensions(string markdown)
+   {
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer().Render(markdown));
+      Assert.Equal("Outside", Assert.Single(document.QuerySelectorAll("mark")).TextContent);
+      Assert.Empty(document.QuerySelectorAll("code mark,pre mark"));
    }
 
 
@@ -137,6 +237,38 @@ public sealed class MarkdownExtensionsTests
       var disabled = new DocumentOutline(Source, mode, new MarkdownExtensions(false, false, false, false));
       Assert.Equal("==Highlighted== H~2~O", disabled.Headings[^2].Title);
       Assert.Equal("++Underlined++ ^Power^", disabled.Headings[^1].Title);
+      Assert.Equal(outline.SourceHeadings, disabled.SourceHeadings);
+   }
+
+
+
+   /// <summary>Protecting authored heading code does not rewrite the original source identities or ranges.</summary>
+   [Fact]
+   public void Create_AuthoredCodeHeading_PreservesOriginalOffsets()
+   {
+      const string Source = "# Root\n\nprefix <h2>Child <code>==Literal== ^Power^</code> ==Marked==</h2>\n\nBody.";
+      var outline = new DocumentOutline(Source);
+      Assert.Equal("Child ==Literal== ^Power^ Marked", outline.Headings[1].Title);
+      DocumentSourceHeading heading = outline.SourceHeadings[1];
+      Assert.Equal("<h2>Child <code>==Literal== ^Power^</code> ==Marked==</h2>", Source[heading.Start..heading.End]);
+      var disabled = new DocumentOutline(Source, extensions: new MarkdownExtensions(false, false, false, false));
+      Assert.Equal("Child ==Literal== ^Power^ ==Marked==", disabled.Headings[1].Title);
+      Assert.Equal(outline.SourceHeadings, disabled.SourceHeadings);
+   }
+
+
+
+   /// <summary>Formatting raw headings changes visible labels while preserving exact CRLF/Unicode source spans and code text.</summary>
+   [Fact]
+   public void Create_RawBlockExtensionHeading_PreservesOriginalOffsetsAndEntities()
+   {
+      const string Source = "# Root\r\n\r\n<h2 title='==attribute=='>==Raw &amp; café 😀== <code>++Literal++</code></h2>\r\n\r\nBody.";
+      var outline = new DocumentOutline(Source);
+      Assert.Equal("Raw & café 😀 ++Literal++", outline.Headings[1].Title);
+      DocumentSourceHeading heading = outline.SourceHeadings[1];
+      Assert.Equal("<h2 title='==attribute=='>==Raw &amp; café 😀== <code>++Literal++</code></h2>", Source[heading.Start..heading.End]);
+      var disabled = new DocumentOutline(Source, extensions: new MarkdownExtensions(false, false, false, false));
+      Assert.Equal("==Raw & café 😀== ++Literal++", disabled.Headings[1].Title);
       Assert.Equal(outline.SourceHeadings, disabled.SourceHeadings);
    }
 

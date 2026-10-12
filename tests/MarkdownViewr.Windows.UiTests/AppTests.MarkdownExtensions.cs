@@ -18,10 +18,15 @@ public partial class AppTests
    public void Extensions_NativePreferences_PreserveLiteralSourceAndReload()
    {
       const string Heading = "==Highlighted== ^Power^ ~Sub~ ++Underlined++";
-      const string Source = "# " + Heading + "\n\nLiteral extension acceptance.";
+      const string HtmlCode = "==Literal inline HTML code== ^Power^ H~2~O ++Underline++";
+      const string RawCode = "==Literal block HTML code== ^Power^ H~2~O ++Underline++";
+      const string Source = "# " + Heading + "\n\nLiteral extension acceptance.\n\nAuthored code: <code>" + HtmlCode + "</code> and ==Outside==.\n\n<h2>==Raw HTML highlight==</h2>\n<pre><code>" + RawCode + "</code></pre>";
       using var session = new AppSession(document: Source);
       session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0").And(cf.ByName("Highlighted Power Sub Underlined"))), "all enabled extension glyphs in the actual browser", TimeSpan.FromSeconds(30));
+      session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-1").And(cf.ByName("Raw HTML highlight"))), "the raw HTML extension label in the actual browser");
       WaitForHighlightPaint(session, visible: true);
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName(HtmlCode)), "literal authored inline HTML code in the actual browser");
+      session.WaitFor(() => session.FindInApp(cf => cf.ByName(RawCode)), "literal authored block HTML code in the actual browser");
       session.InvokeMenuItem("View", "SourceToggle");
       string literal = session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value;
       Assert.Contains(Heading, literal, StringComparison.Ordinal);
@@ -33,6 +38,9 @@ public partial class AppTests
          session.MouseClickElement(ids[index]);
          session.WaitFor(() => session.FindInApp(cf => cf.ByAutomationId("mv-heading-0").And(cf.ByName(titles[index]))), "the actual heading after the independent " + ids[index] + " change");
          Assert.Equal(literal, session.WaitForElement("SourceText").Patterns.Value.Pattern.Value.Value);
+         Assert.NotNull(session.FindInApp(cf => cf.ByName(HtmlCode)));
+         Assert.NotNull(session.FindInApp(cf => cf.ByName(RawCode)));
+         Assert.Equal("==Raw HTML highlight==", session.WaitForElement("mv-heading-1").Name);
       }
       WaitForHighlightPaint(session, visible: false);
       using(var saved = JsonDocument.Parse(session.ReadSettings()))
