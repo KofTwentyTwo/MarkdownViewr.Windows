@@ -2,6 +2,32 @@
 
 Updated: 2026-10-11
 
+## Application source review finished; next hosted checkpoint - 2026-10-11
+
+All105 application C# files (41 core/64 native), native markup/project configuration
+and relevant CI/release/installed-lifecycle paths are reviewed. Inventory with
+blob hashes and review scope are retained in artifacts/final-pr-review-progress.json
+and application-review-3b01199.md. Test implementation review was focused; this
+is not final production assessment or genuine maintainer acknowledgement.
+The six reserved filename corrections remain the only new source finding;668
+core tests/100% measured lines and format pass. No further blocking source
+defect established. Consolidate this checkpoint with the held signed fix and
+push for fresh hosted gates; preserve all cases/deadlines.
+
+Correction to the earlier screenshot comparison: ThemeManagementDialog, ThemeEditor
+and EditorConfigurationDialog already route through ShowEditorAsync in Settings;
+old class names do not imply separate modal windows. Owner visual/scaling review
+remains pending. Private screenshot/document contents stay private.
+
+Live PR3 still shows b542dcd automated gates passed (native/published109, focused28,
+installed108 per channel, zero skips); its genuine review check is unsatisfied.
+Shared signing31 remains an unmerged draft without approval, protected release
+variables are empty and signing preflight correctly blocks publication. Pending
+shared merge/publication approval was not answered; no Azure login retry. Actual
+OS chooser/Explorer and owner design acceptance, shared inventory/license decisions,
+repository signing authority and exact shipped SignTool proof remain required.
+No preview55472 changes, local input, shared merge, tag or release publication.
+
 ## All-channel acceptance retained; final PR review in progress - 2026-10-11
 
 Exactb542dcd CI38197169201 is terminal success: native/published109/109,
