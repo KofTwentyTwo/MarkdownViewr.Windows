@@ -330,7 +330,7 @@ public partial class AppTests
          string windows = string.Join(Environment.NewLine, session.TopLevelWindows().Select(window =>
             "Window=" + window.Name + "; " + string.Join(Environment.NewLine, window.FindAllDescendants().Take(180).Select(element =>
                "Id=" + element.Properties.AutomationId.ValueOrDefault + "; Name=" + element.Properties.Name.ValueOrDefault + "; Type=" + element.Properties.ControlType.ValueOrDefault))));
-         throw new TimeoutException(exception.Message + " Logs: " + session.ReadLogs() + "; Owned native windows: " + windows + "; Main tree: " + session.DescribeDocumentStatus(), exception);
+         throw new TimeoutException(exception.Message + "; Last invocation: " + session.LastInvocation + "; Last mouse input: " + session.LastMouseInput + " Logs: " + session.ReadLogs() + "; Owned native windows: " + windows + "; Main tree: " + session.DescribeDocumentStatus(), exception);
       }
    }
 

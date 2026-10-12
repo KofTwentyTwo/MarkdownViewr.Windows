@@ -2,6 +2,9 @@
 
 ## Current release checklist
 
+- [x] Pushe6fd281 and verify hosted fuzz9/9 core+2/2 activation,677 core/100% lines, focused28 and full native111, zero skips; retain actual evidence.
+- [ ] Verify the owned Settings activation candidate through exact hosted native/published/installed acceptance after the observed picker failure and600-second published timeout. Preserve all cases/assertions/deadlines; current required-check addition remains unapplied.
+
 - [x] Exact82256f3 CI38201379210 passes668 core/100% lines, focused28, native/published109 and installed108 per channel, zero skips; actual lifecycle artifacts/logs retained.
 - [x] Prepare current-standard assurance record, five seeded parser/property targets and honest unenrolled Best Practices assessment (#30/#31).
 - [x] Run local long campaigns:80000 core inputs plus minimized oracle regression,20000 activation envelopes,677 core tests/100% measured lines, zero-warning Release/format and23 setup tests.

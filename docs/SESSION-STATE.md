@@ -1,6 +1,38 @@
 # Session State
 
-Updated: 2026-10-11
+Updated: 2026-10-12
+
+## Assurance push accepted natively; published picker failure investigated - 2026-10-12
+
+Signed/DCOe6fd281 is pushed. Hosted fuzz38204215912 passes core9/9 and activation2/2,
+zero skips; actual TRXs/log retained under current-fuzz-evidence-38204215912 and
+current-fuzz-e6fd281.log. ExactCI38204216325 passes677 core/100%, focused28/28,
+full native111/111 and format/scripts/security/CodeQL; retain current-native-
+e6fd281.log and reader-regressions-38204216325. Native duration10m11; do not infer
+published or installed acceptance from that result.
+
+Distributed job114664001461 fails: published process reaches its unchanged600-
+second bound with no final TRX. Actual ThemeTransfer_NativePickerCancels fails
+waiting10 seconds for exact native filename1148; owned-window evidence shows
+only Settings/main and blank SettingsStatus, with both app windows inactive in
+the retained screenshot. No installed phase/lifecycle is reached. Preserve
+current-installed-evidence-38204216325/process-15.log and installed job log.
+No signing/publication/required-check addition is inferred from partial success.
+
+A candidate activates the exact owned Settings window and focuses its actual
+native action before UIA invocation; prior helper did neither. Preserve original
+selector/assertions/cases/deadlines, add LastInvocation/LastMouseInput to timeout
+evidence. Full isolated Release0 warnings/errors and format pass; actual hosted
+validation still required. Inactive-owner causation remains a hypothesis until
+that evidence, not an established app defect. No production source changes.
+
+Current ruleset24859282 still requires the genuine review check and every prior
+context. Prepared ruleset-add-fuzz.json adds only Actions-bound fuzzing; do not
+apply until all required automated bootstrap gates pass. Shared31 signing approval,
+Azure resource/identity/profile verification and final signatures, actual Best
+Practices enrollment/shared inventory, final-head acknowledgement and owner
+layout/chooser acceptance remain required. No local GUI input, Azure login retry,
+shared merge, release tag or publication.
 
 ## Current standards delta prepared; preceding checkpoint fully accepted - 2026-10-11
 

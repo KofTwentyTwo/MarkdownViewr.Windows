@@ -423,6 +423,10 @@ public partial class AppTests
    {
       session.InvokeMenuItem("File", "SettingsMenuItem");
       session.WaitForElement(tab).Patterns.SelectionItem.Pattern.Select();
+      Window settings = session.TopLevelWindows().Single(window => string.Equals(window.Name, session.DisplayName + " — Settings", StringComparison.Ordinal)).AsWindow();
+      settings.SetForeground();
+      session.WaitForElement(identity).Focus();
+      Wait.UntilInputIsProcessed();
       session.ClickElement(identity);
    }
 
