@@ -45,8 +45,9 @@ Full product scope remains in PRODUCT.md; unsigned fixtures are not release proo
 - [ ] Push the renderer correction after the preceding terminal run and verify the extended actual browser case plus all native/published/installed suites.
 - [ ] Obtain owner acceptance of the toolbar, icon and native Settings layout, including Windows11 scaling. Actual user-selected Default Apps/Open With/Explorer behavior remains unverified; read-only status/registration tests do not replace it.
 - [ ] Complete remaining reference rendering/extension/image/link fidelity review. Preserve pinned document CSS and the explicit native-pane CSS boundary; representative tests do not certify arbitrary documents or CSS.
-- [ ] Obtain the required shared maintainer decisions: standards signing builder PR31, AppKit-only tooling license proposal PR32, inventory PR36 and shared Help PRs AppKit29/windows-app-template4. Prior permission covers draft pushes only.
-- [ ] After signing builder31 is reviewed/published, adopt its published full-SHA pin and required six-file signing catalog; preserve fail-closed publication.
+- [x] Owner review and release authority supplied for standards signing31, reference correction39 and analyzer fix41; all merged and builder1.1.0 published.
+- [ ] Obtain the prepared inventory PR36 human review for registration. AppKit-only tooling license32 and shared Help AppKit29/windows-app-template4 remain separate follow-ups.
+- [x] Standards1.1.0 is actually published/verified at93b1d616; final caller enables signing and its required six-file catalog, retaining fail-closed verification.
 - [x] Authenticated Azure readback verifies actual subscription/tenant, East US endpoint, Active releases/PublicTrust profile and full James Maes subject. Separate secretless CI identity, exact immutable release-environment trust, profile-scoped signer role and all seven protected release variables are configured/read back; existing gclo setup preserved.
 - [x] Local representative321816c six-binary signing test passes SignTool /pa /all /v and strict SHA256/publisher/trust/timestamp checks; owner previews untouched.
 - [ ] Prove the new CI identity through the protected release job; verify final installer/archive signatures after adopting the published reviewed builder.

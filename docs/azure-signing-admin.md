@@ -190,7 +190,8 @@ verified values through `gh variable set NAME --repo KofTwentyTwo/MarkdownViewr.
 `AZURE_SUBSCRIPTION_ID`, `ARTIFACT_SIGNING_ENDPOINT`, `ARTIFACT_SIGNING_ACCOUNT`,
 `ARTIFACT_SIGNING_PROFILE` and `ARTIFACT_SIGNING_SUBJECT` (full subject).
 
-The reviewed/published catalog builder remains a dependency (standards PR#31).
+The release caller now uses the reviewed standards v1.1.0 catalog builder;
+PRs #31, #39 and #41 provide its implementation and verified CI corrections.
 Current verified official pins are azure/login@v3.1.0 commit
 `a641126d1b8aa4d1fa005f4f92df94a3a4c4c906` and
 azure/artifact-signing-action@v2.0.0 commit

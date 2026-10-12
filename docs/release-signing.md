@@ -1,10 +1,9 @@
 # Windows release signing
 
-Application releases require Authenticode signing. The generated caller starts
-with `sign: false` so it remains compatible with its currently published builder,
-but its preflight blocks publication until the reviewed signing builder is
-published, pinned and configured. The source template's content-only NuGet package
-does not contain application binaries and uses a separate release workflow.
+Application releases require Authenticode signing. The caller enables `sign: true`
+with an explicit six-file ownership catalog and pins the reviewed standards v1.1.0
+builder. Configuration and final-signature checks stop publication on failure.
+The source template's content-only NuGet package uses a separate release workflow.
 
 ## Configure the protected environment
 
@@ -36,11 +35,10 @@ signing service. Never export a PFX or put administrative passwords in CI.
 
 ## Enable the reviewed builder
 
-Pin a published shared builder that supports an explicit `signing-files` catalog
-and verifies the final shipped bytes/signatures. Standards v1.0.0 contains gclo's
-Velopack signing fix, but lacks this catalog interface; do not enable a partial
-path or pin unpublished commits. After the prepared builder is reviewed and
-published, update the caller's full commit SHA/version comment and add:
+The release caller pins standards v1.1.0 at
+`93b1d6163a4c466ae443e98b62786fc4d80d33bd`. Its reviewed builder supports the
+explicit ownership catalog and verifies final shipped bytes/signatures. The
+configured catalog is:
 
 ```yaml
 sign: true
@@ -73,7 +71,8 @@ and the installed SignTool/dlib paths with an authorized identity.
 MarkdownViewr-specific verified OIDC claims and the precise remaining Azure
 administrator steps are in [azure-signing-admin.md](azure-signing-admin.md).
 This repository uses immutable owner/repository IDs in its subject; a copied
-name-only trust from gclo would not match. Azure resource/identity/role and protected release variables are verified; the
-representative six-binary local signing test passes. CI OIDC and exact final
-installer/distribution signing still require the protected release integration.
+name-only trust from gclo would not match. Azure resource/identity/role and protected release variables are verified. The
+local six-binary and final installer/portable/update-package signing proofs pass.
+The new CI identity and production artifacts still require the protected release
+run; local administrative signing does not prove CI OIDC.
 See the administrator runbook for actual evidence and remaining dependencies.

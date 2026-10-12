@@ -2,6 +2,33 @@
 
 Updated: 2026-10-12
 
+## Current release status - 2026-10-12
+
+Owner explicitly authorizes publication and confirms review/resolved findings for
+standards PR31/e3aaed4, PR39/0f46568 and PR41/1e2179a. All are merged. The
+reproduced PSScriptAnalyzer metadata race is fixed without dropping rules/tests
+or deadlines: 20 fresh-process probes and every hosted signing gate pass.
+Standards1.1.0 is published immutably at93b1d6163a4c466ae443e98b62786fc4d80d33bd,
+releaseCI38275622522 green. All five asset attestations, checksums and exact
+reviewed builder/module/composite bytes verify; evidence remains in AppKit/
+artifacts/standards-1.1.0-93b1d61. Checklist40 shipping proof is prepared.
+
+The app's final delta enables signing with the published SHA and explicit six-file
+catalog. Nine preflight tests, actual protected-variable preflight and workflow
+syntax/online security pass. Tested application code remains321816c: current
+313d258 acceptance passes published111, stable/dev110 each with zero skips,
+actual updates/restarts, registrations, default preservation and coexistence.
+Local final installer/portable/update signatures and payload checks pass;
+production CI OIDC and 1.0/dev publication still need the release run.
+
+Keep scope to publication: no redesign, new feature work or repeated unchanged
+acceptance runs. Owner previews/profiles remain untouched. Final app review record,
+actual Windows OpenSSF URL and prepared inventory PR36 review remain required.
+The process-only Scorecard assessment is explicit; no invented badge, reviewer,
+90-day history or vulnerability statement. Final caller/docs commit will run the
+required unchanged CI; avoid additional commits while it runs unless a real failure
+or required owner enrollment result changes the candidate.
+
 ## Azure configured and representative local signatures verified - 2026-10-12
 
 Browser login completes successfully. Authenticated account/ARM readback verifies
