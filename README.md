@@ -4,9 +4,7 @@ Read Markdown comfortably, keep up with changes, and turn your notes into someth
 
 MarkdownViewr is a dedicated Windows reader for project documentation, notes, and README files. Open a document, choose a look you like, and focus on the words.
 
-**[Release downloads](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases) · [User guide](docs/user-guide.md) · [Ask a question](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions)**
-
-> The first Windows release is being prepared. There are no published Windows downloads yet; the Releases page will contain the stable installer and development previews when publication completes.
+**[Download Windows installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) · [User guide](docs/user-guide.md) · [Ask a question](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions)**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15417/badge)](https://www.bestpractices.dev/en/projects/15417)
@@ -29,17 +27,17 @@ Contents and Source start hidden. Turn them on when needed, or change their new-
 
 ## Download and install
 
-The planned Windows packages support **Windows 10 version 1809 or later and Windows 11, x64**. Microsoft Edge WebView2 Runtime is required. No .NET SDK is needed to use a release.
+Windows packages support **Windows 10 version 1809 or later and Windows 11, x64**. Microsoft Edge WebView2 Runtime is required. No .NET SDK is needed to use a release.
 
 | Edition | Choose it for | Package |
 | --- | --- | --- |
-| Stable | Everyday reading | `markdownviewr-windows-stable-Setup.exe` |
-| Development preview | Trying upcoming changes | `markdownviewr-windows-dev-Setup.exe` |
-| Portable | Running without installation | `markdownviewr-windows-stable-Portable.zip` |
+| Stable | Everyday reading | [Download EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) |
+| Development preview | Trying upcoming changes | [Download dev EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.1-beta.1/markdownviewr-windows-dev-dev-Setup.exe) |
+| Portable | Running without installation | [Download portable ZIP](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Portable.zip) |
 
-Once available, download a package from [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.
+Download a package from [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.
 
-Installed editions check for updates through **Help → Check for updates**. Stable and development editions keep separate settings and update channels, so they can coexist. Portable copies do not self-update.
+Installed and portable editions check for updates through **Help → Check for updates**. Stable and development editions keep separate settings and update channels, so they can coexist.
 
 ## Quick start
 

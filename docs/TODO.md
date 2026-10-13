@@ -1,21 +1,16 @@
 # Development Tasks
 
-## Current release checklist - 2026-10-12
+## Release and follow-up work
 
-- [x] Merge genuinely owner-reviewed app through PR35 at38dd5c1; all main gates pass.
-- [x] Preserve signed1.0.0/stable and1.0.0-beta.1/dev tags; no release is published.
-- [x] Apply only the exact Syft image addition explicitly approved by the owner.
-- [x] Prove production Azure OIDC login; preserve existing account/profile/trust.
-- [x] Reproduce signing dependency conflict; standards PR44 real package bootstrap and40 signing tests pass locally.
-- [x] Measure stable retry110/111 without reported test failures before600-second limit; prepare bounded900-second suite budget with unchanged assertions/deadlines.
-- [ ] Obtain genuine reviews, pass exact-head hosted checks and merge the release fixes.
-- [x] Owner personally reviewed standards PR44; merge the signing fix and version-only PR42 through normal protections, then push signedstandards1.1.1.
-- [x] Update the app caller to fixed builder96cbdf2; preserve caller NuGet mapping and strict signing verification.
-- [x] Keep the exactjkg assertion while awaiting native text processing within its existing deadline; add the case to focused hosted regressions.
-- [ ] Verify fresh full hosted acceptance and obtain genuine final-head app review before merge.
-- [ ] Publish stable/dev EXE and ZIP candidates; verify exact distributed signatures, timestamps, hashes, SBOMs and attestations (#33).
-- [ ] Update user download links only after actual verified publication.
-- [ ] Deliver signed and acceptance-tested MSI installers in the next release (#36), following the owner's latest decision.
+- [x] Merge genuinely reviewed PR37 at4c0ccc7; all required gates pass, with actual focused30/native111/published111/stable110/dev110 reports and no failures/skips.
+- [x] Publish and verify owner-reviewed standards1.1.1; pin96cbdf2 without changing caller NuGet mapping or Azure trust scopes.
+- [x] Preserve the failed1.0.0 tags and push signed1.0.1 stable/dev candidates on the verified main commit.
+- [x] Prepare direct user download links, current portable-update instructions and a valid developer verification link.
+- [x] Set the next development version prefix to1.0.2.
+- Track production publication and exact shipped signing/checksum/SBOM/provenance results in [release checklist#33](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33).
+- Deliver signed, installed-acceptance-tested MSI installers next release (#36).
+- Reduce repeated release validation while preserving trust and complete acceptance (#38).
+- Complete remaining evidence-backed OpenSSF assessment items; current70% is not a passing badge (#31).
 
 ## Prior release checklist
 

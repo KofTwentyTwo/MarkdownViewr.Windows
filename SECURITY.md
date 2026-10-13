@@ -50,11 +50,10 @@ minor receives security fixes for 6 months.
 
 Public Windows releases require Authenticode signing of the final shipped binaries
 and installers. Publication fails closed until the approved Azure signing identity
-and expected publisher, trust and timestamp are verified. No verified signed
-MarkdownViewr release has been published yet; unsigned test fixtures are not releases.
+and expected publisher, trust and timestamp are verified. Unsigned test fixtures are not releases.
 
 Verify final signatures, `SHA256SUMS` and provenance attestations as described in the
-[README](README.md#verifying-a-release) and
+[Developer Guide](DEVELOPERS.md#releases-and-verification) and
 [release signing instructions](docs/release-signing.md). No historical exception
 is claimed as permission to publish unsigned application releases.
 
