@@ -13,11 +13,27 @@ Describe 'Installed update smoke boundaries' `
       $script:SmokeArtifacts = Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts'
       $script:SmokeAppId = [regex]::Match((Get-Content -LiteralPath (Join-Path (Split-Path -Parent $PSScriptRoot) 'src/MarkdownViewr.Windows.Core/AppIdentity.cs') -Raw), '(?m)^\s*Id\s*=\s*"([a-z0-9][a-z0-9-]*)"').Groups[1].Value
       $ast = [Management.Automation.Language.Parser]::ParseFile($script:SmokeHarness, [ref]$null, [ref]$null)
-      foreach($name in @('Assert-SmokeCliVersion', 'Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved', 'Assert-SmokeInstallationOwner'))
+      foreach($name in @('Assert-SmokeCliVersion', 'Get-SmokeDefaultChoiceSnapshot', 'Get-SmokeFileRegistration', 'Assert-SmokeFileRegistrationRemoved', 'Assert-SmokeInstallationOwner', 'Invoke-SmokeProcess'))
       {
          $function = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name }, $true)
          . ([scriptblock]::Create($function.Extent.Text))
       }
+      $script:repositoryRoot = $TestDrive
+      $script:outputRoot = $TestDrive
+      $script:vpk = 'not-a-fixture-tool'
+      $script:smokeProcessNumber = 0
+   }
+
+   It 'terminates a hung child process and fails the smoke gate' `
+   {
+      $shell = (Get-Process -Id $PID).Path
+      { Invoke-SmokeProcess -File $shell -Arguments @('-NoProfile', '-Command', 'Start-Sleep -Seconds 30') -TimeoutSeconds 1 } | Should -Throw '*Process timed out*'
+   }
+
+   It 'rejects a failing child process and retains its output' `
+   {
+      $shell = (Get-Process -Id $PID).Path
+      { Invoke-SmokeProcess -File $shell -Arguments @('-NoProfile', '-Command', "Write-Output 'fixture failure'; exit 7") -TimeoutSeconds 10 } | Should -Throw '*Process failed (7)*fixture failure*'
    }
 
    It 'requires an actual matching manifest inside the resolved artifact boundary before uninstall' `

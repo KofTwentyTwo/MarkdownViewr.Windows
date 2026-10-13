@@ -1032,6 +1032,8 @@ public partial class AppTests
       SendReadingKey(VirtualKeyShort.KEY_J);
       SendReadingKey(VirtualKeyShort.KEY_K);
       SendReadingKey(VirtualKeyShort.KEY_G);
+      // FlaUI's input helper sleeps briefly; it does not acknowledge native text processing.
+      session.WaitFor(() => string.Equals(query.AsTextBox().Text, "jkg", StringComparison.Ordinal) ? query : null, "the complete literal keyboard query 'jkg'");
       Assert.Equal("jkg", query.AsTextBox().Text);
       WaitForFindCount(session, "0 of 0");
       Assert.True(scroller.Patterns.Scroll.Pattern.VerticalScrollPercent.Value < 10);

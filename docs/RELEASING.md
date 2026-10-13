@@ -7,7 +7,7 @@ which calls the shared `release-velopack.yml` workflow in KofTwentyTwo/standards
 
 ## Workflow baseline
 
-The signing release builder is pinned to standards v1.1.0 (`93b1d6163a4c466ae443e98b62786fc4d80d33bd`); other shared gates retain v0.1.2. The release caller checks main ancestry and reruns build, coverage, formatting, UI tests, security scans and CodeQL before publication.
+The signing release builder is pinned to standards v1.1.1 (`96cbdf208a15c9c524676bd15ff9e323228a952b`); other shared gates retain v0.1.2. The release caller checks main ancestry and reruns build, coverage, formatting, UI tests, security scans and CodeQL before publication.
 The AppKit dependency locks now match the published 0.1.0 packages. Before changing any package version, regenerate the affected locks and verify a locked restore with a clean package cache.
 
 ## Versioning and channels
