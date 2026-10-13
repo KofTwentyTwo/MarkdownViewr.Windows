@@ -38,6 +38,8 @@ jobs:
     environment: release
     permissions:
       contents: read
+      checks: read
+      pull-requests: read
     steps:
       - name: Checkout main and tag history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -61,41 +63,16 @@ jobs:
           ARTIFACT_SIGNING_SUBJECT: ${{ vars.ARTIFACT_SIGNING_SUBJECT || vars.TRUSTED_SIGNING_SUBJECT }}
         run: ./build/Assert-ReleaseSigning.ps1
 
-  gates:
-    needs: verify
-    uses: ./.github/workflows/ci.yml
-    permissions:
-      contents: read
-
-  security:
-    needs: verify
-    uses: ./.github/workflows/security.yml
-    permissions:
-      contents: read
-      security-events: write
-
-  codeql:
-    needs: verify
-    uses: ./.github/workflows/codeql.yml
-    permissions:
-      contents: read
-      security-events: write
-
-  scripts:
-    needs: verify
-    uses: ./.github/workflows/scripts.yml
-    permissions:
-      contents: read
-
-  fuzzing:
-    needs: verify
-    uses: ./.github/workflows/fuzz.yml
-    permissions:
-      contents: read
+      - name: Require passing CI for the exact merged release tree
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { run } = require('./.github/scripts/assert-release-source.cjs');
+            await run({ github, context, core });
 
   release:
-    needs: [verify, gates, security, codeql, scripts, fuzzing]
-    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@083d90326a8f3b750d840b6180e00870ee1342f5 # v1.1.2
+    needs: verify
+    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@70b555bd5658273090769991bfc4c9b6681dde18 # v1.2.1
     permissions:
       contents: write      # create and publish the GitHub release
       id-token: write      # sign attestations; Azure OIDC when signing
@@ -113,6 +90,7 @@ jobs:
       test-projects: |
         tests/MarkdownViewr.Windows.Core.Tests
       sign: true
+      msi: true
       signing-files: |
         app/MarkdownViewr.Windows.exe
         app/MarkdownViewr.Windows.dll

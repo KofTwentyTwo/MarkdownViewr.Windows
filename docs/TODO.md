@@ -2,16 +2,12 @@
 
 ## Release and follow-up work
 
-- [x] Merge reviewed PR37 at4c0ccc7; focused30/native111/published111/stable110/dev110 pass with no failures/skips.
-- [x] Merge personally approved signing-wrapper PR45 and metadata-only standards1.1.2 proposal; pin083d903 without changing NuGet mapping or Azure trust scopes.
-- [x] Preserve failed1.0.0 and1.0.1 stable/dev tags and prepare new1.0.2 candidates.
-- [x] Prepare direct download links, portable-update guidance and developer verification links.
-- [x] Set next development VersionPrefix to1.0.3.
-- [ ] Verify published standards1.1.2 bundle hashes/provenance and exact builder bytes.
-- [ ] Pass final exact-head CI, record automated review and the maintainer's explicit release-specific review waiver, and merge normally.
-- [ ] Publish signed stable/dev EXE installers and portable ZIPs; verify exact shipped signatures, publisher, trust, timestamps, checksums, SBOMs and provenance (#33).
-- Deliver signed, installed-acceptance-tested MSI installers next release (#36).
-- Reduce repeated validation while preserving trust and complete acceptance (#38).
+- [x] Publish/verify signed stable1.0.2 and dev1.0.2-beta.1 EXE/ZIP releases (#33).
+- [x] Prepare exact-tree/provider-bound reuse of genuine source CI; boundary tests and real17-check source proof pass (#38).
+- [ ] Publish the native MSI builder, pin it and enable signed MSI in the caller (#36).
+- [ ] Pass exact-head CI, record the existing release waiver, merge and restore all original branch checks.
+- [ ] Publish1.0.3 stable/dev MSI+EXE+ZIP; verify actual MSI install/launch/uninstall and all final payload signatures, hashes, SBOMs and provenance.
+- [x] Set next development prefix to1.0.4 and prepare user download links.
 - Complete remaining OpenSSF evidence; saved70% is not a passing badge (#31).
 
 ## Prior release checklist

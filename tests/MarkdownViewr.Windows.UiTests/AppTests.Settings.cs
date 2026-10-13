@@ -150,6 +150,12 @@ public partial class AppTests
       CloseSettings(session);
       InvokeDocumentMenu(session, sibling, "SourceToggle", menuName: "View");
       AssertSavedPrintingDefaults(session, options);
+      session.WaitFor(() =>
+      {
+         string settings = session.ReadSettings();
+         using var saved = JsonDocument.Parse(settings);
+         return saved.RootElement.GetProperty("ShowSource").GetBoolean() ? sibling : null;
+      }, "the sibling source toggle to finish saving before the print-cancel snapshot");
       string savedSettings = session.ReadSettings();
       InvokeDocumentMenu(session, primary, "PrintMenuItem");
       AssertPrintOptionControls(session, options);

@@ -75,3 +75,7 @@ Documents are rendered locally. Authored scripts and remote images are blocked; 
 - **The app does not start:** confirm Microsoft Edge WebView2 Runtime is installed and inspect the activity logs if available.
 
 For help, use [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions). Report reproducible problems through [Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose), including **Help → About** version, Windows version, and relevant sanitized logs. Report vulnerabilities privately using [SECURITY.md](../SECURITY.md).
+
+## MSI installation
+
+The MSI installs for the current Windows user, alongside the EXE and portable download options. Stable and dev have separate package identities. Use the same installer format for an existing edition; install the other channel separately to try previews. Uninstall an MSI installation through Windows Settings → Apps → Installed apps. The installer registers supported Markdown types and preserves your existing default choices.
