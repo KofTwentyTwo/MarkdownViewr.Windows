@@ -2,15 +2,17 @@
 
 ## Release and follow-up work
 
-- [x] Merge genuinely reviewed PR37 at4c0ccc7; all required gates pass, with actual focused30/native111/published111/stable110/dev110 reports and no failures/skips.
-- [x] Publish and verify owner-reviewed standards1.1.1; pin96cbdf2 without changing caller NuGet mapping or Azure trust scopes.
-- [x] Preserve the failed1.0.0 tags and push signed1.0.1 stable/dev candidates on the verified main commit.
-- [x] Prepare direct user download links, current portable-update instructions and a valid developer verification link.
-- [x] Set the next development version prefix to1.0.2.
-- Track production publication and exact shipped signing/checksum/SBOM/provenance results in [release checklist#33](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33).
+- [x] Merge reviewed PR37 at4c0ccc7; focused30/native111/published111/stable110/dev110 pass with no failures/skips.
+- [x] Merge personally approved signing-wrapper PR45 and metadata-only standards1.1.2 proposal; pin083d903 without changing NuGet mapping or Azure trust scopes.
+- [x] Preserve failed1.0.0 and1.0.1 stable/dev tags and prepare new1.0.2 candidates.
+- [x] Prepare direct download links, portable-update guidance and developer verification links.
+- [x] Set next development VersionPrefix to1.0.3.
+- [ ] Verify published standards1.1.2 bundle hashes/provenance and exact builder bytes.
+- [ ] Pass final exact-head CI, record automated review and the maintainer's explicit release-specific review waiver, and merge normally.
+- [ ] Publish signed stable/dev EXE installers and portable ZIPs; verify exact shipped signatures, publisher, trust, timestamps, checksums, SBOMs and provenance (#33).
 - Deliver signed, installed-acceptance-tested MSI installers next release (#36).
-- Reduce repeated release validation while preserving trust and complete acceptance (#38).
-- Complete remaining evidence-backed OpenSSF assessment items; current70% is not a passing badge (#31).
+- Reduce repeated validation while preserving trust and complete acceptance (#38).
+- Complete remaining OpenSSF evidence; saved70% is not a passing badge (#31).
 
 ## Prior release checklist
 

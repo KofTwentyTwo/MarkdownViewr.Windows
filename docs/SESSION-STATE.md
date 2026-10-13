@@ -1,31 +1,34 @@
 # Session State
 
-Updated: 2026-10-12
+Updated: 2026-10-13
 
 ## Release source and verification
 
-The owner-reviewed release source is main commit4c0ccc71f388686f19d794ee3ec1b150033a3209,
-merged normally through PR37. Its tree matches reviewed a3cab85; GitHub verifies
-its signature. Actual focused30, native111, published111 and installed stable/dev110
-reports each have zero failures/skips. Update/restart, channel coexistence,
-file-type registration and preservation of existing defaults are verified.
+Application behavior remains the owner-reviewed PR37 source at main4c0ccc7.
+Actual focused30, native111, published111 and installed stable/dev110 reports
+have zero failures/skips. Unchanged-source main validation38325540268 attempt2
+also passes published111 and installed stable/dev110 each. Update/restart,
+channel coexistence, registration and preservation of defaults are verified.
 
-The signing caller pins published immutable standards1.1.1 at96cbdf2. Its five
-assets verify hashes/provenance; the bundled builder matches the personally
-reviewed PR44 source. Caller NuGet mapping and strict publisher/signature gates
-are preserved. No new Azure administration is required.
+The signing caller pins standards1.1.2 at
+083d90326a8f3b750d840b6180e00870ee1342f5. Personally approved PR45 corrects the
+GitHub pwsh bootstrap wrapper; all hosted signing checks pass. Caller NuGet
+mapping, Azure trust scopes and strict publisher/signature gates are unchanged.
+No new Azure administration is required.
 
-Signed1.0.1/stable and1.0.1-beta.1/dev tags preserve the earlier failed1.0.0 refs.
-Live production status and final shipped-artifact evidence belong in the
-[release checklist](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33)
+Preserve the failed1.0.0 and1.0.1 stable/dev tags. New candidates are
+1.0.2/stable and1.0.2-beta.1/dev. Production status and exact shipped-artifact
+proof belong in [release checklist](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33)
 and [GitHub Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases).
-Require successful production signing and verify exact downloaded bytes before
-claiming a signed public release. Avoid duplicating transient CI state here.
+Require successful signing and verification of exact downloaded bytes before
+claiming a signed public release.
 
-The next development prefix is1.0.2. EXE/ZIP publication comes first; MSI is tracked
-for the following release in issue36. Release-validation latency is tracked in
-issue38. OpenSSF project15417 remains a saved70% assessment, not a passing badge.
-Original owner previews/profiles and unrelated worktrees must remain untouched.
+The maintainer authorized release without further human-review requests on
+2026-10-13. Record this as an explicit release-specific waiver, never as a claim
+that an unseen change was personally read. Automated review and technical CI
+remain required. The next development prefix is1.0.3. EXE/ZIP publication comes
+first; MSI is tracked for the following release in issue36. OpenSSF15417 remains
+70%, not passing. Preserve original owner previews/profiles and unrelated work.
 
 ## Historical release snapshots
 
