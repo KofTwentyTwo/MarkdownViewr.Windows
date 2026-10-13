@@ -31,8 +31,8 @@ Windows packages support **Windows 10 version 1809 or later and Windows 11, x64*
 
 | Edition | Choose it for | Package |
 | --- | --- | --- |
-| Stable | Everyday reading | [Download EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) |
-| Development preview | Trying upcoming changes | [Download dev EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.2-beta.1/markdownviewr-windows-dev-dev-Setup.exe) |
+| Stable | Everyday reading | [Download EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) · [MSI installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable.msi) |
+| Development preview | Trying upcoming changes | [Download dev EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev-Setup.exe) · [MSI installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev.msi) |
 | Portable | Running without installation | [Download portable ZIP](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Portable.zip) |
 
 Download a package from [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.

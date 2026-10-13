@@ -4,31 +4,30 @@ Updated: 2026-10-13
 
 ## Release source and verification
 
-Application behavior remains the owner-reviewed PR37 source at main4c0ccc7.
-Actual focused30, native111, published111 and installed stable/dev110 reports
-have zero failures/skips. Unchanged-source main validation38325540268 attempt2
-also passes published111 and installed stable/dev110 each. Update/restart,
-channel coexistence, registration and preservation of defaults are verified.
+Stable1.0.2 and dev1.0.2-beta.1 EXE/ZIP releases are public and immutable at
+source18d8ae950cab445672d216d387a956b964d2c6c1, builder083d903. Actual downloaded
+signatures/publisher/trust/timestamps, package payloads, checksums, CycloneDX
+SBOM attestations, source/builder provenance and updater feeds verify.
+Production runs38392743207 and38392743312 succeeded. Failed older refs remain.
 
-The signing caller pins standards1.1.2 at
-083d90326a8f3b750d840b6180e00870ee1342f5. Personally approved PR45 corrects the
-GitHub pwsh bootstrap wrapper; all hosted signing checks pass. Caller NuGet
-mapping, Azure trust scopes and strict publisher/signature gates are unchanged.
-No new Azure administration is required.
+The maintainer renewed the MSI request on2026-10-13; earlier MSI deferral is
+superseded. Prepare signed per-user MSI alongside EXE/ZIP for stable/dev1.0.3.
+MSI payload verification and focused native install/launch/uninstall must pass
+before publication. Source behaviors, dependencies and Azure trust are unchanged.
 
-Preserve the failed1.0.0 and1.0.1 stable/dev tags. New candidates are
-1.0.2/stable and1.0.2-beta.1/dev. Production status and exact shipped-artifact
-proof belong in [release checklist](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33)
-and [GitHub Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases).
-Require successful signing and verification of exact downloaded bytes before
-claiming a signed public release.
+Prevent duplicate release test passes by requiring the exact complete Git tree
+of a genuinely merged main PR whose latest required technical checks all passed
+under their required provider identities. Reject unverified source signatures,
+different trees, missing/failed/pending checks and API failures. Reuse real CI
+proof; do not post fabricated results or weaken branch protection. Fresh release
+build/core coverage, signing and installer/distribution checks remain required.
 
-The maintainer authorized release without further human-review requests on
-2026-10-13. Record this as an explicit release-specific waiver, never as a claim
-that an unseen change was personally read. Automated review and technical CI
-remain required. The next development prefix is1.0.3. EXE/ZIP publication comes
-first; MSI is tracked for the following release in issue36. OpenSSF15417 remains
-70%, not passing. Preserve original owner previews/profiles and unrelated work.
+The owner explicitly authorized finishing releases without further human-review
+requests. Record the release-specific waiver truthfully; restore the original
+manual-review requirement immediately after each authorized merge. The next
+development prefix is1.0.4. OpenSSF15417 remains70%, not passing. Preserve owner
+previews/profiles and unrelated worktrees. Track actual publication/proof in
+[release checklist](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33).
 
 ## Historical release snapshots
 

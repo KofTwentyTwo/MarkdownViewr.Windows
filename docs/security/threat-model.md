@@ -426,3 +426,7 @@ actual parsers. Independent properties detect unsafe acceptance as well as crash
 Synthetic inputs never execute scripts, start native processes or touch real profiles.
 The record in [assurance.json](assurance.json) does not claim coverage-guided
 instrumentation, Best Practices enrollment or verified production signatures.
+
+## Release validation reuse
+
+Release tags must be on main and have a verified commit signature. Reused source CI must belong to the genuinely merged main PR, match the entire tagged Git tree and have successful latest required technical checks from the configured provider identities. Missing, stale, failed or pending proof fails publication. This avoids repeating identical UI tests; it does not trust arbitrary PR artifacts or remove branch checks. Fresh build/coverage, Azure signing, MSI installation and exact distributed-payload verification remain release gates.
