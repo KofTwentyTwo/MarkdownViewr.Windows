@@ -7,7 +7,7 @@
    },
    "scripts": {
       "lint": "eslint .github/scripts eslint.config.mjs --max-warnings 0",
-      "test": "node --test .github/scripts/review-gate.test.cjs"
+      "test": "node --test .github/scripts/review-gate.test.cjs .github/scripts/assert-release-source.test.cjs"
    },
    "devDependencies": {
       "@eslint/js": "10.0.1",

@@ -72,7 +72,7 @@ jobs:
 
   release:
     needs: verify
-    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@0ef3d319b8d212039707f4921b42991158dd7849 # v1.2.0
+    uses: KofTwentyTwo/standards/.github/workflows/release-velopack.yml@70b555bd5658273090769991bfc4c9b6681dde18 # v1.2.1
     permissions:
       contents: write      # create and publish the GitHub release
       id-token: write      # sign attestations; Azure OIDC when signing

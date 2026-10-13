@@ -29,8 +29,15 @@ test("reuses only verified identical-source passing CI", async () =>
             merged_at: "today", base: { ref: "main" }, merge_commit_sha: "release", head: { sha: "head" } }])
             : failure === "missing" ? [] : failure === "latest" ? [check, { ...check, id: 2, conclusion: "failure" }] : [check],
       };
-      const operation = run({ github, context: { repo: { owner: "owner", repo: "repo" }, sha: "release" }, core: { info: () => {} } });
-      if(failure) { await assert.rejects(operation); }
-      else { assert.deepEqual(await operation, { head: "head", tree: "tree", checks: 1 }); }
+      const operation = run({ github, context: { repo: { owner: "owner", repo: "repo" }, sha: "release" }, core: { info: () =>
+      {} } });
+      if(failure)
+      {
+         await assert.rejects(operation);
+      }
+      else
+      {
+         assert.deepEqual(await operation, { head: "head", tree: "tree", checks: 1 });
+      }
    }
 });
