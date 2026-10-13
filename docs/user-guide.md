@@ -60,7 +60,7 @@ The installer preserves your current defaults. Windows requires you to choose th
 
 ## Updates and local data
 
-Installed stable and development editions update within their own channels using **Help → Check for updates**. They have separate settings, recent files, and logs. Portable copies require a fresh download.
+Stable and development editions, including portable copies, update within their own channels using **Help → Check for updates**. They have separate settings, recent files, and logs.
 
 Settings and logs are stored locally under `%LOCALAPPDATA%\markdownviewr-windows` or `%LOCALAPPDATA%\markdownviewr-windows-dev`. **Help → Activity log** opens the log viewer and provides a shortcut to its folder.
 

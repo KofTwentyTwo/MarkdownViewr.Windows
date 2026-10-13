@@ -1,21 +1,18 @@
 # Development Tasks
 
-## Current release checklist - 2026-10-12
+## Release and follow-up work
 
-- [x] Merge genuinely owner-reviewed app through PR35 at38dd5c1; all main gates pass.
-- [x] Preserve signed1.0.0/stable and1.0.0-beta.1/dev tags; no release is published.
-- [x] Apply only the exact Syft image addition explicitly approved by the owner.
-- [x] Prove production Azure OIDC login; preserve existing account/profile/trust.
-- [x] Reproduce signing dependency conflict; standards PR44 real package bootstrap and40 signing tests pass locally.
-- [x] Measure stable retry110/111 without reported test failures before600-second limit; prepare bounded900-second suite budget with unchanged assertions/deadlines.
-- [ ] Obtain genuine reviews, pass exact-head hosted checks and merge the release fixes.
-- [x] Owner personally reviewed standards PR44; merge the signing fix and version-only PR42 through normal protections, then push signedstandards1.1.1.
-- [x] Update the app caller to fixed builder96cbdf2; preserve caller NuGet mapping and strict signing verification.
-- [x] Keep the exactjkg assertion while awaiting native text processing within its existing deadline; add the case to focused hosted regressions.
-- [ ] Verify fresh full hosted acceptance and obtain genuine final-head app review before merge.
-- [ ] Publish stable/dev EXE and ZIP candidates; verify exact distributed signatures, timestamps, hashes, SBOMs and attestations (#33).
-- [ ] Update user download links only after actual verified publication.
-- [ ] Deliver signed and acceptance-tested MSI installers in the next release (#36), following the owner's latest decision.
+- [x] Merge reviewed PR37 at4c0ccc7; focused30/native111/published111/stable110/dev110 pass with no failures/skips.
+- [x] Merge personally approved signing-wrapper PR45 and metadata-only standards1.1.2 proposal; pin083d903 without changing NuGet mapping or Azure trust scopes.
+- [x] Preserve failed1.0.0 and1.0.1 stable/dev tags and prepare new1.0.2 candidates.
+- [x] Prepare direct download links, portable-update guidance and developer verification links.
+- [x] Set next development VersionPrefix to1.0.3.
+- [ ] Verify published standards1.1.2 bundle hashes/provenance and exact builder bytes.
+- [ ] Pass final exact-head CI, record automated review and the maintainer's explicit release-specific review waiver, and merge normally.
+- [ ] Publish signed stable/dev EXE installers and portable ZIPs; verify exact shipped signatures, publisher, trust, timestamps, checksums, SBOMs and provenance (#33).
+- Deliver signed, installed-acceptance-tested MSI installers next release (#36).
+- Reduce repeated validation while preserving trust and complete acceptance (#38).
+- Complete remaining OpenSSF evidence; saved70% is not a passing badge (#31).
 
 ## Prior release checklist
 

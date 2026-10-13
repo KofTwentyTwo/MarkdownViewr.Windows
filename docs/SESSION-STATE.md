@@ -1,49 +1,36 @@
 # Session State
 
-Updated: 2026-10-12
+Updated: 2026-10-13
 
-## Release blockers after main merge - 2026-10-12
+## Release source and verification
 
-Standards PR44 was personally reviewed by the owner and merged atb3e4b49.
-Its version/changelog-only release PR42 merged at96cbdf2; signedv1.1.1 was pushed
-and release CI38322016784 is running. The app caller now pins that exact builder.
-No new Azure administration or credentials are required.
+Application behavior remains the owner-reviewed PR37 source at main4c0ccc7.
+Actual focused30, native111, published111 and installed stable/dev110 reports
+have zero failures/skips. Unchanged-source main validation38325540268 attempt2
+also passes published111 and installed stable/dev110 each. Update/restart,
+channel coexistence, registration and preservation of defaults are verified.
 
-App PR37's first hosted run completed111 published tests:110 passed, one literal
-keyboard assertion observedjk instead ofjkg. The test now waits for the exactjkg
-value within its existing10-second deadline before retaining the same assertion.
-FlaUI5.0.0's UntilInputIsProcessed is only a100ms sleep, not an acknowledgement.
-The exact test is also included in the focused hosted regression job. Builds and
-formatting pass; hosted verification remains required. Local baseline and changed
-runs both stopped earlier at missing FindText, so they do not verify thejkg fix.
-Temporary diagnostics were removed. Original preview processes/profiles remain
-untouched. Fresh exact-head hosted acceptance must pass before merge/publication.
+The signing caller pins standards1.1.2 at
+083d90326a8f3b750d840b6180e00870ee1342f5. Personally approved PR45 corrects the
+GitHub pwsh bootstrap wrapper; all hosted signing checks pass. Caller NuGet
+mapping, Azure trust scopes and strict publisher/signature gates are unchanged.
+No new Azure administration is required.
 
-The owner-reviewed application merged through PR35 at38dd5c1. Main CI38294895221
-passed; retained published111 and installed stable/dev110 reports have zero
-failures/skips. OpenSSF project15417 assessment is saved at70%, not passing.
-The exact Syft image is now explicitly owner-approved and allowlisted.
+Preserve the failed1.0.0 and1.0.1 stable/dev tags. New candidates are
+1.0.2/stable and1.0.2-beta.1/dev. Production status and exact shipped-artifact
+proof belong in [release checklist](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/33)
+and [GitHub Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases).
+Require successful signing and verification of exact downloaded bytes before
+claiming a signed public release.
 
-Neither production release is published. Signedv1.0.0 andv1.0.0-beta.1 tags remain
-preserved. Dev38299469062 passed acceptance and Azure OIDC login, then failed the
-official signing action dependency install because --add-source conflicts with
-NuGet package source mapping. Standards PR44 stages the exact verified dependency
-without changing caller NuGet policy;40 signing tests and the real package bootstrap
-pass locally. Production CI signing and final artifact verification remain pending.
+The maintainer authorized release without further human-review requests on
+2026-10-13. Record this as an explicit release-specific waiver, never as a claim
+that an unseen change was personally read. Automated review and technical CI
+remain required. The next development prefix is1.0.3. EXE/ZIP publication comes
+first; MSI is tracked for the following release in issue36. OpenSSF15417 remains
+70%, not passing. Preserve original owner previews/profiles and unrelated work.
 
-Stable38299469141 attempt2 completed110 of111 published tests without a reported
-test failure before its600-second process limit. The successful main published
-suite took572 seconds. The bounded suite budget is now900 seconds; individual
-test deadlines, assertions, cases and failure handling remain unchanged. The job
-budget allows all three suites plus packaging/update probes. Two real subprocess
-regressions verify that hangs and nonzero exits still fail the gate. Fresh hosted
-acceptance is required; this timing change is not proof of a successful release.
-
-The owner's latest instruction is EXE/portable ZIP first, MSI next release (#36).
-Do not cancel runs, alter published assets, replace existing release tags, skip
-acceptance or claim public downloads. Next: genuine review and green checks for
-the two fixes, merge the shared builder, update the app's immutable builder pin,
-then publish new signed release candidates and verify the downloaded artifacts.
+## Historical release snapshots
 
 ## Current release status - 2026-10-12
 
