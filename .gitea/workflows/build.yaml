@@ -20,6 +20,7 @@ jobs:
         pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
         # PowerShell build scripts: analyzer and Pester boundary tests with pinned modules saved to the job's temp directory.
         $modules = Join-Path ($env:RUNNER_TEMP ?? [IO.Path]::GetTempPath()) "psmodules-$env:GITHUB_RUN_ID"
+        New-Item -ItemType Directory -Force -Path $modules | Out-Null
         Save-PSResource -Name PSScriptAnalyzer -Version 1.25.0 -Repository PSGallery -TrustRepository -Path $modules
         Save-PSResource -Name Pester -Version 5.7.1 -Repository PSGallery -TrustRepository -Path $modules
         Import-Module (Join-Path $modules PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1)
