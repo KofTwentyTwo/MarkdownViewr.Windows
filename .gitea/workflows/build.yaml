@@ -1,0 +1,50 @@
+name: build
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+jobs:
+  windows:
+    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/windows.yaml@v1
+    secrets: inherit
+    with:
+      commands: |
+        dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
+        dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror --no-restore
+        # The WinUI app project is built directly so the format workspace can load its generated XAML code.
+        dotnet build src/MarkdownViewr.Windows/MarkdownViewr.Windows.csproj -p:Platform=x64 -warnaserror --no-restore
+        $env:Platform = 'x64'
+        dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
+        Remove-Item Env:Platform
+        dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --logger trx --results-directory TestResults
+        pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+        # PowerShell build scripts: analyzer and Pester boundary tests with pinned modules saved to the job's temp directory.
+        $modules = Join-Path ($env:RUNNER_TEMP ?? [IO.Path]::GetTempPath()) "psmodules-$env:GITHUB_RUN_ID"
+        New-Item -ItemType Directory -Force -Path $modules | Out-Null
+        Save-PSResource -Name PSScriptAnalyzer -Version 1.25.0 -Repository PSGallery -TrustRepository -Path $modules
+        Save-PSResource -Name Pester -Version 5.7.1 -Repository PSGallery -TrustRepository -Path $modules
+        Import-Module (Join-Path $modules PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1)
+        Import-Module (Join-Path $modules Pester/5.7.1/Pester.psd1)
+        foreach ($file in Get-ChildItem -LiteralPath build -Recurse -File | Where-Object Extension -In '.ps1', '.psm1', '.psd1') {
+          # Casing runs in its own pass: command metadata races other rules in 1.25.0 (PSScriptAnalyzer#1708).
+          $findings = @(
+            Invoke-ScriptAnalyzer -Path $file.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -IncludeRule PSUseCorrectCasing
+            Invoke-ScriptAnalyzer -Path $file.FullName -Settings ./PSScriptAnalyzerSettings.psd1 -ExcludeRule PSUseCorrectCasing
+          )
+          if ($findings.Count -gt 0) { $findings | Format-Table; throw "Script analysis failed: $($file.Name)" }
+        }
+        # The Pester suites assert on child processes' exit codes themselves.
+        $PSNativeCommandUseErrorActionPreference = $false
+        $pester = New-PesterConfiguration
+        $pester.Run.Path = @('build/Assert-Coverage.Tests.ps1', 'build/GitHubRepository.Tests.ps1', 'build/Distribution.Tests.ps1', 'build/InstalledUpdates.Tests.ps1', 'build/PackageBytes.Tests.ps1', 'build/ReleaseSigning.Tests.ps1')
+        $pester.Run.PassThru = $true
+        if ((Invoke-Pester -Configuration $pester).Result -ne 'Passed') { throw 'Pester tests failed' }
+  scripts:
+    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/node.yaml@v1
+    with:
+      node-version: '24'
+      install: npm ci --ignore-scripts
+      commands: |
+        npm run lint
+        npm test
+        npm audit signatures
