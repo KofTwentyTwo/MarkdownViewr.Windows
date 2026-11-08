@@ -17,7 +17,7 @@ jobs:
         dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
         Remove-Item Env:Platform
         dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --logger trx --results-directory TestResults
-        ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+        pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
         # PowerShell build scripts: analyzer and Pester boundary tests with pinned modules saved to the job's temp directory.
         $modules = Join-Path ($env:RUNNER_TEMP ?? [IO.Path]::GetTempPath()) "psmodules-$env:GITHUB_RUN_ID"
         Save-PSResource -Name PSScriptAnalyzer -Version 1.25.0 -Repository PSGallery -TrustRepository -Path $modules
