@@ -4,6 +4,7 @@
  */
 
 using System.Runtime.InteropServices;
+using MarkdownViewr.Windows.Core.Activation;
 using Microsoft.Windows.AppLifecycle;
 using Windows.ApplicationModel.Activation;
 

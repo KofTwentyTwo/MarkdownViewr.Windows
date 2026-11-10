@@ -6,9 +6,10 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MarkdownViewr.Windows.Core.Activation;
 
 
-namespace MarkdownViewr.Windows.UiTests;
+namespace MarkdownViewr.Windows.Core.Tests;
 
 /// <summary>Fuzzes the real generated activation schema and path validator without creating a window, pipe, process or profile.</summary>
 [Trait("Category", "Fuzz")]

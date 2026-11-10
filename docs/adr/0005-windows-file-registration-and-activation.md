@@ -33,10 +33,22 @@ crossing processes; the public SDK launch envelope cannot carry sender CWD.
 Deliver requests through a current-user-only .NET named pipe. Accept only a
 source-generated bounded schema: at most128 absolute paths, a1MiB frame and an
 optional fixed invalid-path notification. Reject unknown fields; no command or
-script operation exists. Connection/read/acknowledgement waits are bounded to
-10seconds, with at most16 requests queued before XAML attaches its dispatcher.
-Malformed/disconnected peers cannot stop later valid requests. App shutdown
-cancels and disposes the listener. No dependencies or generic RPC layer are added.
+script operation exists. A sender waits at most2 seconds for the reader's pipe
+and each side at most10 seconds for one exchange, with at most16 requests held
+before XAML attaches its dispatcher. Malformed/disconnected peers cannot stop
+later valid requests. App shutdown cancels and disposes the listener, releasing
+the pipe name before the instance key. No dependencies or generic RPC layer are added.
+
+The request, the schema and the inbox live in the core library
+(`Core/Activation`), where the unit tests and the coverage gate reach them.
+
+Forwarding is best effort; opening the document is not. A launch whose request
+the running reader did not take (no listener, a refusal, or a deadline) opens
+its documents in its own process. A reader that cannot create its inbox, because
+the pipe name is already held by a reader that is still closing or by another
+program, runs without one; later launches then open their own documents. An
+argument that cannot name a document is dropped and reported in the reader
+window while the usable arguments still open.
 
 The foreground launcher permits the primary to focus an existing document.
 Dispatch all window creation on the native UI thread; duplicate paths include

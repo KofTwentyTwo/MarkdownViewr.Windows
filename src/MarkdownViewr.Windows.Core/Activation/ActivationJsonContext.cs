@@ -6,10 +6,9 @@
 using System.Text.Json.Serialization;
 
 
-namespace MarkdownViewr.Windows;
+namespace MarkdownViewr.Windows.Core.Activation;
 
-
-/// <summary>Activation JSON is a fixed generated schema with unknown fields rejected, rather than a general command protocol.</summary>
+/// <summary>The fixed schema of an activation message; a field it does not define is an error, so the message cannot grow into a command protocol.</summary>
 [JsonSourceGenerationOptions(UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow)]
 [JsonSerializable(typeof(ActivationRequest))]
 internal sealed partial class ActivationJsonContext : JsonSerializerContext;

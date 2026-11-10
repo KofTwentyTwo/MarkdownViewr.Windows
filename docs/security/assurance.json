@@ -11,7 +11,7 @@
       "reason": "Untrusted Markdown/HTML/frontmatter, source ranges/folds, resource URLs, imported theme JSON and activation JSON are parser boundaries. Seeded mutation targets verify unsafe acceptance as well as exceptions.",
       "targets": [
          "tests/MarkdownViewr.Windows.Core.Tests/SecurityFuzzTests.cs",
-         "tests/MarkdownViewr.Windows.UiTests/ActivationFuzzTests.cs"
+         "tests/MarkdownViewr.Windows.Core.Tests/ActivationFuzzTests.cs"
       ],
       "command": "dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz",
       "workflow": ".github/workflows/fuzz.yml",

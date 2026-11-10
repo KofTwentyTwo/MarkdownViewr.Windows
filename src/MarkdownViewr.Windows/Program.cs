@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+using MarkdownViewr.Windows.Core.Activation;
 using Microsoft.UI.Dispatching;
 using Microsoft.Windows.AppLifecycle;
 using Velopack;
@@ -16,17 +17,21 @@ namespace MarkdownViewr.Windows;
 /// </summary>
 public static class Program
 {
-   /// <summary>The primary's bounded current-user inbox is attached by App only after the native reader initializes.</summary>
+   /// <summary>The running reader's inbox; null in a process that could not create one or that opened its documents itself.</summary>
    internal static ActivationInbox? Inbox { get; private set; }
 
 
 
-   /// <summary>The initial canonical request preserves sender-relative paths and SDK rich file activation.</summary>
+   /// <summary>The documents this launch was asked to open, resolved against its own working folder.</summary>
    internal static ActivationRequest InitialRequest { get; private set; } = new([]);
 
 
 
-   /// <summary>Runs install hooks before XAML, chooses a profile/install-specific primary, then starts or forwards the native document request.</summary>
+   /// <summary>
+   /// Runs the installer hooks, then either hands this launch's documents to the reader that is
+   /// already running or becomes a reader. A launch whose documents the running reader could not
+   /// take opens them itself, so a double-clicked file always opens.
+   /// </summary>
    [STAThread]
    private static int Main()
    {
@@ -39,12 +44,12 @@ public static class Program
       WinRT.ComWrappersSupport.InitializeComWrappers();
       InitialRequest = DesktopActivation.ReadInitialRequest();
       string key = ActivationRequest.InstanceKey(AppContext.BaseDirectory, Path.GetDirectoryName(AppIdentity.Paths.SettingsFile)!);
-      var primary = AppInstance.FindOrRegisterForKey(key);
-      if(!primary.IsCurrent)
+      var instance = AppInstance.FindOrRegisterForKey(key);
+      if(!instance.IsCurrent && Forward(key, instance.ProcessId))
       {
-         return ForwardToPrimary(key, primary.ProcessId);
+         return 0;
       }
-      using var inbox = new ActivationInbox(key, DesktopActivation.ReportFailure);
+      ActivationInbox? inbox = instance.IsCurrent ? OpenInbox(key) : null;
       Inbox = inbox;
       try
       {
@@ -57,30 +62,54 @@ public static class Program
       finally
       {
          Inbox = null;
-         primary.UnregisterKey();
+         // The pipe name is released before the instance key, so the next reader to register can create its own inbox.
+         inbox?.Dispose();
+         if(instance.IsCurrent)
+         {
+            instance.UnregisterKey();
+         }
       }
       return 0;
    }
 
 
 
-   /// <summary>Current-user .NET pipe delivery avoids the SDK STA redirection deadlock and resolves relative paths before crossing processes.</summary>
-   private static int ForwardToPrimary(string key, uint processId)
+   /// <summary>
+   /// Creates the inbox, or returns null when the pipe name is taken. The reader then runs
+   /// without one: later launches find nobody listening and open their documents themselves.
+   /// </summary>
+   private static ActivationInbox? OpenInbox(string key)
+   {
+      try
+      {
+         return new ActivationInbox(key, DesktopActivation.ReportFailure);
+      }
+      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException)
+      {
+         DesktopActivation.ReportFailure(exception);
+         return null;
+      }
+   }
+
+
+
+   /// <summary>Hands this launch's documents to the running reader; false when it did not take them.</summary>
+   private static bool Forward(string key, uint processId)
    {
       try
       {
          DesktopActivation.AllowPrimaryForeground(processId);
-         bool delivered = ActivationInbox.SendAsync(key, InitialRequest, CancellationToken.None).GetAwaiter().GetResult();
-         if(!delivered)
+         // A plain pipe is used because the SDK's own redirection deadlocks an STA entry point.
+         if(ActivationInbox.SendAsync(key, InitialRequest, CancellationToken.None).GetAwaiter().GetResult())
          {
-            DesktopActivation.ReportFailure(new IOException("The running reader is busy."));
+            return true;
          }
-         return delivered ? 0 : 1;
+         DesktopActivation.ReportFailure(new IOException("The running reader is busy."));
       }
       catch(Exception exception) when(exception is IOException or ArgumentException or InvalidDataException or OperationCanceledException or UnauthorizedAccessException)
       {
          DesktopActivation.ReportFailure(exception);
-         return 1;
       }
+      return false;
    }
 }

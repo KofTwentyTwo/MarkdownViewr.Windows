@@ -324,6 +324,13 @@ relative/control-containing/null/overlong paths and more than128 paths; frames
 are bounded to1MiB, connection/read waits to10seconds and pre-XAML queuing to16
 requests. Normal document size/resource/sanitizer boundaries still apply.
 
+The pipe name is derived from the executable and data folders, so another
+program running as any user on the machine can create that name first. That
+cannot expose a document or redirect one: both ends require a pipe owned by the
+current user. It could only deny forwarding, so a reader that cannot create its
+inbox starts without one, and a launch whose request is not taken opens its own
+documents.
+
 Malformed/disconnected requests are rejected and the listener continues; owned
 shutdown cancels the pipe. Fixed notifications and failure kind/HRESULT logging
 do not expose paths or payloads. UI-dispatched duplicate activation preserves

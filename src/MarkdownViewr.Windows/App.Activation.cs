@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+using MarkdownViewr.Windows.Core.Activation;
+
 
 namespace MarkdownViewr.Windows;
 

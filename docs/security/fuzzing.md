@@ -30,8 +30,7 @@ Run from the repository root with the pinned .NET 10 SDK on Windows:
 dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
 $env:K22_FUZZ_ITERATIONS = '500'
 dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --filter Category=Fuzz
-dotnet test tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 --filter Category=Fuzz
-# Weekly and before every MINOR/MAJOR release, repeat both commands with 10000.
+# Weekly and before every MINOR/MAJOR release, repeat the command with 10000.
 $env:K22_FUZZ_ITERATIONS = '10000'
 ```
 

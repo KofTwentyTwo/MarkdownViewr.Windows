@@ -41,20 +41,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           dotnet build tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 -warnaserror --no-restore
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Restore and build activation adapter targets
-        shell: pwsh
-        run: |
-          dotnet restore tests/MarkdownViewr.Windows.UiTests -p:Platform=x64 --locked-mode
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          dotnet build tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 -warnaserror --no-restore
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify seeded parser security properties
         shell: pwsh
         run: |
           Write-Output "Fuzz seeds22023/99173, five targets, $env:K22_FUZZ_ITERATIONS iterations per seed/target."
           dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz --logger 'trx;LogFileName=fuzz.trx' --results-directory artifacts/fuzz
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          dotnet test tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz --logger 'trx;LogFileName=activation-fuzz.trx' --results-directory artifacts/fuzz
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Retain synthetic campaign failures and results
         if: always()
