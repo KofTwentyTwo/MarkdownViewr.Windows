@@ -202,8 +202,9 @@ public sealed class AppSettings : ShellSettings
          _ = Themes.ReaderTheme.ParseCompatible(json);
          return true;
       }
-      catch(JsonException)
+      catch(Exception exception) when(exception is JsonException or InvalidOperationException)
       {
+         // A string the JSON reader cannot decode, such as an unpaired surrogate escape, is invalid content too.
          return false;
       }
    }

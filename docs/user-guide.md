@@ -73,7 +73,8 @@ Documents are rendered locally. Authored scripts and remote images are blocked; 
 - **Open in editor is disabled:** hover for the reason, then configure an installed editor in Settings.
 - **The viewer is not a default option:** use Setup rather than a portable copy, then reopen Windows Default Apps.
 - **The app does not start:** confirm Microsoft Edge WebView2 Runtime is installed and inspect the activity logs if available.
-- **A setting could not be saved:** another program is holding `settings.json`, or the folder is read-only. Nothing is overwritten while the file cannot be read; try the change again. If the file was edited by hand and is no longer valid, the app starts with defaults and keeps the invalid file as `settings.json.corrupt` on the next save.
+- **A setting could not be saved:** another program is using `settings.json`, or the file or folder is read-only. Nothing is overwritten while the file cannot be read; try the change again.
+- **Settings were edited by hand:** a trailing comma, a comment or a quoted number is accepted. A value that is not valid is ignored and the rest are kept. The next save keeps the file as it was beside the new one, as `settings.json.corrupt` (then `.corrupt-2` up to `.corrupt-9`).
 
 For help, use [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions). Report reproducible problems through [Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose), including **Help → About** version, Windows version, and relevant sanitized logs. Report vulnerabilities privately using [SECURITY.md](../SECURITY.md).
 
