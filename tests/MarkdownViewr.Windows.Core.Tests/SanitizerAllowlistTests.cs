@@ -145,6 +145,34 @@ public sealed class SanitizerAllowlistTests
 
 
 
+   /// <summary>A code-language class is kept up to 80 characters and dropped one character past that.</summary>
+   [Fact]
+   public void Render_CodeLanguageClassAtAndPastTheLengthLimit_IsBoundedExactly()
+   {
+      string atLimit = "language-" + new string('x', 71);
+      Assert.Equal(80, atLimit.Length);
+      using IHtmlDocument kept = Parse(new MarkdownRenderer().Render($"<span class=\"{atLimit}\">text</span>"));
+      Assert.Equal(atLimit, Assert.Single(kept.Body!.QuerySelectorAll("span")).GetAttribute("class"));
+      using IHtmlDocument dropped = Parse(new MarkdownRenderer().Render($"<span class=\"{atLimit}x\">text</span>"));
+      Assert.Null(Assert.Single(dropped.Body!.QuerySelectorAll("span")).GetAttribute("class"));
+   }
+
+
+
+   /// <summary>The attribute that carries source positions is allowed only during a source-aware render, whether that render finishes or fails.</summary>
+   [Fact]
+   public void RenderWithSources_AfterTheRender_NoLongerAllowsTheSourceAttribute()
+   {
+      var renderer = new MarkdownRenderer();
+      var sources = new DocumentSourceMap("# Title");
+      Assert.Contains("Title", renderer.RenderWithSources("# Title", FrontmatterMode.Hide, sources), StringComparison.Ordinal);
+      Assert.DoesNotContain(sources.AttributeName, renderer.Policy.AllowedAttributes);
+      Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderWithSources("# Title", (FrontmatterMode)99, sources));
+      Assert.DoesNotContain(sources.AttributeName, renderer.Policy.AllowedAttributes);
+   }
+
+
+
    /// <summary>Only web and mail links keep a target; every other scheme, including ones Windows would hand to another application, is removed.</summary>
    [Theory]
    [InlineData("http://example.com/a", true)]

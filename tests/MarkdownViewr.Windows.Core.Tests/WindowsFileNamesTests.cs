@@ -50,7 +50,7 @@ public sealed class WindowsFileNamesTests
    [InlineData("CON-.md")]
    [InlineData("null.md")]
    [InlineData(" NUL.png")]
-   [InlineData("NUL .png")]
+   [InlineData("NUL\u00A0.png")]
    [InlineData("NUL\t.png")]
    [InlineData("readme.NUL")]
    [InlineData("COM⁴.png")]

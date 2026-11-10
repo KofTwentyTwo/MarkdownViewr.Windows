@@ -270,23 +270,51 @@ public sealed class UntrustedInputValidationTests
 
 
    /// <summary>
-   /// Text the JSON reader cannot decode, an unpaired surrogate escape, is an invalid theme like any
-   /// other: parsing, import and saved-theme repair all handle it as one.
+   /// Text the JSON reader cannot decode, an unpaired surrogate escape, makes the theme invalid
+   /// wherever it appears: in a value the theme reads, in a property name, or in a value this
+   /// version ignores but would later re-serialize. So does a repeated property name.
    /// </summary>
    [Theory]
    [InlineData("\"name\": \"Nord\"", "\"name\": \"\\uD83D\"")]
    [InlineData("\"background\": \"#2e3440\"", "\"background\": \"\\uD800\"")]
    [InlineData("\"body\": \"System\"", "\"body\": \"A\\uDC00B\"")]
-   public void Parse_UndecodableText_IsRejectedAsAnInvalidTheme(string valid, string undecodable)
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"\\uD83D\": 1")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"note\": \"\\uD83D\"")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"notes\": [1, [\"ok\", {\"deep\": \"\\uDFFF\"}]]")]
+   [InlineData("\"body\": \"System\"", "\"body\": \"System\", \"\\uD800x\": \"y\"")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"name\": \"Nord\"")]
+   [InlineData("\"body\": \"System\"", "\"body\": \"System\", \"body\": \"Other\"")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"extra\": {\"a\": 1, \"a\": 2}")]
+   public void Parse_UndecodableTextOrRepeatedProperty_IsRejectedAsAnInvalidTheme(string valid, string invalid)
    {
       string original = ThemeCatalog.Find("Nord").Json;
       Assert.Contains(valid, original, StringComparison.Ordinal);
-      string json = original.Replace(valid, undecodable, StringComparison.Ordinal);
+      string json = original.Replace(valid, invalid, StringComparison.Ordinal);
       Assert.Throws<JsonException>(() => ReaderTheme.Parse(json));
       Assert.Throws<JsonException>(() => ReaderTheme.ParseCompatible(json));
       var settings = new AppSettings { UserThemes = [json, original] };
       settings.Sanitize();
       Assert.Equal([original], settings.UserThemes);
+   }
+
+
+
+   /// <summary>
+   /// A theme that parses can be renamed, copied, edited and imported under a new name, whatever
+   /// extra properties it carries: those operations re-serialize the whole document.
+   /// </summary>
+   [Fact]
+   public void Parse_AcceptedThemeWithExtraProperties_SurvivesRenameCopyEditAndImport()
+   {
+      string json = ThemeCatalog.Find("Nord").Json.Replace("\"name\": \"Nord\"", "\"name\": \"Nord\", \"note\": \"caf\\u00e9 \\ud83d\\ude00\", \"future\": {\"list\": [1, \"two\", null]}", StringComparison.Ordinal);
+      var theme = ReaderTheme.Parse(json);
+      Assert.Equal("Renamed", theme.Rename("Renamed").Name);
+      AppSettings imported = ThemeManagement.Import(new AppSettings(), theme);
+      Assert.Contains(ThemeManagement.All(imported), item => item.Name.StartsWith("Nord (", StringComparison.Ordinal));
+      Assert.EndsWith(" Copy", ThemeManagement.CopyTheme(imported, theme).Name, StringComparison.Ordinal);
+      ReaderTheme edited = theme.Edit("Edited", new Dictionary<string, string>(StringComparer.Ordinal), new Dictionary<string, double>(StringComparer.Ordinal), new Dictionary<string, string>(StringComparer.Ordinal), "");
+      Assert.Equal("Edited", edited.Name);
+      Assert.Contains("caf", edited.Json, StringComparison.Ordinal);
    }
 
 

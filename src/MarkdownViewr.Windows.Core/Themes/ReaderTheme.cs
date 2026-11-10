@@ -157,6 +157,7 @@ public sealed class ReaderTheme
       using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
       JsonElement root = document.RootElement;
       RequireObject(root);
+      RequireReadableText(root);
       int schemaVersion = 1;
       if(root.TryGetProperty("schemaVersion", out JsonElement version) && (version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out schemaVersion) || schemaVersion < 1 || !allowNewer && schemaVersion != 1))
       {
@@ -260,15 +261,7 @@ public sealed class ReaderTheme
       {
          throw new JsonException("The theme is missing a required string: " + name);
       }
-      try
-      {
-         return value.GetString()!;
-      }
-      catch(InvalidOperationException exception)
-      {
-         // An unpaired surrogate escape is valid JSON syntax that has no string value.
-         throw new JsonException("The theme contains text that cannot be decoded: " + name, exception);
-      }
+      return value.GetString()!;
    }
 
 
@@ -282,6 +275,53 @@ public sealed class ReaderTheme
       }
       RequireObject(value);
       return value;
+   }
+
+
+
+   /// <summary>
+   /// Checks every property name and string in the theme once, including ones this version does
+   /// not read, because a kept theme is later renamed, edited and re-serialized as a whole. An
+   /// unpaired surrogate escape is valid JSON syntax with no string value, and a repeated
+   /// property name has no single value; both are invalid themes.
+   /// </summary>
+   private static void RequireReadableText(JsonElement root)
+   {
+      try
+      {
+         var pending = new Stack<JsonElement>();
+         pending.Push(root);
+         while(pending.TryPop(out JsonElement element))
+         {
+            if(element.ValueKind == JsonValueKind.Object)
+            {
+               var names = new HashSet<string>(StringComparer.Ordinal);
+               foreach(JsonProperty property in element.EnumerateObject())
+               {
+                  if(!names.Add(property.Name))
+                  {
+                     throw new JsonException("The theme repeats a property: " + property.Name);
+                  }
+                  pending.Push(property.Value);
+               }
+            }
+            else if(element.ValueKind == JsonValueKind.Array)
+            {
+               foreach(JsonElement item in element.EnumerateArray())
+               {
+                  pending.Push(item);
+               }
+            }
+            else if(element.ValueKind == JsonValueKind.String)
+            {
+               _ = element.GetString();
+            }
+         }
+      }
+      catch(InvalidOperationException exception)
+      {
+         throw new JsonException("The theme contains text that cannot be decoded.", exception);
+      }
    }
 
 
