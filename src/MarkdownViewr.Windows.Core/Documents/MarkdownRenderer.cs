@@ -6,6 +6,8 @@
 
 using System.Text;
 using System.Text.RegularExpressions;
+using AngleSharp;
+using AngleSharp.Css.Parser;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
@@ -23,6 +25,14 @@ public sealed class MarkdownRenderer
 {
    /// <summary>Bounds parser work before an opened document can consume unbounded memory.</summary>
    public const int MaximumCharacters = 16 * 1024 * 1024;
+
+   // The sanitizer's own parser settings: scripting on, so noscript content stays text, and its CSS-aware context.
+   private static readonly IBrowsingContext s_sanitizerContext = BrowsingContext.New(Configuration.Default.WithCss(new CssParserOptions
+   {
+      IsIncludingUnknownDeclarations = true,
+      IsIncludingUnknownRules = true,
+      IsToleratingInvalidSelectors = true,
+   }));
 
    private readonly MarkdownPipeline _pipeline;
 
@@ -100,7 +110,23 @@ public sealed class MarkdownRenderer
          _ => "",
       } : "";
       string html = sources is null ? RenderDocument(Markdown.Parse(body, _pipeline)) : sources.Render(body, _pipeline, markdown.Length - body.Length, RenderDocument);
-      return _sanitizer.Sanitize(prefix + html);
+      return Sanitize(prefix + html);
+   }
+
+
+
+   /// <summary>
+   /// Parses once with the sanitizer's own settings, proves the tree is shallow enough for the
+   /// sanitizer's recursive passes, and only then sanitizes and serializes it.
+   /// </summary>
+   private string Sanitize(string html)
+   {
+      var nesting = new HtmlNesting();
+      var parser = new HtmlParser(new HtmlParserOptions { IsScripting = true, OnToken = (token, _) => nesting.Observe(token) }, s_sanitizerContext);
+      using IHtmlDocument document = parser.ParseDocument("<!doctype html><html><body>" + html);
+      HtmlNesting.ThrowIfTooDeep(document.Body!);
+      _sanitizer.SanitizeDom(document, document.Body!);
+      return document.Body!.ChildNodes.ToHtml(_sanitizer.OutputFormatter);
    }
 
 
@@ -124,21 +150,26 @@ public sealed class MarkdownRenderer
          var block = (HtmlBlock)node;
          string html = string.Join('\n', block.Lines.Lines.Take(block.Lines.Count).Select(line => line.Slice.ToString()));
          var changes = new List<(int Start, int End, string Value)>();
+         var nesting = new HtmlNesting();
          var parser = new HtmlParser(new HtmlParserOptions
          {
             OnToken = (token, range) =>
             {
+               nesting.Observe(token);
                if(token.Type is HtmlTokenType.StartTag or HtmlTokenType.EndTag && token.Name is "code" or "pre")
                {
                   codeDepth = Math.Max(0, codeDepth + (token.Type == HtmlTokenType.StartTag ? 1 : -1));
                }
                else if(token.Type == HtmlTokenType.Character && codeDepth == 0)
                {
-                  string text = html[range.Start.Index..range.End.Index];
+                  // An unterminated script or comment reports a range past the end of the block.
+                  int start = Math.Min(range.Start.Index, html.Length);
+                  int end = Math.Clamp(range.End.Index, start, html.Length);
+                  string text = html[start..end];
                   string formatted = FormatRawText(text, extendSubscript);
                   if(!string.Equals(text, formatted, StringComparison.Ordinal))
                   {
-                     changes.Add((range.Start.Index, range.End.Index, formatted));
+                     changes.Add((start, end, formatted));
                   }
                }
             },
@@ -148,19 +179,35 @@ public sealed class MarkdownRenderer
          {
             continue;
          }
-         var rewritten = new StringBuilder(html);
-         for(int index = changes.Count - 1; index >= 0; index--)
-         {
-            (int start, int end, string value) = changes[index];
-            rewritten.Remove(start, end - start).Insert(start, value);
-         }
-         string[] lines = rewritten.ToString().Split('\n');
+         string[] lines = Rewrite(html, changes).Split('\n');
          for(int index = 0; index < block.Lines.Count; index++)
          {
             block.Lines.Lines[index].Slice = new Markdig.Helpers.StringSlice(lines[index]);
          }
       }
       return Markdown.ToHtml(document, _pipeline);
+   }
+
+
+
+   /// <summary>
+   /// Applies replacements in one forward pass, so the work is linear in the block. Malformed markup
+   /// can report a text run that starts inside an earlier one; that run is left as authored.
+   /// </summary>
+   private static string Rewrite(string html, List<(int Start, int End, string Value)> changes)
+   {
+      var rewritten = new StringBuilder(html.Length + 64);
+      int copied = 0;
+      foreach((int start, int end, string value) in changes)
+      {
+         if(start < copied)
+         {
+            continue;
+         }
+         rewritten.Append(html, copied, start - copied).Append(value);
+         copied = end;
+      }
+      return rewritten.Append(html, copied, html.Length - copied).ToString();
    }
 
 
@@ -198,10 +245,12 @@ public sealed class MarkdownRenderer
          }
          else if(node is HtmlBlock block)
          {
+            var nesting = new HtmlNesting();
             var parser = new HtmlParser(new HtmlParserOptions
             {
                OnToken = (token, _) =>
                {
+                  nesting.Observe(token);
                   if(token.Type is HtmlTokenType.StartTag or HtmlTokenType.EndTag && token.Name is "code" or "pre")
                   {
                      codeDepth = Math.Max(0, codeDepth + (token.Type == HtmlTokenType.StartTag ? 1 : -1));

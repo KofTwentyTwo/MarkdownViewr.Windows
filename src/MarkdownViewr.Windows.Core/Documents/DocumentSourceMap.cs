@@ -142,10 +142,12 @@ internal sealed class DocumentSourceMap
       string html = string.Join('\n', lines.Take(block.Lines.Count).Select(line => line.Slice.ToString()));
       int? close = null;
       bool seenTag = false;
+      var nesting = new HtmlNesting();
       var parser = new HtmlParser(new HtmlParserOptions
       {
          OnToken = (token, range) =>
          {
+            nesting.Observe(token);
             if(!seenTag && token.Type is HtmlTokenType.StartTag or HtmlTokenType.EndTag
                && token.Name.Length == 2 && token.Name[0] == 'h' && token.Name[1] is >= '1' and <= '6')
             {
@@ -209,11 +211,13 @@ internal sealed class DocumentSourceMap
    private static HtmlParser CreateSourceParser(Dictionary<int, int> headingEnds)
    {
       int pendingHeading = -1;
+      var nesting = new HtmlNesting();
       return new HtmlParser(new HtmlParserOptions
       {
          IsKeepingSourceReferences = true,
          OnToken = (token, range) =>
          {
+            nesting.Observe(token);
             if(token.Name.Length == 2 && token.Name[0] == 'h' && token.Name[1] is >= '1' and <= '6')
             {
                if(token.Type == HtmlTokenType.StartTag)

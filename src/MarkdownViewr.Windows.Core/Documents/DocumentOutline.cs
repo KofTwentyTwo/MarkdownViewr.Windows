@@ -18,16 +18,25 @@ public sealed class DocumentOutline
 
 
 
-   /// <summary>Sanitizes first; authored identifiers cannot impersonate the generated navigation targets.</summary>
-   public DocumentOutline(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide, MarkdownExtensions? extensions = null)
+   /// <summary>
+   /// Sanitizes first; authored identifiers cannot impersonate the generated navigation targets.
+   /// A large document takes time that grows with its size: cancellation is honoured between the
+   /// render, the parse and each heading, so a closed window or a newer load does not wait for it.
+   /// </summary>
+   public DocumentOutline(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide, MarkdownExtensions? extensions = null, CancellationToken cancellation = default)
    {
       var sources = new DocumentSourceMap(markdown);
       var sourceHeadings = new List<DocumentSourceHeading>();
-      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(new MarkdownRenderer(extensions).RenderWithSources(markdown, frontmatter, sources));
+      cancellation.ThrowIfCancellationRequested();
+      string rendered = new MarkdownRenderer(extensions).RenderWithSources(markdown, frontmatter, sources);
+      cancellation.ThrowIfCancellationRequested();
+      using AngleSharp.Html.Dom.IHtmlDocument document = new HtmlParser().ParseDocument(rendered);
       IElement body = document.Body!;
       var fragments = new Dictionary<string, string>(StringComparer.Ordinal);
+      var nextSuffix = new Dictionary<string, int>(StringComparer.Ordinal);
       foreach(IElement element in body.QuerySelectorAll("h1,h2,h3,h4,h5,h6"))
       {
+         cancellation.ThrowIfCancellationRequested();
          var heading = new DocumentHeading(_headings.Count, element.LocalName[1] - '0', element.TextContent.Trim());
          _headings.Add(heading);
          if(element.GetAttribute(sources.AttributeName) is { } identity && sources.TryGetPosition(identity, out (int Start, int End) position))
@@ -37,11 +46,15 @@ public sealed class DocumentOutline
          _elements.Add(element, heading);
          element.Id = "mv-heading-" + heading.Index.ToString(CultureInfo.InvariantCulture);
          string slug = Markdig.Helpers.LinkHelper.UrilizeAsGfm(heading.Title);
+         // Repeated titles continue from the last suffix used for that title instead of rescanning from one.
          string fragment = slug;
-         for(int suffix = 1; fragments.ContainsKey(fragment); suffix++)
+         int suffix = nextSuffix.GetValueOrDefault(slug, 1);
+         while(fragments.ContainsKey(fragment))
          {
             fragment = slug + "-" + suffix.ToString(CultureInfo.InvariantCulture);
+            suffix++;
          }
+         nextSuffix[slug] = suffix;
          fragments.Add(fragment, element.Id);
       }
       foreach(IElement element in body.QuerySelectorAll("[" + sources.AttributeName + "]"))
@@ -56,6 +69,7 @@ public sealed class DocumentOutline
             link.SetAttribute("href", "#" + target);
          }
       }
+      cancellation.ThrowIfCancellationRequested();
       foreach(IElement element in body.QuerySelectorAll("*").Reverse())
       {
          if(!_elements.ContainsKey(element))

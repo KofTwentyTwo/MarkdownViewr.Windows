@@ -46,7 +46,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Image traversal, device/ADS paths or encoded separators | Core path-policy tests pass; denied before filesystem access |
 | Junction/symlink escape or check/reopen race | Check normalized physical path on opened image handle; read same handle; real junction rejection test passes |
 | Remote image tracking / resource exfiltration | No-referrer header, no document networking; actual listening-server browser denial passed on 77dd04d |
-| Oversized input / image denial of service | Pre-parse character bound and image byte bound; native limit tests pass; performance acceptance remains |
+| Oversized input / image denial of service | Pre-parse character bound and image byte bound; native limit tests pass. Element nesting is bounded at 256 levels before any library walks the parsed tree recursively, with an early count that stops runaway nesting while it is still being parsed; deeper markup is refused as an unsupported document. Parse time is not bounded: it grows with document size, runs off the window thread, and can be cancelled between the render, the parse and each heading |
 | Settings corruption / UI exception | AppKit shell sanitation and crash handling; inherited foundation tests |
 | Tampered installer/update | Fail-closed signing/provenance/checksum release pipeline; real Azure CI authorization and signed artifacts remain unverified |
 | Privileged repository review abuse | Trusted review workflow only; current-SHA human acknowledgement remains required |
