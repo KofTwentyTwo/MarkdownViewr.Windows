@@ -56,8 +56,8 @@ public sealed partial class MainWindow
    /// <summary>Failed persistence does not apply an unsaved theme draft; sibling fields untouched by this edit retain their latest values.</summary>
    private async Task<bool> CommitThemeDraftAsync(Core.AppSettings before, Core.AppSettings edited)
    {
-      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), before, edited);
-      if(!AppIdentity.SettingsStore.Save(merged))
+      Core.AppSettings? merged = AppIdentity.SettingsStore.Update(current => Core.SettingsChanges.Merge(current, before, edited));
+      if(merged is null)
       {
          StatusText.Text = "Could not save document themes.";
          return false;

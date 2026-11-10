@@ -34,7 +34,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Remote resources | Denied by CSP and resource interception |
 | External links | HTTP(S) only, actual browser user gesture, external Windows handler; no document navigation outside current page |
 | Heading navigation | Labels extracted after sanitation; authored identity attributes stripped; generated numeric targets only. Fixed host operations reveal/jump/collapse on the current intercepted page; authored scripts, messages and host objects remain disabled |
-| Settings / logs | AppKit sanitation; per-user data root; log operational events without document content or paths |
+| Settings / logs | AppKit sanitation; per-user data root; log operational events without document content or paths. Settings changes are read-modify-write under a lock file beside `settings.json` and replace it by rename; an unreadable file is never overwritten, invalid content is kept as `settings.json.corrupt`, a file over 16 MiB is not loaded, and faults are logged by kind, exception type and HRESULT only |
 | Updates | Repository HTTPS feed, Velopack integrity checks and production signing preflight |
 | Repository / CI | Protected main and release tags; producer-bound checks; no untrusted PR checkout with privileged review token |
 

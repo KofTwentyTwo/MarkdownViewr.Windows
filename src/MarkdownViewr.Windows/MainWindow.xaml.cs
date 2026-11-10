@@ -522,8 +522,7 @@ public sealed partial class MainWindow : Window, IDisposable
    /// <summary>Saves the settings and reports a failed save in the status line.</summary>
    private void Save()
    {
-      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), _lastSavedSettings, _settings);
-      if(AppIdentity.SettingsStore.Save(merged))
+      if(AppIdentity.SettingsStore.Update(current => Core.SettingsChanges.Merge(current, _lastSavedSettings, _settings)) is not null)
       {
          _lastSavedSettings = Core.SettingsChanges.Copy(_settings);
       }

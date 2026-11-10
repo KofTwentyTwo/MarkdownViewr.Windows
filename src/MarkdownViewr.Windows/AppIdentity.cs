@@ -5,7 +5,6 @@
 
 using KofTwentyTwo.AppKit;
 using KofTwentyTwo.AppKit.Logging;
-using KofTwentyTwo.AppKit.Settings;
 using Velopack.Locators;
 
 
@@ -31,8 +30,8 @@ internal static class AppIdentity
 
 
 
-   /// <summary>Each edition owns its own persisted preferences and recent document list.</summary>
-   public static SettingsStore<AppSettings> SettingsStore { get; } = new(Paths.SettingsFile, AppSettingsContext.Default.AppSettings);
+   /// <summary>Each edition owns its own persisted preferences and recent document list; faults are logged by kind, never with a path or message text.</summary>
+   public static Core.AppSettingsStore SettingsStore { get; } = new(Paths.SettingsFile, ReportSettingsFault);
 
 
 
@@ -53,6 +52,12 @@ internal static class AppIdentity
 
    /// <summary>Both editions use the Windows repository's discussions.</summary>
    public static Uri SupportUrl => Core.AppIdentity.SupportUrl;
+
+
+
+   /// <summary>A settings fault is an operational event: the kind, exception type and HRESULT identify it without disclosing the profile.</summary>
+   private static void ReportSettingsFault(Core.SettingsFault fault, Exception? exception)
+      => App.Log.Warning(FormattableString.Invariant($"Settings file fault: {fault}; exception={exception?.GetType().Name ?? "none"}; HRESULT=0x{exception?.HResult ?? 0:X8}."));
 
 
 
