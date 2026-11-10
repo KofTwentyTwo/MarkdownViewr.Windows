@@ -129,6 +129,11 @@ public partial class App
          settings.RecentFiles = [];
          return settings;
       }) is not null;
+      if(saved)
+      {
+         // Copies of an invalid settings file kept beside it would still list the history.
+         AppIdentity.SettingsStore.DeleteKeptAside();
+      }
       RefreshRecentMenus();
       return saved;
    }

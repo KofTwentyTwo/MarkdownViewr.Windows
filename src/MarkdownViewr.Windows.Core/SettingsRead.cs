@@ -13,9 +13,11 @@ internal enum SettingsRead
    Loaded,
    /// <summary>No file yet; defaults apply and the first save creates it.</summary>
    Missing,
-   /// <summary>Valid values were kept and invalid ones dropped; a save keeps the original file aside.</summary>
+   /// <summary>A file with no content, as a program that clears a file before rewriting it leaves it; defaults apply and a save replaces it.</summary>
+   Empty,
+   /// <summary>Valid properties were kept and invalid ones dropped; a save keeps a copy of the original aside.</summary>
    Repaired,
-   /// <summary>Not settings at all; defaults apply and a save keeps the invalid file aside.</summary>
+   /// <summary>Not settings at all; defaults apply and a save keeps a copy of the file aside.</summary>
    Corrupt,
    /// <summary>The content is unknown, so it must not be replaced.</summary>
    Unreadable,

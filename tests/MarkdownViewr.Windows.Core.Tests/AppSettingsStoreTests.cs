@@ -196,6 +196,24 @@ public class AppSettingsStoreTests
 
 
 
+   /// <summary>A change that throws leaves the stored file as it was and open to every other program at once.</summary>
+   [Fact]
+   public void Update_ChangeThrows_ReleasesTheStoredFile()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      byte[] before = File.ReadAllBytes(temp.File("settings.json"));
+      var store = new AppSettingsStore(temp.File("settings.json"));
+      Assert.Throws<InvalidOperationException>(() => store.Update(_ => throw new InvalidOperationException("change failed")));
+      using(new FileStream(temp.File("settings.json"), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+      {
+      }
+      Assert.Equal(before, File.ReadAllBytes(temp.File("settings.json")));
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
    /// <summary>Another handle holding the file for a moment (a scanner, a backup) is waited out, not read as an empty profile.</summary>
    [Fact]
    public void Load_FileLockedBriefly_RetriesAndReadsTheStoredValues()
@@ -358,7 +376,7 @@ public class AppSettingsStoreTests
          Assert.Null(store.Update(settings => settings));
          Assert.Equal("Catppuccin Mocha", store.Load().DocumentTheme);
       }
-      Assert.Equal([SettingsFault.Unreadable, SettingsFault.Unreadable], faults);
+      Assert.Equal([SettingsFault.Unreadable], faults);
       Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
       Assert.Equal(0, new FileInfo(temp.File("settings.json")).Length);
    }
@@ -367,7 +385,6 @@ public class AppSettingsStoreTests
 
    /// <summary>Content that is not settings at all yields defaults, is reported, and stays where it is until something is saved.</summary>
    [Theory]
-   [InlineData("")]
    [InlineData("{")]
    [InlineData("null")]
    [InlineData("[1]")]
@@ -403,20 +420,177 @@ public class AppSettingsStoreTests
 
 
 
-   /// <summary>One invalid value costs only that value: every other stored preference is kept.</summary>
+   /// <summary>An invalid property costs only that property: every other stored preference, before and after it, is kept.</summary>
    [Fact]
-   public void Load_OneInvalidValue_KeepsEveryOtherValue()
+   public void Load_InvalidProperties_KeepsEveryOtherProperty()
    {
       using var temp = new TempDirectory();
-      File.WriteAllText(temp.File("settings.json"), """{"Theme":"Dark","OutlineDepth":5.5,"DocumentTheme":"Nord","RecentFiles":["C:\\docs\\a.md",5],"GlobalCss":"body { color: red }","FutureSetting":{"a":1}}""");
+      File.WriteAllText(temp.File("settings.json"), """{"Theme":"Dark","OutlineDepth":5.5,"DocumentTheme":"Nord","RecentFiles":["C:\\docs\\a.md",5],"GlobalCss":"body { color: red }","FutureSetting":{"a":1},"WrapOutlineEntries":true,"ContentWidthPx":1234,"Frontmatter":"Metadata","RenderHighlight":false,"ShowSplashScreen":false,"OutlineWidth":300,"Print":{"Theme":"Nord","Borders":true}}""");
       var faults = new List<SettingsFault>();
       AppSettings loaded = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault)).Load();
       Assert.Equal([SettingsFault.Repaired], faults);
       Assert.Equal("Dark", loaded.Theme);
       Assert.Equal("Nord", loaded.DocumentTheme);
       Assert.Equal("body { color: red }", loaded.GlobalCss);
+      Assert.True(loaded.WrapOutlineEntries);
+      Assert.Equal(1234, loaded.ContentWidthPx);
+      Assert.Equal("Metadata", loaded.Frontmatter);
+      Assert.False(loaded.RenderHighlight);
+      Assert.False(loaded.ShowSplashScreen);
+      Assert.Equal(300, loaded.OutlineWidth);
+      Assert.Equal("Nord", loaded.Print.Theme);
+      Assert.True(loaded.Print.Borders);
       Assert.Equal(3, loaded.OutlineDepth);
       Assert.Empty(loaded.RecentFiles);
+   }
+
+
+
+   /// <summary>
+   /// Text the JSON reader cannot decode, an unpaired surrogate escape, is an invalid property
+   /// like any other: it is dropped, the rest load, and nothing is thrown into startup.
+   /// </summary>
+   [Fact]
+   public void LoadAndUpdate_UndecodableText_DropsThatPropertyAndSavesTheRest()
+   {
+      using var temp = new TempDirectory();
+      File.WriteAllText(temp.File("settings.json"), "{\"DocumentTheme\":\"Nord\",\"GlobalCss\":\"a\\uD800b\",\"Theme\":\"Dark\"}");
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault));
+      AppSettings loaded = store.Load();
+      Assert.Equal("Nord", loaded.DocumentTheme);
+      Assert.Equal("Dark", loaded.Theme);
+      Assert.Equal("", loaded.GlobalCss);
+      Assert.NotNull(store.Update(settings => settings));
+      Assert.Equal([SettingsFault.Repaired, SettingsFault.Repaired], faults);
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.corrupt", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>A file with no content is not invalid settings: it reads as defaults, without a fault and without a wait.</summary>
+   [Fact]
+   public void Load_EmptyFile_ReturnsDefaultsWithoutAFaultOrAWait()
+   {
+      using var temp = new TempDirectory();
+      File.WriteAllBytes(temp.File("settings.json"), []);
+      int waits = 0;
+      var faults = new List<SettingsFault>();
+      Assert.Equal("Catppuccin Mocha", new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ => waits++).Load().DocumentTheme);
+      Assert.Empty(faults);
+      Assert.Equal(0, waits);
+   }
+
+
+
+   /// <summary>
+   /// A program that clears the file, closes it, and then writes it again leaves it empty for a
+   /// moment. A save waits for the content instead of filling the gap with defaults.
+   /// </summary>
+   [Fact]
+   public void Update_FileClearedThenRewritten_WaitsForTheContent()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      File.WriteAllBytes(temp.File("settings.json"), []);
+      int waits = 0;
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ =>
+      {
+         if(++waits == 2)
+         {
+            File.WriteAllText(temp.File("settings.json"), """{"Theme":"Light","DocumentTheme":"Dracula"}""");
+         }
+      });
+      AppSettings? saved = store.Update(settings =>
+      {
+         settings.OutlineDepth = 5;
+         return settings;
+      });
+      Assert.NotNull(saved);
+      Assert.Equal(2, waits);
+      Assert.Empty(faults);
+      Assert.Equal("Dracula", store.Load().DocumentTheme);
+      Assert.Equal("Light", store.Load().Theme);
+      Assert.Equal(5, store.Load().OutlineDepth);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>A file that stays empty is replaced after the wait, and nothing is kept aside: there is nothing to keep.</summary>
+   [Fact]
+   public void Update_FileStaysEmpty_SavesAfterTheWaitWithoutKeepingAnythingAside()
+   {
+      using var temp = new TempDirectory();
+      File.WriteAllBytes(temp.File("settings.json"), []);
+      int waits = 0;
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ => waits++);
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Dark";
+         return settings;
+      }));
+      Assert.Equal(AppSettingsStore.MaximumAttempts - 1, waits);
+      Assert.Empty(faults);
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>
+   /// A handle another program merely holds with write access does not delay a read for display:
+   /// the stored values are read beside it.
+   /// </summary>
+   [Fact]
+   public void Load_FileHeldWithWriteAccess_ReadsTheStoredValuesWithoutWaiting()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      int waits = 0;
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ => waits++);
+      using(new FileStream(temp.File("settings.json"), FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete))
+      {
+         Assert.Equal("Nord", store.Load().DocumentTheme);
+      }
+      Assert.Equal(0, waits);
+      Assert.Empty(faults);
+   }
+
+
+
+   /// <summary>
+   /// Content read beside a writer that does not parse may simply be half written. The read waits
+   /// for the writer; if the content never becomes valid it is reported as unreadable, not as
+   /// corrupt, because it cannot be judged while someone is writing it.
+   /// </summary>
+   [Theory]
+   [InlineData(true)]
+   [InlineData(false)]
+   public void Load_HalfWrittenContentBesideAWriter_WaitsAndNeverCallsItCorrupt(bool writerFinishes)
+   {
+      using var temp = new TempDirectory();
+      using var writer = new FileStream(temp.File("settings.json"), FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete);
+      writer.Write("""{"DocumentTheme":"Dra"""u8);
+      writer.Flush();
+      int waits = 0;
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ =>
+      {
+         if(++waits == 2 && writerFinishes)
+         {
+            writer.Write("""cula"}"""u8);
+            writer.Flush();
+         }
+      });
+      AppSettings loaded = store.Load();
+      Assert.Equal(writerFinishes ? "Dracula" : "Catppuccin Mocha", loaded.DocumentTheme);
+      Assert.Equal(writerFinishes ? 2 : AppSettingsStore.MaximumAttempts - 1, waits);
+      Assert.Equal(writerFinishes ? [] : [SettingsFault.Unreadable], faults);
    }
 
 
@@ -520,7 +694,144 @@ public class AppSettingsStoreTests
 
 
 
-   /// <summary>When the save over invalid content fails, the invalid file is still in place: it is never moved away first.</summary>
+   /// <summary>A folder where a kept-aside copy would go is skipped; the next name is used.</summary>
+   [Fact]
+   public void Update_KeptAsideNameIsAFolder_UsesTheNextName()
+   {
+      using var temp = new TempDirectory();
+      Directory.CreateDirectory(temp.File("settings.json.corrupt"));
+      File.WriteAllText(temp.File("settings.json"), "not json");
+      var faults = new List<SettingsFault>();
+      Assert.NotNull(new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault)).Update(settings => settings));
+      Assert.Equal("not json", File.ReadAllText(temp.File("settings.json.corrupt-2")));
+      Assert.Equal([SettingsFault.Corrupt], faults);
+   }
+
+
+
+   /// <summary>When no copy can be made the save still goes through, and the missing copy is reported.</summary>
+   [Fact]
+   public void Update_CopyCannotBeKeptAside_SavesAndReportsIt()
+   {
+      using var temp = new TempDirectory();
+      for(int slot = 2; slot <= AppSettingsStore.MaximumKeptAside; slot++)
+      {
+         Directory.CreateDirectory(temp.File("settings.json.corrupt-" + slot.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+      }
+      Directory.CreateDirectory(temp.File("settings.json.corrupt"));
+      File.WriteAllText(temp.File("settings.json"), "not json");
+      var faults = new List<(SettingsFault Fault, Exception? Exception)>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, exception) => faults.Add((fault, exception)));
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Dark";
+         return settings;
+      }));
+      Assert.Equal([SettingsFault.Corrupt, SettingsFault.NotKeptAside], faults.Select(entry => entry.Fault));
+      Assert.IsType<UnauthorizedAccessException>(faults[1].Exception);
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>Kept-aside copies hold whatever the file held, so they can be removed on request; folders with those names are left.</summary>
+   [Fact]
+   public void DeleteKeptAside_CopiesAndAFolder_RemovesOnlyTheCopies()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      File.WriteAllText(temp.File("settings.json.corrupt"), "copy 1");
+      File.WriteAllText(temp.File("settings.json.corrupt-2"), "copy 2");
+      File.WriteAllText(temp.File("settings.json.corrupt-9"), "copy 9");
+      File.WriteAllText(temp.File("settings.json.corrupt-10"), "not a kept-aside name");
+      Directory.CreateDirectory(temp.File("settings.json.corrupt-3"));
+      new AppSettingsStore(temp.File("settings.json")).DeleteKeptAside();
+      Assert.Equal(["settings.json", "settings.json.corrupt-10", "settings.json.lock"], FileNames(temp.Path));
+      Assert.True(Directory.Exists(temp.File("settings.json.corrupt-3")));
+   }
+
+
+
+   /// <summary>
+   /// The stored file is in place at the moment the new one is renamed over it and immediately
+   /// after: there is no step at which the folder has no settings file.
+   /// </summary>
+   [Fact]
+   public void Update_AtTheRename_TheStoredFileIsStillInPlace()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      string path = temp.File("settings.json");
+      var observed = new List<string>();
+      var store = new AppSettingsStore(path, null, null, (source, destination) =>
+      {
+         observed.Add(File.Exists(destination) ? "stored file present before" : "stored file missing before");
+         observed.Add(File.Exists(source) ? "new file written" : "new file missing");
+         bool renamed = FileSwap.TryRenameOver(source, destination);
+         observed.Add(File.Exists(destination) ? "stored file present after" : "stored file missing after");
+         return renamed;
+      });
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Light";
+         return settings;
+      }));
+      Assert.Equal(["stored file present before", "new file written", "stored file present after"], observed);
+      Assert.Equal("Light", store.Load().Theme);
+   }
+
+
+
+   /// <summary>On a volume that cannot rename over an open file the store closes its own handle and replaces the file the older way.</summary>
+   [Fact]
+   public void Update_VolumeCannotRenameOverAnOpenFile_ReplacesAfterClosingItsHandle()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      int attempts = 0;
+      var store = new AppSettingsStore(temp.File("settings.json"), null, _ => { }, (_, _) =>
+      {
+         attempts++;
+         return false;
+      });
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Light";
+         return settings;
+      }));
+      Assert.Equal(1, attempts);
+      Assert.Equal("Light", store.Load().Theme);
+      Assert.Equal("Nord", store.Load().DocumentTheme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>Only a sharing violation is waited out at the rename; any other I/O failure fails the save at once.</summary>
+   [Theory]
+   [InlineData(unchecked((int)0x80070020), 3, true)]
+   [InlineData(unchecked((int)0x80070021), 0, false)]
+   [InlineData(unchecked((int)0x8007001F), 0, false)]
+   [InlineData(0x00000020, 0, false)]
+   public void Update_RenameFails_WaitsOnlyForASharingViolation(int result, int expectedWaits, bool saved)
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      int waits = 0;
+      int attempts = 0;
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ => waits++, (source, destination) =>
+         ++attempts <= 3 ? throw new IOException("refused", result) : FileSwap.TryRenameOver(source, destination));
+      Assert.Equal(saved, store.Update(settings => settings) is not null);
+      Assert.Equal(expectedWaits, waits);
+      Assert.Equal(saved ? [] : [SettingsFault.WriteFailed], faults);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>When the save over invalid content fails, the invalid file is still in place and the copy made for this save is removed again.</summary>
    [Fact]
    public void Update_InvalidContentAndFailedSave_LeavesTheInvalidFileInPlace()
    {
