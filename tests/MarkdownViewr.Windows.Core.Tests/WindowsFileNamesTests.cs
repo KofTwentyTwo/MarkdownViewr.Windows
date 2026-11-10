@@ -21,35 +21,24 @@ public sealed class WindowsFileNamesTests
 
 
 
-   /// <summary>Every device name, in each letter case and with the suffixes Windows ignores.</summary>
-   public static TheoryData<string> DeviceSpellings()
+   /// <summary>A device is a device in any letter case, with any extension, and with spaces before the extension or at the end.</summary>
+   [Fact]
+   public void IsReservedDeviceName_EveryDeviceSpelling_IsReserved()
    {
-      var data = new TheoryData<string>();
-      foreach(string device in s_devices)
+      Assert.All(Spellings(), spelling =>
       {
-         string mixed = char.ToUpperInvariant(device[0]) + device[1..].ToLowerInvariant();
-         foreach(string spelling in new[] { device, device.ToLowerInvariant(), mixed })
-         {
-            data.Add(spelling);
-            data.Add(spelling + ".png");
-            data.Add(spelling + ".tar.md");
-            data.Add(spelling + " .png");
-            data.Add(spelling + "  ");
-         }
-      }
-      return data;
+         Assert.True(WindowsFileNames.IsReservedDeviceName(spelling), spelling);
+         Assert.True(WindowsFileNames.IsReservedDeviceName(spelling + ".png"), spelling);
+         Assert.True(WindowsFileNames.IsReservedDeviceName(spelling + ".tar.md"), spelling);
+         Assert.True(WindowsFileNames.IsReservedDeviceName(spelling + " .png"), spelling);
+         Assert.True(WindowsFileNames.IsReservedDeviceName(spelling + "  "), spelling);
+      });
+      Assert.Equal(96, Spellings().Count());
    }
 
 
 
-   /// <summary>A device is a device whatever its case, extension, or trailing spaces before the extension.</summary>
-   [Theory]
-   [MemberData(nameof(DeviceSpellings))]
-   public void IsReservedDeviceName_DeviceSpelling_IsReserved(string name) => Assert.True(WindowsFileNames.IsReservedDeviceName(name));
-
-
-
-   /// <summary>Names that only resemble a device stay ordinary file names.</summary>
+   /// <summary>Names that only resemble a device stay ordinary file names; only spaces are ignored before the extension.</summary>
    [Theory]
    [InlineData("")]
    [InlineData("console.md")]
@@ -58,10 +47,15 @@ public sealed class WindowsFileNamesTests
    [InlineData("LPT.txt")]
    [InlineData("xCON.png")]
    [InlineData("CON-notes.md")]
+   [InlineData("CON-.md")]
    [InlineData("null.md")]
    [InlineData(" NUL.png")]
+   [InlineData("NUL .png")]
+   [InlineData("NUL\t.png")]
    [InlineData("readme.NUL")]
    [InlineData("COM⁴.png")]
+   [InlineData("CLOCK$")]
+   [InlineData("CLOCK$.txt")]
    public void IsReservedDeviceName_OrdinaryName_IsNotReserved(string name) => Assert.False(WindowsFileNames.IsReservedDeviceName(name));
 
 
@@ -72,23 +66,29 @@ public sealed class WindowsFileNamesTests
 
 
 
-   /// <summary>The characters Windows forbids in a name are exactly these nine.</summary>
+   /// <summary>The printable characters Windows forbids in a name; control characters are refused separately by each caller.</summary>
    [Fact]
-   public void InvalidCharacters_ListsTheNineForbiddenCharacters() => Assert.Equal("\"*/:<>?\\|", new string(WindowsFileNames.InvalidCharacters.Order().ToArray()));
+   public void InvalidCharacters_Constant_ListsThePrintableForbiddenCharacters() => Assert.Equal("\"*/:<>?\\|", new string(WindowsFileNames.InvalidCharacters.Order().ToArray()));
 
 
 
-   /// <summary>No image or linked-document request can name a device in any spelling, at any depth.</summary>
-   [Theory]
-   [MemberData(nameof(DeviceSpellings))]
-   public void ResourcePolicy_DeviceSegment_DeniesImageAndDocument(string name)
+   /// <summary>No image or linked-document request can name a device in any spelling, as the file or as a folder on the way to it.</summary>
+   [Fact]
+   public void GetRelativePath_DeviceSegment_IsDenied()
    {
       var policy = new DocumentResourcePolicy();
-      string segment = Uri.EscapeDataString(name.TrimEnd(' '));
-      Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, segment + (name.Contains('.', StringComparison.Ordinal) ? "" : ".png"))));
-      Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, segment + "/picture.png")));
-      Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, segment + (name.Contains('.', StringComparison.Ordinal) ? "" : ".md"))));
-      Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, "docs/" + segment + "/child.md")));
+      Assert.All(Spellings(), spelling =>
+      {
+         string segment = Uri.EscapeDataString(spelling);
+         Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, segment + ".png")));
+         Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, segment + "%20.png")));
+         Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, segment + "/picture.png")));
+         Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, segment + ".md")));
+         Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, segment + ".tar.md")));
+         Assert.Null(policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, "docs/" + segment + "/child.md")));
+      });
+      Assert.Equal("console.png", policy.GetImageRelativePath(new Uri(policy.DocumentUri, "console.png")));
+      Assert.Equal("docs/com10/child.md", policy.GetDocumentRelativePath(new Uri(policy.DocumentUri, "docs/com10/child.md")));
    }
 
 
@@ -104,4 +104,22 @@ public sealed class WindowsFileNamesTests
          Assert.Equal("theme-" + device.ToLowerInvariant() + ".backup.json", ThemeJson.SuggestedFileName(ThemeCatalog.Find(null).Rename(device + ".backup")));
       });
    }
+
+
+
+   /// <summary>Leading and trailing dots and hyphens are dropped from a suggested name, and a name made only of them falls back to a plain one.</summary>
+   [Theory]
+   [InlineData("-Edge-", "edge.json")]
+   [InlineData(".Dotted.", "dotted.json")]
+   [InlineData("--", "theme.json")]
+   [InlineData(" spaced ", "spaced.json")]
+   [InlineData("-con-", "theme-con.json")]
+   public void SuggestedFileName_LeadingAndTrailingSeparators_AreTrimmed(string name, string expected)
+      => Assert.Equal(expected, ThemeJson.SuggestedFileName(ThemeCatalog.Find(null).Rename(name)));
+
+
+
+   /// <summary>Each device name in upper, lower and mixed case.</summary>
+   private static IEnumerable<string> Spellings()
+      => s_devices.SelectMany(device => new[] { device, device.ToLowerInvariant(), char.ToUpperInvariant(device[0]) + device[1..].ToLowerInvariant() });
 }

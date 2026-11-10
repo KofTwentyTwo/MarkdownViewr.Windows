@@ -260,7 +260,15 @@ public sealed class ReaderTheme
       {
          throw new JsonException("The theme is missing a required string: " + name);
       }
-      return value.GetString()!;
+      try
+      {
+         return value.GetString()!;
+      }
+      catch(InvalidOperationException exception)
+      {
+         // An unpaired surrogate escape is valid JSON syntax that has no string value.
+         throw new JsonException("The theme contains text that cannot be decoded: " + name, exception);
+      }
    }
 
 

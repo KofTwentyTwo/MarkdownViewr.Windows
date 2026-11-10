@@ -32,6 +32,16 @@ public sealed class DocumentResourcePolicy
 
 
 
+   /// <summary>The image file types served to the document surface.</summary>
+   internal static IReadOnlyCollection<string> ImageExtensions => s_imageExtensions;
+
+
+
+   /// <summary>The document file types a link may open in a new reader.</summary>
+   internal static IReadOnlyCollection<string> DocumentExtensions => s_documentExtensions;
+
+
+
    /// <summary>The only top-level document URI the browser host may serve.</summary>
    public Uri DocumentUri { get; }
 

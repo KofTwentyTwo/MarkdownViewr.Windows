@@ -51,7 +51,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>The private source marker is new for every render, so an authored attribute cannot predict it.</summary>
    [Fact]
-   public void SourceMap_EveryRender_UsesAnUnpredictableAttributeName()
+   public void AttributeName_EachSourceMap_IsUnpredictable()
    {
       string first = new DocumentSourceMap("# Title").AttributeName;
       string second = new DocumentSourceMap("# Title").AttributeName;
@@ -67,7 +67,7 @@ public sealed class UntrustedInputValidationTests
    [InlineData(1)]
    [InlineData(5)]
    [InlineData(6)]
-   public void Outline_RawHtmlHeadingLevel_MapsItsSource(int level)
+   public void SourceHeadings_RawHtmlHeadingLevel_MapsItsSource(int level)
    {
       string heading = $"<h{level}>Raw</h{level}>";
       string source = "Intro\n\n" + heading + "\n\nAfter\n";
@@ -81,7 +81,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>A level the HTML standard does not define is not a heading and gets no source mapping.</summary>
    [Fact]
-   public void Outline_RawHtmlLevelSeven_IsNotAHeading()
+   public void SourceHeadings_RawHtmlLevelSeven_IsNotAHeading()
    {
       var outline = new DocumentOutline("<h7>Not a heading</h7>\n");
       Assert.Empty(outline.Headings);
@@ -178,7 +178,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>Editor and document paths are accepted up to the Windows limit and refused one character past it.</summary>
    [Fact]
-   public void EditorLaunch_PathAtAndPastTheWindowsLimit_IsBoundedExactly()
+   public void IsExecutablePath_PathAtAndPastTheWindowsLimit_IsBoundedExactly()
    {
       string atLimit = @"C:\" + new string('e', 32767 - 7) + ".exe";
       string pastLimit = @"C:\" + new string('e', 32768 - 7) + ".exe";
@@ -195,7 +195,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>Recent paths are kept up to the Windows limit and dropped one character past it.</summary>
    [Fact]
-   public void RecentDocuments_PathAtAndPastTheWindowsLimit_IsBoundedExactly()
+   public void Sanitize_RecentPathAtAndPastTheWindowsLimit_IsBoundedExactly()
    {
       string atLimit = @"C:\" + new string('d', 32767 - 6) + ".md";
       Assert.Equal([atLimit], RecentDocuments.Sanitize([atLimit, atLimit + "x"]));
@@ -205,7 +205,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>A find term is accepted at its limit and refused one character past it.</summary>
    [Fact]
-   public void DocumentFind_QueryAtAndPastTheLimit_IsBoundedExactly()
+   public void Constructor_FindTermAtAndPastTheLimit_IsBoundedExactly()
    {
       string atLimit = new('q', DocumentFind.MaximumQueryCharacters);
       Assert.Equal(atLimit, new DocumentFind(atLimit + " tail", atLimit).Query);
@@ -216,7 +216,7 @@ public sealed class UntrustedInputValidationTests
 
    /// <summary>The viewport result is read up to its size cap and ignored past it, even when it would parse.</summary>
    [Fact]
-   public void DocumentViewport_ResultAtAndPastTheSizeCap_IsBoundedExactly()
+   public void FromBrowserResult_ViewportAtAndPastTheSizeCap_IsBoundedExactly()
    {
       string atCap = "[0.25," + new string(' ', 128 - 11) + "0.75]";
       Assert.Equal(128, atCap.Length);
@@ -230,7 +230,7 @@ public sealed class UntrustedInputValidationTests
    [Theory]
    [InlineData(0)]
    [InlineData(3)]
-   public void DocumentScrollState_ResultAtAndPastTheSizeCap_IsBoundedExactly(int headings)
+   public void FromBrowserResult_ScrollStateAtAndPastTheSizeCap_IsBoundedExactly(int headings)
    {
       int cap = headings * 128 + 512;
       string atCap = "[1,2,[],[]" + new string(' ', cap - 11) + "]";
@@ -246,7 +246,7 @@ public sealed class UntrustedInputValidationTests
    [InlineData("[1,2,[]]")]
    [InlineData("[1,2,[],[],[]]")]
    [InlineData("[1,2,[],[],0]")]
-   public void DocumentScrollState_WrongNumberOfParts_IsRejected(string json)
+   public void FromBrowserResult_ScrollStateWithWrongNumberOfParts_IsRejected(string json)
       => Assert.Null(DocumentScrollState.FromBrowserResult(json, 2));
 
 
@@ -257,7 +257,7 @@ public sealed class UntrustedInputValidationTests
    [InlineData(double.PositiveInfinity, "padding:0px")]
    [InlineData(5000, "padding:96px")]
    [InlineData(-3, "padding:0px")]
-   public void PrintStyles_CorruptPadding_UsesTheRepairedValue(double padding, string expected)
+   public void Build_CorruptPadding_UsesTheRepairedValue(double padding, string expected)
    {
       ReaderTheme theme = ThemeCatalog.Find(null);
       string css = PrintStyles.Build(new PrintOptions(PaddingPixels: padding), theme, [theme], 1);
@@ -265,6 +265,28 @@ public sealed class UntrustedInputValidationTests
       Assert.DoesNotContain("NaN", css, StringComparison.Ordinal);
       Assert.DoesNotContain("Infinity", css, StringComparison.Ordinal);
       Assert.DoesNotContain("∞", css, StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>
+   /// Text the JSON reader cannot decode, an unpaired surrogate escape, is an invalid theme like any
+   /// other: parsing, import and saved-theme repair all handle it as one.
+   /// </summary>
+   [Theory]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"\\uD83D\"")]
+   [InlineData("\"background\": \"#2e3440\"", "\"background\": \"\\uD800\"")]
+   [InlineData("\"body\": \"System\"", "\"body\": \"A\\uDC00B\"")]
+   public void Parse_UndecodableText_IsRejectedAsAnInvalidTheme(string valid, string undecodable)
+   {
+      string original = ThemeCatalog.Find("Nord").Json;
+      Assert.Contains(valid, original, StringComparison.Ordinal);
+      string json = original.Replace(valid, undecodable, StringComparison.Ordinal);
+      Assert.Throws<JsonException>(() => ReaderTheme.Parse(json));
+      Assert.Throws<JsonException>(() => ReaderTheme.ParseCompatible(json));
+      var settings = new AppSettings { UserThemes = [json, original] };
+      settings.Sanitize();
+      Assert.Equal([original], settings.UserThemes);
    }
 
 
@@ -280,7 +302,7 @@ public sealed class UntrustedInputValidationTests
 
 
 
-   /// <summary>A parse error anywhere in a theme is reported as invalid JSON content, the one failure callers handle.</summary>
+   /// <summary>A colour that is not six hexadecimal digits after a hash, or a label containing a control character, is refused.</summary>
    [Theory]
    [InlineData("colors.background", "\";ffffff\"")]
    [InlineData("colors.background", "\"#fffffff\"")]
@@ -292,7 +314,7 @@ public sealed class UntrustedInputValidationTests
    [InlineData("name", "\"Theme\\u007fName\"")]
    [InlineData("fonts.heading", "\"Font\\u0001Name\"")]
    [InlineData("fonts.code", "\"Font\\u009bName\"")]
-   public void ThemeParse_MalformedColorOrLabel_IsRejected(string path, string json)
+   public void Parse_MalformedColorOrLabel_IsRejected(string path, string json)
    {
       JsonNode root = JsonNode.Parse(ThemeCatalog.Find(null).Json)!;
       string[] parts = path.Split('.');

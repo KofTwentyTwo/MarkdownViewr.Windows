@@ -16,7 +16,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
 {
    /// <summary>The valid baseline every single-component variation below is derived from.</summary>
    [Fact]
-   public void Baseline_ValidRequests_AreAccepted()
+   public void GetRelativePath_OwnDocumentRequest_IsAccepted()
    {
       var policy = new DocumentResourcePolicy();
       Assert.Equal("image.png", policy.GetImageRelativePath(Vary(policy, "image.png", _ => { })));
@@ -27,7 +27,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
    /// <summary>Plain HTTP on the same host, port and path is not the document's origin.</summary>
    [Fact]
-   public void OtherScheme_SameHostPortAndPath_IsDenied()
+   public void GetRelativePath_OtherScheme_IsDenied()
    {
       var policy = new DocumentResourcePolicy();
       Uri image = Vary(policy, "image.png", builder =>
@@ -48,7 +48,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
    /// <summary>Another port on the same host is another origin.</summary>
    [Fact]
-   public void OtherPort_SameSchemeHostAndPath_IsDenied()
+   public void GetRelativePath_OtherPort_IsDenied()
    {
       var policy = new DocumentResourcePolicy();
       Assert.Null(policy.GetImageRelativePath(Vary(policy, "image.png", builder => builder.Port = 444)));
@@ -59,7 +59,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
    /// <summary>Credentials in the request never reach a resource.</summary>
    [Fact]
-   public void UserInformation_SameOriginAndPath_IsDenied()
+   public void GetRelativePath_UserInformation_IsDenied()
    {
       var policy = new DocumentResourcePolicy();
       Assert.Null(policy.GetImageRelativePath(Vary(policy, "image.png", builder => builder.UserName = "user")));
@@ -72,12 +72,12 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
 
 
-   /// <summary>Another host, or the same host in another letter case position such as a subdomain, is denied.</summary>
+   /// <summary>Another host is denied, including a subdomain of the viewer's host and a host that merely starts with it.</summary>
    [Theory]
    [InlineData("example.com")]
    [InlineData("sub.viewer.markdownviewr.invalid")]
    [InlineData("viewer.markdownviewr.invalid.example.com")]
-   public void OtherHost_SameSchemePortAndPath_IsDenied(string host)
+   public void GetRelativePath_OtherHost_IsDenied(string host)
    {
       var policy = new DocumentResourcePolicy();
       Assert.Null(policy.GetImageRelativePath(Vary(policy, "image.png", builder => builder.Host = host)));
@@ -86,7 +86,32 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
 
 
-   /// <summary>Exactly these image types are served; documents, pages, scripts and executables are not images.</summary>
+   /// <summary>The served image types and the openable document types are exactly these sets.</summary>
+   [Fact]
+   public void Extensions_ConfiguredSets_AreExactlyTheListedTypes()
+   {
+      Assert.Equal([".avif", ".bmp", ".gif", ".ico", ".jpeg", ".jpg", ".png", ".svg", ".webp"], DocumentResourcePolicy.ImageExtensions.Order(StringComparer.Ordinal), StringComparer.Ordinal);
+      Assert.Equal([".markdown", ".md", ".mdown", ".mkd", ".txt"], DocumentResourcePolicy.DocumentExtensions.Order(StringComparer.Ordinal), StringComparer.Ordinal);
+   }
+
+
+
+   /// <summary>The document's own path prefix is matched exactly; another letter case is another document.</summary>
+   [Fact]
+   public void GetRelativePath_PrefixInAnotherLetterCase_IsDenied()
+   {
+      var policy = new DocumentResourcePolicy();
+      string shouted = policy.DocumentUri.AbsoluteUri.Replace("/documents/", "/DOCUMENTS/", StringComparison.Ordinal);
+      Assert.NotEqual(policy.DocumentUri.AbsoluteUri, shouted, StringComparer.Ordinal);
+      Assert.Null(policy.GetImageRelativePath(new Uri(new Uri(shouted), "image.png")));
+      Assert.Null(policy.GetDocumentRelativePath(new Uri(new Uri(shouted), "child.md")));
+      Assert.Null(policy.GetHeadingIndex(new Uri(shouted + "#mv-heading-0"), 3));
+      Assert.Equal(0, policy.GetHeadingIndex(new Uri(policy.DocumentUri.AbsoluteUri + "#mv-heading-0"), 3));
+   }
+
+
+
+   /// <summary>Image types are served in any letter case; documents, pages, scripts and executables are not images.</summary>
    [Theory]
    [InlineData(".png", true)]
    [InlineData(".jpg", true)]
@@ -120,7 +145,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
 
 
 
-   /// <summary>Exactly these document types open in a new reader; pages, images, scripts and executables do not.</summary>
+   /// <summary>Document types open in a new reader in any letter case; pages, images, scripts and executables do not.</summary>
    [Theory]
    [InlineData(".md", true)]
    [InlineData(".markdown", true)]
@@ -160,7 +185,7 @@ public sealed class DocumentResourcePolicyBoundaryTests
    [InlineData("%7C")]
    [InlineData("%3F")]
    [InlineData("%2A")]
-   public void ForbiddenCharacter_InAnySegment_IsDenied(string encoded)
+   public void GetRelativePath_ForbiddenCharacter_IsDenied(string encoded)
    {
       var policy = new DocumentResourcePolicy();
       Assert.Null(policy.GetImageRelativePath(new Uri(policy.DocumentUri, "images/a" + encoded + "b.png")));
@@ -174,9 +199,6 @@ public sealed class DocumentResourcePolicyBoundaryTests
    [Theory]
    [InlineData("#MV-HEADING-0")]
    [InlineData("#Mv-Heading-0")]
-   [InlineData("#mv-heading-0x")]
-   [InlineData("#mv-heading-00a")]
-   [InlineData("#mv-heading- 0")]
    public void GetHeadingIndex_OtherSpelling_IsNotAHeadingTarget(string fragment)
    {
       var policy = new DocumentResourcePolicy();

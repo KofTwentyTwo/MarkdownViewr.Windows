@@ -12,7 +12,7 @@ namespace MarkdownViewr.Windows.Core;
 /// </summary>
 public static class WindowsFileNames
 {
-   /// <summary>Characters that cannot appear in a Windows file or folder name.</summary>
+   /// <summary>Printable characters that cannot appear in a Windows file or folder name. Control characters are also forbidden; callers refuse those themselves.</summary>
    public const string InvalidCharacters = "<>:\"/\\|?*";
 
    private static readonly HashSet<string> s_devices = new(StringComparer.OrdinalIgnoreCase)
@@ -25,8 +25,10 @@ public static class WindowsFileNames
 
 
    /// <summary>
-   /// Whether a single name addresses a device in any letter case. Windows ignores everything after
-   /// the first dot and any spaces before it, so <c>nul.txt</c> and <c>COM1 .log</c> are devices too.
+   /// Whether a single name addresses a device under the legacy Win32 rule: any letter case, and
+   /// ignoring everything after the first dot and any spaces before it, so <c>nul.txt</c> and
+   /// <c>COM1 .log</c> count. Current Windows versions resolve fewer of these spellings to a
+   /// device; the rule is applied in full on every version so the answer never depends on it.
    /// </summary>
    public static bool IsReservedDeviceName(string name)
    {
