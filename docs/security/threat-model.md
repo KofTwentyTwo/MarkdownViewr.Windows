@@ -43,7 +43,7 @@ physical directory. It does not authorize native commands or remote resource acc
 | Threat | Mitigation and evidence |
 | --- | --- |
 | Document script or native-command execution | Sanitizer regressions pass; host disables scripts/bridge; actual browser malicious-script and reader acceptance passed on 77dd04d |
-| Image traversal, device/ADS paths or encoded separators | Core path-policy tests pass; denied before filesystem access |
+| Image traversal, device/ADS paths or encoded separators | Core path-policy tests pass; denied before filesystem access. Reserved device names and forbidden characters are one written-out rule (`WindowsFileNames`), independent of the running Windows version: every device name in any letter case, with any extension, and with spaces before the extension |
 | Junction/symlink escape or check/reopen race | Check normalized physical path on opened image handle; read same handle; real junction rejection test passes |
 | Remote image tracking / resource exfiltration | No-referrer header, no document networking; actual listening-server browser denial passed on 77dd04d |
 | Oversized input / image denial of service | Pre-parse character bound and image byte bound; native limit tests pass; performance acceptance remains |

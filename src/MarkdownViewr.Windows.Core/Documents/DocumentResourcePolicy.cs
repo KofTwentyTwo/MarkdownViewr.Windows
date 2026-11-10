@@ -19,12 +19,6 @@ public sealed class DocumentResourcePolicy
       ".md", ".markdown", ".mdown", ".mkd", ".txt",
    };
 
-   private static readonly HashSet<string> s_deviceNames = new(StringComparer.OrdinalIgnoreCase)
-   {
-      "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-      "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "COM¹", "COM²", "COM³", "LPT¹", "LPT²", "LPT³",
-   };
-
    private readonly string _prefix;
 
 
@@ -93,7 +87,7 @@ public sealed class DocumentResourcePolicy
    private static bool IsSafeSegment(string segment)
    {
       return segment.Length > 0 && segment is not ("." or "..") && !segment.EndsWith(' ') && !segment.EndsWith('.') &&
-         !segment.Any(character => char.IsControl(character) || "<>:\\|?*".Contains(character, StringComparison.Ordinal)) &&
-         !s_deviceNames.Contains(segment.Split('.')[0]);
+         !segment.Any(character => char.IsControl(character) || WindowsFileNames.InvalidCharacters.Contains(character, StringComparison.Ordinal)) &&
+         !WindowsFileNames.IsReservedDeviceName(segment);
    }
 }
