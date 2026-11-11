@@ -87,8 +87,9 @@ is a courtesy for recovering a hand edit, with these limits:
 
 - a file over 16 MiB is replaced without a copy, since it was never this
   application's settings and copying it would stall the window;
-- a copy that cannot be given its name is removed and reported, and the save stands,
-  because refusing would block every later change too;
+- a copy that cannot be written, for example on a full disk, or cannot be given its
+  name, is removed and reported, and the save goes ahead, because refusing would
+  block every later change too;
 - a process killed between the save and the rename of the copy loses that copy.
 
 Nothing reads the copies back. They contain whatever the file contained, including
@@ -102,8 +103,8 @@ lock, removes files that match this store's own name pattern and no others.
 apart, for the lock, the read and the rename. Access denied is treated as permanent
 and reported at once, so a read-only profile does not stall a window. The fallback
 move is the exception: it answers access denied while any handle is open on the
-file, a reader's included, so there access denied is waited out as well, and a
-read-only file costs the full wait before the save is refused.
+file, a reader's included, so there access denied is waited out as well, unless the
+file carries the read-only attribute.
 
 **Reporting.** Faults are reported by kind with the exception type and HRESULT. No
 path and no operating-system message text reaches the log.

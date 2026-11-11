@@ -878,6 +878,38 @@ public class AppSettingsStoreTests
 
 
 
+   /// <summary>When the invalid file cannot be copied, here because another program has locked its bytes, the save still goes through, the missing copy is reported and no partial copy is left.</summary>
+   [Fact]
+   [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+   public void Update_InvalidFileCannotBeRead_SavesWithoutACopyAndReportsIt()
+   {
+      using var temp = new TempDirectory();
+      File.WriteAllText(temp.File("settings.json"), "not json");
+      var faults = new List<(SettingsFault Fault, Exception? Exception)>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, exception) => faults.Add((fault, exception)));
+      FileStream? locker = null;
+      try
+      {
+         Assert.NotNull(store.Update(settings =>
+         {
+            locker = new FileStream(temp.File("settings.json"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            locker.Lock(0, locker.Length);
+            settings.Theme = "Dark";
+            return settings;
+         }));
+      }
+      finally
+      {
+         locker?.Dispose();
+      }
+      Assert.Equal([SettingsFault.Corrupt, SettingsFault.NotKeptAside], faults.Select(entry => entry.Fault));
+      Assert.IsType<IOException>(faults[1].Exception);
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
    /// <summary>A file past the size bound is replaced without being copied: copying it would stall the window and fill the disk with something that was never settings.</summary>
    [Fact]
    public void Update_OversizedFile_IsReplacedWithoutACopy()
@@ -936,9 +968,9 @@ public class AppSettingsStoreTests
 
 
 
-   /// <summary>The same move on a read-only file is refused for good: the store gives up after its bounded wait and leaves the file and the folder as they were.</summary>
+   /// <summary>The same move on a read-only file is refused for good, which the store sees from the attribute: it gives up at once and leaves the file and the folder as they were.</summary>
    [Fact]
-   public void Update_FallbackMoveOnAReadOnlyFile_GivesUpAfterTheWait()
+   public void Update_FallbackMoveOnAReadOnlyFile_FailsWithoutWaiting()
    {
       using var temp = new TempDirectory();
       Seed(temp);
@@ -950,7 +982,7 @@ public class AppSettingsStoreTests
          var faults = new List<(SettingsFault Fault, Exception? Exception)>();
          var store = new AppSettingsStore(temp.File("settings.json"), (fault, exception) => faults.Add((fault, exception)), _ => waits++, (_, _) => false);
          Assert.Null(store.Update(settings => settings));
-         Assert.Equal(AppSettingsStore.MaximumAttempts - 1, waits);
+         Assert.Equal(0, waits);
          Assert.Equal(SettingsFault.WriteFailed, Assert.Single(faults).Fault);
          Assert.IsType<UnauthorizedAccessException>(faults[0].Exception);
          Assert.Equal(before, File.ReadAllBytes(temp.File("settings.json")));
@@ -992,24 +1024,6 @@ public class AppSettingsStoreTests
       }
       Assert.Empty(faults);
       Assert.Equal(["settings.json", "settings.json.lock"], FileNames(folder));
-   }
-
-
-
-   /// <summary>Without a wait supplied, the store really pauses between attempts instead of spinning through them.</summary>
-   [Fact]
-   public void Update_LockHeld_DefaultWaitPausesBetweenAttempts()
-   {
-      using var temp = new TempDirectory();
-      Seed(temp);
-      var store = new AppSettingsStore(temp.File("settings.json"));
-      using(new FileStream(temp.File("settings.json.lock"), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-      {
-         long started = System.Diagnostics.Stopwatch.GetTimestamp();
-         Assert.Null(store.Update(settings => settings));
-         TimeSpan elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started);
-         Assert.True(elapsed >= AppSettingsStore.RetryDelay * (AppSettingsStore.MaximumAttempts - 1) / 2, "The store waited only " + elapsed + ".");
-      }
    }
 
 

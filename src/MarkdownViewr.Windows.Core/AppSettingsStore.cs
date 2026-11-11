@@ -344,10 +344,11 @@ public sealed class AppSettingsStore
 
 
    /// <summary>
-   /// Copies an invalid file to a temporary name before it is replaced and returns that name. A
-   /// file past the size bound is not this application's settings and is not worth a copy: that
-   /// is reported and null returned. A copy left behind by a save that never finished is removed
-   /// with the other abandoned temporary files.
+   /// Copies an invalid file to a temporary name before it is replaced and returns that name.
+   /// The copy is a courtesy, so the save goes ahead without one, with the reason reported and
+   /// null returned, when the file is past the size bound (it was never this application's
+   /// settings) or the copy cannot be written. A copy left behind by a save that never finished
+   /// is removed with the other abandoned temporary files.
    /// </summary>
    private string? CopyAside(FileStream stored)
    {
@@ -357,11 +358,22 @@ public sealed class AppSettingsStore
          return null;
       }
       string temporary = TemporaryName();
-      using var copy = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-      stored.Position = 0;
-      stored.CopyTo(copy);
-      copy.Flush(flushToDisk: true);
-      return temporary;
+      try
+      {
+         using(var copy = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+         {
+            stored.Position = 0;
+            stored.CopyTo(copy);
+            copy.Flush(flushToDisk: true);
+         }
+         return temporary;
+      }
+      catch(Exception exception) when(exception is IOException or UnauthorizedAccessException)
+      {
+         TryDelete(temporary);
+         _report(SettingsFault.NotKeptAside, exception);
+         return null;
+      }
    }
 
 
@@ -498,11 +510,12 @@ public sealed class AppSettingsStore
 
 
    /// <summary>
-   /// What a move over an existing file fails with while another handle is open on it. Unlike
-   /// an open or a rename, that move answers access denied, which therefore has to be waited out
-   /// there even though a read-only file gives the same answer.
+   /// What a move over the settings file fails with while another handle is open on it. Unlike
+   /// an open or a rename, that move answers access denied, which therefore has to be waited
+   /// out. A read-only file gives the same answer for good, so it is told apart by its attribute.
    /// </summary>
-   private static bool IsBlockedByAHandle(Exception exception) => exception is UnauthorizedAccessException || IsTransient(exception);
+   private bool IsBlockedByAHandle(Exception exception)
+      => IsTransient(exception) || (exception is UnauthorizedAccessException && !new FileInfo(Path).IsReadOnly);
 
 
 
