@@ -61,8 +61,8 @@ public sealed partial class MainWindow
       draft.ContentWidthEnabled = appearance.LimitWidth;
       draft.ContentWidthPx = appearance.WidthPixels;
       draft.GlobalCss = appearance.GlobalCss;
-      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), before, draft);
-      if(!AppIdentity.SettingsStore.Save(merged))
+      Core.AppSettings? merged = AppIdentity.SettingsStore.Update(current => Core.SettingsChanges.Merge(current, before, draft));
+      if(merged is null)
       {
          return false;
       }
@@ -79,14 +79,16 @@ public sealed partial class MainWindow
       {
          return false;
       }
-      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
-      settings.ShowSplashScreen = showSplash;
-      settings.SplashMilliseconds = milliseconds;
-      settings.CheckForUpdatesOnStartup = checkUpdates;
-      settings.ShowOutlineByDefault = showOutline;
-      settings.ShowSourceByDefault = showSource;
-      settings.Sanitize();
-      if(!AppIdentity.SettingsStore.Save(settings))
+      Core.AppSettings? settings = AppIdentity.SettingsStore.Update(current =>
+      {
+         current.ShowSplashScreen = showSplash;
+         current.SplashMilliseconds = milliseconds;
+         current.CheckForUpdatesOnStartup = checkUpdates;
+         current.ShowOutlineByDefault = showOutline;
+         current.ShowSourceByDefault = showSource;
+         return current;
+      });
+      if(settings is null)
       {
          return false;
       }
@@ -120,10 +122,13 @@ public sealed partial class MainWindow
       {
          return false;
       }
-      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
-      settings.WrapOutlineEntries = wrap;
-      settings.ShowOutlineDepthMarkers = depthMarkers;
-      if(!AppIdentity.SettingsStore.Save(settings))
+      Core.AppSettings? settings = AppIdentity.SettingsStore.Update(current =>
+      {
+         current.WrapOutlineEntries = wrap;
+         current.ShowOutlineDepthMarkers = depthMarkers;
+         return current;
+      });
+      if(settings is null)
       {
          return false;
       }

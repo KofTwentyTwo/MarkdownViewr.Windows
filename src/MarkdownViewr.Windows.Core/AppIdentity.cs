@@ -5,7 +5,6 @@
 
 using KofTwentyTwo.AppKit;
 using KofTwentyTwo.AppKit.Logging;
-using KofTwentyTwo.AppKit.Settings;
 
 
 namespace MarkdownViewr.Windows.Core;
@@ -73,7 +72,7 @@ public static class AppIdentity
 
 
    /// <summary>Loads and saves <see cref="AppSettings"/> at <see cref="AppPaths.SettingsFile"/>.</summary>
-   public static SettingsStore<AppSettings> SettingsStore { get; } = new(Paths.SettingsFile, AppSettingsContext.Default.AppSettings);
+   public static AppSettingsStore SettingsStore { get; } = new(Paths.SettingsFile);
 
 
 

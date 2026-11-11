@@ -19,9 +19,12 @@ public sealed partial class MainWindow
       {
          return false;
       }
-      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
-      settings.Print = options.Sanitize();
-      if(!AppIdentity.SettingsStore.Save(settings))
+      Core.AppSettings? settings = AppIdentity.SettingsStore.Update(current =>
+      {
+         current.Print = options.Sanitize();
+         return current;
+      });
+      if(settings is null)
       {
          return false;
       }

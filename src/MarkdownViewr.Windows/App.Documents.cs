@@ -107,12 +107,14 @@ public partial class App
 
 
 
-   /// <summary>Records a successfully committed path through the latest store snapshot, then refreshes every recent menu.</summary>
+   /// <summary>Records a successfully committed path in the latest stored history under the settings lock, then refreshes every recent menu.</summary>
    internal bool RecordRecentDocument(string path)
    {
-      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
-      settings.RecentFiles = Core.Documents.RecentDocuments.Record(settings.RecentFiles, path);
-      bool saved = AppIdentity.SettingsStore.Save(settings);
+      bool saved = AppIdentity.SettingsStore.Update(settings =>
+      {
+         settings.RecentFiles = Core.Documents.RecentDocuments.Record(settings.RecentFiles, path);
+         return settings;
+      }) is not null;
       RefreshRecentMenus();
       return saved;
    }
@@ -122,9 +124,16 @@ public partial class App
    /// <summary>Clears only the local history, leaving open documents, reading preferences and files intact.</summary>
    internal bool ClearRecentDocuments()
    {
-      Core.AppSettings settings = AppIdentity.SettingsStore.Load();
-      settings.RecentFiles = [];
-      bool saved = AppIdentity.SettingsStore.Save(settings);
+      bool saved = AppIdentity.SettingsStore.Update(settings =>
+      {
+         settings.RecentFiles = [];
+         return settings;
+      }) is not null;
+      if(saved)
+      {
+         // Copies of an invalid settings file kept beside it would still list the history.
+         AppIdentity.SettingsStore.DeleteKeptAside();
+      }
       RefreshRecentMenus();
       return saved;
    }

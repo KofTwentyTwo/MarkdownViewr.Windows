@@ -8,6 +8,8 @@
       <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
       <!-- Include the SDK tool dependency in the lock used by single-file CLI publishing. -->
       <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+      <!-- Source-generated P/Invoke marshalling (FileSwap) compiles to unsafe code. -->
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    </PropertyGroup>
 
    <ItemGroup>

@@ -76,21 +76,24 @@ public sealed class EditorConfigurationTests
 
 
 
-   /// <summary>Atomic AppKit persistence retains named IDs, order and folder mode using the trimmed serializer.</summary>
+   /// <summary>Atomic persistence retains named IDs, order and folder mode using the trimmed serializer.</summary>
    [Fact]
    public void SaveAndLoad_EditorList_PreservesIdentityOrderAndMode()
    {
       using var temporary = new TempDirectory();
-      var store = new KofTwentyTwo.AppKit.Settings.SettingsStore<AppSettings>(temporary.File("settings.json"), AppSettingsContext.Default.AppSettings);
+      var store = new AppSettingsStore(temporary.File("settings.json"));
       var first = new EditorConfiguration(Guid.NewGuid(), "Folder editor", @"C:\Editor\folder.exe", true);
       var second = new EditorConfiguration(Guid.NewGuid(), "File editor", @"C:\Editor\file.exe");
-      Assert.True(store.Save(new AppSettings { ConfiguredEditors = [first, second], ExternalEditor = @"C:\Other\old.exe" }));
+      Assert.NotNull(store.Update(_ => new AppSettings { ConfiguredEditors = [first, second], ExternalEditor = @"C:\Other\old.exe" }));
       AppSettings loaded = store.Load();
       Assert.Equal(new[] { first, second }, loaded.ConfiguredEditors);
       Assert.Equal(first.Executable, loaded.ExternalEditor);
-      loaded.ConfiguredEditors = [];
-      loaded.ExternalEditor = "";
-      Assert.True(store.Save(loaded));
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.ConfiguredEditors = [];
+         settings.ExternalEditor = "";
+         return settings;
+      }));
       Assert.Empty(store.Load().ConfiguredEditors);
    }
 

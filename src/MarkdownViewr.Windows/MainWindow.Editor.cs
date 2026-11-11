@@ -48,8 +48,8 @@ public sealed partial class MainWindow
       Core.AppSettings draft = Core.SettingsChanges.Copy(before);
       draft.ConfiguredEditors = choices;
       draft.ExternalEditor = choices.FirstOrDefault()?.Executable ?? "";
-      Core.AppSettings merged = Core.SettingsChanges.Merge(AppIdentity.SettingsStore.Load(), before, draft);
-      if(!AppIdentity.SettingsStore.Save(merged))
+      Core.AppSettings? merged = AppIdentity.SettingsStore.Update(current => Core.SettingsChanges.Merge(current, before, draft));
+      if(merged is null)
       {
          StatusText.Text = "Could not save editor configuration.";
          return;

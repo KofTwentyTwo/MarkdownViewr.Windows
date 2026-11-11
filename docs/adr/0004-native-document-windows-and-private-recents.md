@@ -30,7 +30,7 @@ and isolated boundary evidence in ADR-0005. Explorer and installed lifecycle
 acceptance remain required; literal process arguments alone are not association
 proof.
 
-Store at most20 successful absolute paths in the private AppKit settings file,
+Store at most20 successful absolute paths in the private settings file,
 deduplicated with Windows path comparison. Update only after a parsed snapshot
 commits. Clear history removes entries without deleting files or closing readers.
 Keep paths out of activity logs/telemetry. Each preference save merges only fields
