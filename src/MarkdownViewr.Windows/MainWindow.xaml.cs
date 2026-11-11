@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+using KofTwentyTwo.AppKit;
 using KofTwentyTwo.AppKit.Settings;
 using KofTwentyTwo.AppKit.Updates;
 using KofTwentyTwo.AppKit.WinUI;
+using MarkdownViewr.Windows.Core.Updates;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.Storage.Pickers;
@@ -64,7 +66,7 @@ public sealed partial class MainWindow : Window, IDisposable
       this.SetAppIcon(AppIdentity.Info);
 
       _updates = new UpdateCoordinator(
-         new VelopackUpdateService(AppIdentity.Info.RepositoryUrl!),
+         new ReleaseUpdateService(() => new GiteaReleaseUpdater(AppIdentity.Info.RepositoryUrl!, BuildVersion.IsPrerelease(typeof(App).Assembly))),
          new ContentDialogPrompter(() => Content.XamlRoot),
          AppIdentity.Info.DisplayName,
          App.Log);

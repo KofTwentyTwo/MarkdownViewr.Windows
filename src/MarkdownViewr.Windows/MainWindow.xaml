@@ -87,9 +87,10 @@
                <RadioMenuFlyoutItem x:Name="ThemeDark" Text="Dark theme" GroupName="Theme" Tag="Dark" Click="Theme_Click" />
             </MenuBarItem>
             <MenuBarItem Title="Help" AccessKey="H">
-               <MenuFlyoutItem Text="View on GitHub" AccessKey="G" AutomationProperties.AutomationId="MenuGitHub" Click="GitHub_Click" />
-               <MenuFlyoutItem Text="Submit an issue…" AccessKey="I" AutomationProperties.AutomationId="MenuSubmitIssue" ToolTipService.ToolTip="Report a bug or request a feature on GitHub" Click="SubmitIssue_Click" />
-               <MenuFlyoutItem Text="Community support…" AccessKey="S" AutomationProperties.AutomationId="MenuCommunitySupport" ToolTipService.ToolTip="Ask a question or share tips in GitHub Discussions" Click="CommunitySupport_Click" />
+               <MenuFlyoutItem Text="Project page" AccessKey="P" AutomationProperties.AutomationId="MenuRepository" ToolTipService.ToolTip="Open the project's page and source code" Click="Repository_Click" />
+               <MenuFlyoutItem Text="Submit an issue…" AccessKey="I" AutomationProperties.AutomationId="MenuSubmitIssue" ToolTipService.ToolTip="Report a bug or request a feature" Click="SubmitIssue_Click" />
+               <MenuFlyoutItem Text="Community support…" AccessKey="S" AutomationProperties.AutomationId="MenuCommunitySupport" ToolTipService.ToolTip="See questions already asked and problems already reported" Click="CommunitySupport_Click" />
+               <MenuFlyoutItem Text="Share MarkdownViewr…" AccessKey="H" AutomationProperties.AutomationId="MenuShare" ToolTipService.ToolTip="Start an email that invites someone to try the app" Click="Share_Click" />
                <MenuFlyoutSeparator />
                <MenuFlyoutItem x:Name="CheckForUpdatesMenuItem" Text="Check for updates" Click="CheckForUpdates_Click" />
                <MenuFlyoutItem x:Name="ActivityLogMenuItem" Text="Activity log" Click="ActivityLog_Click" />

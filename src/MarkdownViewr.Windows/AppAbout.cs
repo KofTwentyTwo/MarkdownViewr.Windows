@@ -23,7 +23,7 @@ internal static class AppAbout
       body.MaxWidth = 580;
       scroll.MaxHeight = Math.Max(160, Math.Min(460, root.Size.Height - 220));
       dialog.Resources["ContentDialogMaxWidth"] = 680d;
-      body.Children.Add(Link("AboutApplicationLicense", "MarkdownViewr MIT license", AppIdentity.Info.RepositoryUrl!.AbsoluteUri + "/blob/main/LICENSE"));
+      body.Children.Add(Link("AboutApplicationLicense", "MarkdownViewr MIT license", Core.AppIdentity.LicenseUrl.AbsoluteUri));
       body.Children.Add(Contributions());
       body.Children.Add(Components("Components", "AboutComponents", AboutComponents.OpenSource));
       return dialog;

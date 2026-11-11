@@ -24,7 +24,7 @@ public static class AppIdentity
       DisplayName = "MarkdownViewr",
       Tagline = "A Windows Markdown reader",
       Description = "A Windows Markdown viewer with live reload, themes and document navigation.",
-      RepositoryUrl = new Uri("https://github.com/KofTwentyTwo/MarkdownViewr.Windows"),
+      RepositoryUrl = new Uri("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows"),
       Author = "James Maes",
       Copyright = "Copyright (c) 2026 James Maes",
       // Keep the gradient in step with the mark (regenerate both with AppKit's BrandTool).
@@ -63,12 +63,37 @@ public static class AppIdentity
 
 
    /// <summary>The app's bug/feature templates, independent of any upstream project credited in About.</summary>
-   public static Uri IssuesUrl { get; } = new(Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/issues/new/choose");
+   public static Uri IssuesUrl { get; } = RepositoryPage("/issues/new/choose");
 
 
 
-   /// <summary>Community questions and tips in the app's own repository.</summary>
-   public static Uri SupportUrl { get; } = new(Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/discussions");
+   /// <summary>Questions already asked and problems already reported in the app's own repository.</summary>
+   public static Uri SupportUrl { get; } = RepositoryPage("/issues");
+
+
+
+   /// <summary>The newest stable release, with its installers and portable archive.</summary>
+   public static Uri LatestReleaseUrl { get; } = RepositoryPage("/releases/latest");
+
+
+
+   /// <summary>The installer of the newest stable release. The file name is the one the release packaging gives the stable edition's Setup.</summary>
+   public static Uri InstallerUrl { get; } = RepositoryPage("/releases/download/latest/" + Info.Id + "-stable-Setup.exe");
+
+
+
+   /// <summary>The user guide as published on the main branch.</summary>
+   public static Uri UserGuideUrl { get; } = RepositoryPage("/src/branch/main/docs/user-guide.md");
+
+
+
+   /// <summary>The app's own license as published on the main branch.</summary>
+   public static Uri LicenseUrl { get; } = RepositoryPage("/src/branch/main/LICENSE");
+
+
+
+   /// <summary>A page of the app's repository, given its path below the repository root.</summary>
+   private static Uri RepositoryPage(string path) => new(Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + path);
 
 
 

@@ -4,7 +4,7 @@ Read Markdown comfortably, keep up with changes, and turn your notes into someth
 
 MarkdownViewr is a dedicated Windows reader for project documentation, notes, and README files. Open a document, choose a look you like, and focus on the words.
 
-**[Download Windows installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) · [User guide](docs/user-guide.md) · [Ask a question](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions)**
+**[Download Windows installer](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/latest/markdownviewr-windows-stable-Setup.exe) · [User guide](docs/user-guide.md) · [Questions and issues](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues)**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15417/badge)](https://www.bestpractices.dev/en/projects/15417)
@@ -31,11 +31,11 @@ Windows packages support **Windows 10 version 1809 or later and Windows 11, x64*
 
 | Edition | Choose it for | Package |
 | --- | --- | --- |
-| Stable | Everyday reading | [Download EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Setup.exe) · [MSI installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable.msi) |
-| Development preview | Trying upcoming changes | [Download dev EXE installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev-Setup.exe) · [MSI installer](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev.msi) |
-| Portable | Running without installation | [Download portable ZIP](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest/download/markdownviewr-windows-stable-Portable.zip) |
+| Stable | Everyday reading | [Download EXE installer](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/latest/markdownviewr-windows-stable-Setup.exe) · [MSI installer](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/latest/markdownviewr-windows-stable.msi) |
+| Development preview | Trying upcoming changes | [Download dev EXE installer](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev-Setup.exe) · [MSI installer](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/v1.0.3-beta.1/markdownviewr-windows-dev-dev.msi) |
+| Portable | Running without installation | [Download portable ZIP](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/latest/markdownviewr-windows-stable-Portable.zip) |
 
-Download a package from [Releases](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.
+Download a package from [Releases](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases). Run Setup for a per-user installation without administrator rights, or extract the portable ZIP before launching the app.
 
 Installed and portable editions check for updates through **Help → Check for updates**. Stable and development editions keep separate settings and update channels, so they can coexist.
 
@@ -52,7 +52,7 @@ See the [user guide](docs/user-guide.md) for settings, shortcuts, printing, and 
 
 ## Help and feedback
 
-Use **Help → Community support** for questions and **Help → Submit an issue** for bugs or feature requests. You can also visit [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions) or [Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues) directly.
+Use **Help → Community support** to see questions and known problems, and **Help → Submit an issue** for bugs or feature requests. You can also visit [Issues](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues) directly. To tell someone else about the app, **Help → Share MarkdownViewr** starts an invitation email with the download links.
 
 For a bug report, include the version from **Help → About**, your Windows version, and steps to reproduce. Remove private information from logs and screenshots. Report security vulnerabilities privately using [SECURITY.md](SECURITY.md).
 

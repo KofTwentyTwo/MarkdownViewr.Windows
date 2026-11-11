@@ -190,6 +190,7 @@
         "dependencies": {
           "HtmlSanitizer": "[9.2.1039, )",
           "KofTwentyTwo.AppKit": "[0.1.0, )",
+          "KofTwentyTwo.AppKit.Updates": "[0.1.0, )",
           "Markdig": "[1.4.0, )"
         }
       },

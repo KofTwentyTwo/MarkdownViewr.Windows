@@ -24,8 +24,21 @@ public class AppIdentityTests
       Assert.Equal("https://github.com/darinkelkhoff/markdownViewr", AppIdentity.OriginalRepositoryUrl.AbsoluteUri);
       Assert.Equal("https://kelkhoff.com/", AppIdentity.OriginalAuthorWebsite.AbsoluteUri);
       Assert.DoesNotContain(AppIdentity.Info.Attributions, credit => credit.Name.Contains("Darin Kelkhoff", StringComparison.Ordinal));
-      Assert.Equal(AppIdentity.Info.RepositoryUrl!.AbsoluteUri.TrimEnd('/') + "/issues/new/choose", AppIdentity.IssuesUrl.AbsoluteUri);
-      Assert.Equal(AppIdentity.Info.RepositoryUrl.AbsoluteUri.TrimEnd('/') + "/discussions", AppIdentity.SupportUrl.AbsoluteUri);
+   }
+
+
+
+   /// <summary>The app's own pages are on its Gitea repository; each is spelled out because a wrong path only shows up as a broken link.</summary>
+   [Fact]
+   public void Links_PointAtTheAppsRepository()
+   {
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows", AppIdentity.Info.RepositoryUrl!.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose", AppIdentity.IssuesUrl.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues", AppIdentity.SupportUrl.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/latest", AppIdentity.LatestReleaseUrl.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/releases/download/latest/markdownviewr-windows-stable-Setup.exe", AppIdentity.InstallerUrl.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/src/branch/main/docs/user-guide.md", AppIdentity.UserGuideUrl.AbsoluteUri);
+      Assert.Equal("https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/src/branch/main/LICENSE", AppIdentity.LicenseUrl.AbsoluteUri);
    }
 
 

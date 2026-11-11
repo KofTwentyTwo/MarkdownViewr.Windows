@@ -35,7 +35,8 @@ physical directory. It does not authorize native commands or remote resource acc
 | External links | HTTP(S) only, actual browser user gesture, external Windows handler; no document navigation outside current page |
 | Heading navigation | Labels extracted after sanitation; authored identity attributes stripped; generated numeric targets only. Fixed host operations reveal/jump/collapse on the current intercepted page; authored scripts, messages and host objects remain disabled |
 | Settings / logs | AppKit sanitation; per-user data root; log operational events without document content or paths |
-| Updates | Repository HTTPS feed, Velopack integrity checks and production signing preflight |
+| Updates | Release feed of the app's Gitea repository over HTTPS, read without credentials; Velopack integrity checks and production signing preflight. The repository host is the trust anchor: whoever controls it or its releases can offer an update (ADR-0007) |
+| Help links and invitation | Fixed HTTPS pages of the app's repository and one fixed `mailto:` draft, each opened by a deliberate menu action. The draft has no recipient and no text taken from documents, settings or the environment; every character outside the unreserved set is percent-encoded |
 | Repository / CI | Protected main and release tags; producer-bound checks; no untrusted PR checkout with privileged review token |
 
 ## Threats and verification

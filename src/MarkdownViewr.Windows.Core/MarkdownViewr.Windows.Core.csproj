@@ -12,6 +12,7 @@
 
    <ItemGroup>
       <PackageReference Include="KofTwentyTwo.AppKit" />
+      <PackageReference Include="KofTwentyTwo.AppKit.Updates" />
    </ItemGroup>
 
    <ItemGroup>

@@ -74,7 +74,11 @@ Documents are rendered locally. Authored scripts and remote images are blocked; 
 - **The viewer is not a default option:** use Setup rather than a portable copy, then reopen Windows Default Apps.
 - **The app does not start:** confirm Microsoft Edge WebView2 Runtime is installed and inspect the activity logs if available.
 
-For help, use [Discussions](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/discussions). Report reproducible problems through [Issues](https://github.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose), including **Help → About** version, Windows version, and relevant sanitized logs. Report vulnerabilities privately using [SECURITY.md](../SECURITY.md).
+For help, look through the [questions and known problems](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues), also reachable from **Help → Community support**. Report reproducible problems through [a new issue](https://git.kof22.com/KofTwentyTwo/MarkdownViewr.Windows/issues/new/choose), including **Help → About** version, Windows version, and relevant sanitized logs. Report vulnerabilities privately using [SECURITY.md](../SECURITY.md).
+
+## Sharing the app
+
+**Help → Share MarkdownViewr** opens a new message in your email program with an invitation already written: what the app is, a link to the installer, the release page, this guide, and where to report problems. Add the recipient, change the wording if you like, and send. Nothing about your documents or settings is included. If no email program is set up, the invitation is copied to the clipboard instead so you can paste it into any message.
 
 ## MSI installation
 
