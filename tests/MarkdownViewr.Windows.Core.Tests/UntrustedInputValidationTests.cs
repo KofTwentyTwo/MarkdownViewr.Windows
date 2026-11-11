@@ -285,6 +285,8 @@ public sealed class UntrustedInputValidationTests
    [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"name\": \"Nord\"")]
    [InlineData("\"body\": \"System\"", "\"body\": \"System\", \"body\": \"Other\"")]
    [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"extra\": {\"a\": 1, \"a\": 2}")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"na\\u006de\": \"Nord\"")]
+   [InlineData("\"name\": \"Nord\"", "\"name\": \"Nord\", \"notes\": [\"\\uD83D\"]")]
    public void Parse_UndecodableTextOrRepeatedProperty_IsRejectedAsAnInvalidTheme(string valid, string invalid)
    {
       string original = ThemeCatalog.Find("Nord").Json;
@@ -300,13 +302,14 @@ public sealed class UntrustedInputValidationTests
 
 
    /// <summary>
-   /// A theme that parses can be renamed, copied, edited and imported under a new name, whatever
-   /// extra properties it carries: those operations re-serialize the whole document.
+   /// A theme that parses can be renamed, copied, edited and imported under a new name with its
+   /// extra properties intact: those operations re-serialize the whole document. Names that differ
+   /// only in case, and the same name in two different objects, are not repeats.
    /// </summary>
    [Fact]
    public void Parse_AcceptedThemeWithExtraProperties_SurvivesRenameCopyEditAndImport()
    {
-      string json = ThemeCatalog.Find("Nord").Json.Replace("\"name\": \"Nord\"", "\"name\": \"Nord\", \"note\": \"caf\\u00e9 \\ud83d\\ude00\", \"future\": {\"list\": [1, \"two\", null]}", StringComparison.Ordinal);
+      string json = ThemeCatalog.Find("Nord").Json.Replace("\"name\": \"Nord\"", "\"name\": \"Nord\", \"Name\": \"other case\", \"note\": \"caf\\u00e9 \\ud83d\\ude00\", \"future\": {\"name\": \"inner\", \"list\": [1, \"two\", null]}", StringComparison.Ordinal);
       var theme = ReaderTheme.Parse(json);
       Assert.Equal("Renamed", theme.Rename("Renamed").Name);
       AppSettings imported = ThemeManagement.Import(new AppSettings(), theme);
@@ -315,6 +318,49 @@ public sealed class UntrustedInputValidationTests
       ReaderTheme edited = theme.Edit("Edited", new Dictionary<string, string>(StringComparer.Ordinal), new Dictionary<string, double>(StringComparer.Ordinal), new Dictionary<string, string>(StringComparer.Ordinal), "");
       Assert.Equal("Edited", edited.Name);
       Assert.Contains("caf", edited.Json, StringComparison.Ordinal);
+      Assert.Contains("\"Name\":\"other case\"", edited.Json, StringComparison.Ordinal);
+      Assert.Contains("\"name\":\"inner\"", edited.Json, StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>
+   /// Renaming, copying and editing write characters as themselves, so a theme near the size
+   /// limit whose text is full of quote marks, angle brackets or non-ASCII characters stays
+   /// within the limit instead of growing sixfold and being refused.
+   /// </summary>
+   [Theory]
+   [InlineData("a>b+c{font:'x'}")]
+   [InlineData("/* \u6f22\u5b57 caf\u00e9 & <tag> */")]
+   public void Rename_ThemeNearTheSizeLimit_DoesNotGrowPastIt(string fragment)
+   {
+      string css = string.Concat(Enumerable.Repeat(fragment, 60_000 / fragment.Length));
+      string original = ThemeCatalog.Find("Nord").Json;
+      Assert.Contains("\"name\": \"Nord\"", original, StringComparison.Ordinal);
+      string json = original.Replace("\"name\": \"Nord\"", "\"name\": \"Nord\", \"note\": \"" + css + "\"", StringComparison.Ordinal);
+      var theme = ReaderTheme.Parse(json);
+      ReaderTheme renamed = theme.Rename("Renamed");
+      Assert.True(renamed.Json.Length <= json.Length);
+      Assert.Contains(fragment, renamed.Json, StringComparison.Ordinal);
+      ReaderTheme edited = renamed.Edit("Edited", new Dictionary<string, string>(StringComparer.Ordinal), new Dictionary<string, double>(StringComparer.Ordinal), new Dictionary<string, string>(StringComparer.Ordinal), "");
+      Assert.True(edited.Json.Length <= json.Length);
+      Assert.EndsWith(" Copy", ThemeManagement.CopyTheme(new AppSettings(), theme).Name, StringComparison.Ordinal);
+   }
+
+
+
+   /// <summary>A string that is not well-formed UTF-16 is refused as an invalid theme, and a stored one is dropped, rather than failing as a programming error.</summary>
+   [Fact]
+   public void Parse_TextWithAnUnpairedSurrogate_IsRejectedAsAnInvalidTheme()
+   {
+      string original = ThemeCatalog.Find("Nord").Json;
+      string json = original.Replace("\"name\": \"Nord\"", "\"name\": \"No\uD83Drd\"", StringComparison.Ordinal);
+      Assert.DoesNotContain("\"name\": \"Nord\"", json, StringComparison.Ordinal);
+      Assert.Throws<JsonException>(() => ReaderTheme.Parse(json));
+      Assert.Throws<JsonException>(() => ReaderTheme.ParseCompatible(json));
+      var settings = new AppSettings { UserThemes = [json, original] };
+      settings.Sanitize();
+      Assert.Equal([original], settings.UserThemes);
    }
 
 

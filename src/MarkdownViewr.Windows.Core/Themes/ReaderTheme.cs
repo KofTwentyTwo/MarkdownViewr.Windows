@@ -6,6 +6,7 @@
 
 using System.Globalization;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -17,6 +18,14 @@ public sealed class ReaderTheme
 {
    /// <summary>Bounds schema input before a native file read allocates the complete JSON text.</summary>
    public const int MaximumCharacters = 128 * 1024;
+
+   /// <summary>
+   /// How a renamed or edited theme is written back. Characters are written as themselves where
+   /// JSON allows it, so a theme within the size limit stays within it: the default encoder turns
+   /// every quote mark, angle bracket and non-ASCII character into a six-character escape. Theme
+   /// JSON is stored and exported, never placed in a page.
+   /// </summary>
+   private static readonly JsonSerializerOptions s_compact = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
    private static readonly string[] s_colors = ["background", "text", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "link", "codeBackground", "codeText", "blockquoteBorder", "blockquoteBackground", "highlightBackground", "highlightText"];
    private static readonly string[] s_sizes = ["baseFontSize", "h1Size", "h2Size", "h3Size", "h4Size", "h5Size", "h6Size", "codeFontSize", "lineHeight"];
    private static readonly string s_baseStyles = LoadBaseStyles();
@@ -59,7 +68,7 @@ public sealed class ReaderTheme
    {
       JsonNode source = JsonNode.Parse(Json)!;
       source["name"] = name;
-      return ParseCompatible(source.ToJsonString());
+      return ParseCompatible(source.ToJsonString(s_compact));
    }
 
 
@@ -103,7 +112,7 @@ public sealed class ReaderTheme
          }
          source["colors"]![key] = value?.Trim();
       }
-      return ParseCompatible(source.ToJsonString());
+      return ParseCompatible(source.ToJsonString(s_compact));
    }
 
 
@@ -154,7 +163,7 @@ public sealed class ReaderTheme
       {
          throw new JsonException("The theme exceeds the 128 Ki-character limit.");
       }
-      using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
+      using JsonDocument document = ParseDocument(json);
       JsonElement root = document.RootElement;
       RequireObject(root);
       RequireReadableText(root);
@@ -275,6 +284,21 @@ public sealed class ReaderTheme
       }
       RequireObject(value);
       return value;
+   }
+
+
+
+   /// <summary>Reads the theme text as JSON; text that is not well-formed UTF-16 is an invalid theme like any other malformed input.</summary>
+   private static JsonDocument ParseDocument(string json)
+   {
+      try
+      {
+         return JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
+      }
+      catch(ArgumentException exception)
+      {
+         throw new JsonException("The theme contains text that cannot be decoded.", exception);
+      }
    }
 
 
