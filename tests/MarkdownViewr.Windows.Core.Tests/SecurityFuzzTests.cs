@@ -35,6 +35,10 @@ public sealed class SecurityFuzzTests
       "[section](#heading) ![image](images/hello%20world.png)\n", "| A | B |\n|---|---|\n| x | y |\n",
       "- [x] Task\n> Quote\n", "😀 café\0\t\r\n", "<!-- <code> -->", "</code></pre></div>",
       "</style><script>execute()</script>", "&lt;script&gt;literal&lt;/script&gt;", "\"'<>:=[]()\\/!?%",
+      "<video src='x.mp4' autoplay onplay='execute()'><source src='y.mp4'></video><audio src='x.mp3' controls></audio>",
+      "<embed src='x.swf'><object data='x.swf'><param name='a' value='b'></object><math><mi xlink:href='javascript:execute()'>x</mi></math>",
+      "<link rel='stylesheet' href='https://outside.invalid/x.css'><meta http-equiv='refresh' content='0;url=https://outside.invalid'><base href='https://outside.invalid/'>",
+      "<textarea autofocus onfocus='execute()'>text</textarea><select><option>one</option></select><a href='x.md' target='_blank' name='n' ping='https://outside.invalid'>x</a>",
    ];
 
 
@@ -242,11 +246,12 @@ public sealed class SecurityFuzzTests
    /// <summary>Uses the parsed DOM's executable capabilities as the oracle, not the renderer's private allowlist.</summary>
    private static void AssertPassive(IHtmlDocument document)
    {
-      Assert.Empty(document.QuerySelectorAll("script,svg,math,iframe,object,embed,form,button,style,base,meta[http-equiv],audio,video"));
+      Assert.Empty(document.QuerySelectorAll("script,svg,math,iframe,object,embed,form,button,style,base,meta,link,audio,video,source,param,textarea,select,option"));
       foreach(IElement element in document.QuerySelectorAll("*"))
       {
          Assert.DoesNotContain(element.Attributes, attribute => attribute.Name.StartsWith("on", StringComparison.OrdinalIgnoreCase));
          Assert.False(element.HasAttribute("srcdoc") || element.HasAttribute("srcset") || element.HasAttribute("style"));
+         Assert.False(element.HasAttribute("target") || element.HasAttribute("ping") || element.HasAttribute("name") || element.HasAttribute("autofocus"));
          foreach(string name in new[] { "href", "src" })
          {
             string? value = element.GetAttribute(name);

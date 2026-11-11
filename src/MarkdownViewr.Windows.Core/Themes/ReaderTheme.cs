@@ -6,6 +6,7 @@
 
 using System.Globalization;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -15,8 +16,24 @@ namespace MarkdownViewr.Windows.Core.Themes;
 /// <summary>Validates Darin's version-one theme format before generating passive document CSS.</summary>
 public sealed class ReaderTheme
 {
-   /// <summary>Bounds schema input before a native file read allocates the complete JSON text.</summary>
+   /// <summary>The largest theme file accepted for import; bounds the read before the complete JSON text is allocated.</summary>
    public const int MaximumCharacters = 128 * 1024;
+
+   /// <summary>
+   /// The largest theme the app keeps. Renaming or editing rewrites the whole theme, and JSON
+   /// writes some characters (emoji, no-break spaces, private-use glyphs) as six-character
+   /// escapes, so a kept theme can be several times the size of the file it was imported from.
+   /// The bound leaves room for that, so a theme that could be imported can always be renamed.
+   /// </summary>
+   public const int MaximumStoredCharacters = 8 * MaximumCharacters;
+
+   /// <summary>
+   /// How a renamed or edited theme is written back. Quote marks, angle brackets and most
+   /// non-ASCII letters are written as themselves instead of as six-character escapes, which
+   /// keeps ordinary CSS and text close to its imported size. Theme JSON is stored and exported,
+   /// never placed in a page.
+   /// </summary>
+   private static readonly JsonSerializerOptions s_compact = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
    private static readonly string[] s_colors = ["background", "text", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "link", "codeBackground", "codeText", "blockquoteBorder", "blockquoteBackground", "highlightBackground", "highlightText"];
    private static readonly string[] s_sizes = ["baseFontSize", "h1Size", "h2Size", "h3Size", "h4Size", "h5Size", "h6Size", "codeFontSize", "lineHeight"];
    private static readonly string s_baseStyles = LoadBaseStyles();
@@ -59,7 +76,7 @@ public sealed class ReaderTheme
    {
       JsonNode source = JsonNode.Parse(Json)!;
       source["name"] = name;
-      return ParseCompatible(source.ToJsonString());
+      return ParseCompatible(source.ToJsonString(s_compact));
    }
 
 
@@ -103,7 +120,7 @@ public sealed class ReaderTheme
          }
          source["colors"]![key] = value?.Trim();
       }
-      return ParseCompatible(source.ToJsonString());
+      return ParseCompatible(source.ToJsonString(s_compact));
    }
 
 
@@ -150,13 +167,14 @@ public sealed class ReaderTheme
    private static ReaderTheme ParseSchema(string json, bool allowNewer)
    {
       ArgumentNullException.ThrowIfNull(json);
-      if(json.Length > MaximumCharacters)
+      if(json.Length > MaximumStoredCharacters)
       {
-         throw new JsonException("The theme exceeds the 128 Ki-character limit.");
+         throw new JsonException("The theme is too large.");
       }
-      using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
+      using JsonDocument document = ParseDocument(json);
       JsonElement root = document.RootElement;
       RequireObject(root);
+      RequireReadableText(root);
       int schemaVersion = 1;
       if(root.TryGetProperty("schemaVersion", out JsonElement version) && (version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out schemaVersion) || schemaVersion < 1 || !allowNewer && schemaVersion != 1))
       {
@@ -274,6 +292,68 @@ public sealed class ReaderTheme
       }
       RequireObject(value);
       return value;
+   }
+
+
+
+   /// <summary>Reads the theme text as JSON; text that is not well-formed UTF-16 is an invalid theme like any other malformed input.</summary>
+   private static JsonDocument ParseDocument(string json)
+   {
+      try
+      {
+         return JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 16 });
+      }
+      catch(ArgumentException exception)
+      {
+         throw new JsonException("The theme contains text that cannot be decoded.", exception);
+      }
+   }
+
+
+
+   /// <summary>
+   /// Checks every property name and string in the theme once, including ones this version does
+   /// not read, because a kept theme is later renamed, edited and re-serialized as a whole. An
+   /// unpaired surrogate escape is valid JSON syntax with no string value, and a repeated
+   /// property name has no single value; both are invalid themes.
+   /// </summary>
+   private static void RequireReadableText(JsonElement root)
+   {
+      try
+      {
+         var pending = new Stack<JsonElement>();
+         pending.Push(root);
+         while(pending.TryPop(out JsonElement element))
+         {
+            if(element.ValueKind == JsonValueKind.Object)
+            {
+               var names = new HashSet<string>(StringComparer.Ordinal);
+               foreach(JsonProperty property in element.EnumerateObject())
+               {
+                  if(!names.Add(property.Name))
+                  {
+                     throw new JsonException("The theme repeats a property: " + property.Name);
+                  }
+                  pending.Push(property.Value);
+               }
+            }
+            else if(element.ValueKind == JsonValueKind.Array)
+            {
+               foreach(JsonElement item in element.EnumerateArray())
+               {
+                  pending.Push(item);
+               }
+            }
+            else if(element.ValueKind == JsonValueKind.String)
+            {
+               _ = element.GetString();
+            }
+         }
+      }
+      catch(InvalidOperationException exception)
+      {
+         throw new JsonException("The theme contains text that cannot be decoded.", exception);
+      }
    }
 
 

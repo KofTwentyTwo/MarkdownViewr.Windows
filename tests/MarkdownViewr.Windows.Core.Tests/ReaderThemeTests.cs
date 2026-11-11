@@ -124,12 +124,15 @@ public sealed class ReaderThemeTests
 
 
 
-   /// <summary>Null and oversized input are rejected before parser work.</summary>
+   /// <summary>Null input is refused, and a theme is kept up to the stored size limit exactly and refused one character past it.</summary>
    [Fact]
    public void Parse_OutsideSizeContract_RejectsInput()
    {
       Assert.Throws<ArgumentNullException>(() => ReaderTheme.Parse(null!));
-      Assert.Throws<JsonException>(() => ReaderTheme.Parse(new string(' ', 128 * 1024 + 1)));
+      string valid = ThemeCatalog.Find("Nord").Json;
+      Assert.Equal("Nord", ReaderTheme.Parse(valid.PadRight(ReaderTheme.MaximumStoredCharacters)).Name);
+      Assert.Throws<JsonException>(() => ReaderTheme.Parse(valid.PadRight(ReaderTheme.MaximumStoredCharacters + 1)));
+      Assert.Equal(8 * 128 * 1024, ReaderTheme.MaximumStoredCharacters);
    }
 
 

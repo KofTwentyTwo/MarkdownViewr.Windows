@@ -59,6 +59,11 @@ public sealed class MarkdownRenderer
 
 
 
+   /// <summary>The configured sanitizer, for comparing its allowlists with an independent list.</summary>
+   internal HtmlSanitizer Policy => _sanitizer;
+
+
+
    /// <summary>Preserves useful markup while sanitizing every parser result, including authored raw HTML.</summary>
    public string Render(string markdown, FrontmatterMode frontmatter = FrontmatterMode.Hide) => Render(markdown, frontmatter, null);
 
