@@ -33,14 +33,13 @@ public static class ThemeJson
    public static string SuggestedFileName(ReaderTheme theme)
    {
       ArgumentNullException.ThrowIfNull(theme);
-      string stem = string.Concat(theme.Name.Select(character => "<>:\"/\\|?*".Contains(character, StringComparison.Ordinal) ? '_' : character))
+      string stem = string.Concat(theme.Name.Select(character => WindowsFileNames.InvalidCharacters.Contains(character, StringComparison.Ordinal) ? '_' : character))
          .Replace(' ', '-').ToLowerInvariant().Trim('.', '-');
       if(stem.Length == 0)
       {
          stem = "theme";
       }
-      string device = stem.Split('.')[0];
-      if(device is "con" or "prn" or "aux" or "nul" || device.Length == 4 && (device.StartsWith("com", StringComparison.Ordinal) || device.StartsWith("lpt", StringComparison.Ordinal)) && device[3] is >= '1' and <= '9' or '¹' or '²' or '³')
+      if(WindowsFileNames.IsReservedDeviceName(stem))
       {
          stem = "theme-" + stem;
       }
