@@ -106,8 +106,12 @@ public sealed class AppSettingsStore
          AppSettings edited = change(current);
          edited.Sanitize();
          RemoveAbandonedTemporaryFiles();
-         string? aside = read is SettingsRead.Corrupt or SettingsRead.Repaired ? KeepAside(stored!) : null;
-         Replace(JsonSerializer.SerializeToUtf8Bytes(edited, AppSettingsContext.Default.AppSettings), stored, aside);
+         string? copy = read is SettingsRead.Corrupt or SettingsRead.Repaired ? CopyAside(stored!) : null;
+         Replace(JsonSerializer.SerializeToUtf8Bytes(edited, AppSettingsContext.Default.AppSettings), stored, copy);
+         if(copy is not null)
+         {
+            KeepAside(copy);
+         }
          return edited;
       }
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException)
@@ -340,12 +344,35 @@ public sealed class AppSettingsStore
 
 
    /// <summary>
-   /// Copies an invalid file to the first free kept-aside name before it is replaced, or over the
-   /// last name once all are taken, and returns the copy's path. The copy is a courtesy: failing
-   /// to make it is reported and does not stop the save, since refusing would block every later
-   /// change as well; null is returned then.
+   /// Copies an invalid file to a temporary name before it is replaced and returns that name. A
+   /// file past the size bound is not this application's settings and is not worth a copy: that
+   /// is reported and null returned. A copy left behind by a save that never finished is removed
+   /// with the other abandoned temporary files.
    /// </summary>
-   private string? KeepAside(FileStream stored)
+   private string? CopyAside(FileStream stored)
+   {
+      if(stored.Length > MaximumBytes)
+      {
+         _report(SettingsFault.NotKeptAside, null);
+         return null;
+      }
+      string temporary = TemporaryName();
+      using var copy = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+      stored.Position = 0;
+      stored.CopyTo(copy);
+      copy.Flush(flushToDisk: true);
+      return temporary;
+   }
+
+
+
+   /// <summary>
+   /// Gives the copy of a replaced invalid file its lasting name: the first free kept-aside name,
+   /// or the last one once all are taken. This happens after the save, so a save that fails
+   /// never disturbs an earlier copy. The copy is a courtesy: one that cannot be placed is
+   /// removed and reported, and the save stands.
+   /// </summary>
+   private void KeepAside(string copy)
    {
       int slot = 1;
       while(slot < MaximumKeptAside && (File.Exists(KeptAsideName(slot)) || Directory.Exists(KeptAsideName(slot))))
@@ -354,16 +381,12 @@ public sealed class AppSettingsStore
       }
       try
       {
-         using var copy = new FileStream(KeptAsideName(slot), FileMode.Create, FileAccess.Write, FileShare.None);
-         stored.Position = 0;
-         stored.CopyTo(copy);
-         copy.Flush(flushToDisk: true);
-         return KeptAsideName(slot);
+         File.Move(copy, KeptAsideName(slot), overwrite: true);
       }
       catch(Exception exception) when(exception is IOException or UnauthorizedAccessException)
       {
+         TryDelete(copy);
          _report(SettingsFault.NotKeptAside, exception);
-         return null;
       }
    }
 
@@ -374,14 +397,19 @@ public sealed class AppSettingsStore
 
 
 
+   /// <summary>A name beside the settings file that only this store uses, so an abandoned one can be recognized and removed.</summary>
+   private string TemporaryName() => Path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+
+
+
    /// <summary>
    /// Writes beside the file and flushes to disk, then renames over it in one step. A failure
-   /// leaves the stored file as it was, and neither the temporary file nor the copy just kept
-   /// aside behind.
+   /// leaves the stored file as it was, and neither the temporary file nor the copy of the
+   /// invalid original behind.
    /// </summary>
-   private void Replace(byte[] content, FileStream? stored, string? aside)
+   private void Replace(byte[] content, FileStream? stored, string? copy)
    {
-      string temporary = Path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+      string temporary = TemporaryName();
       bool replaced = false;
       try
       {
@@ -401,9 +429,10 @@ public sealed class AppSettingsStore
             Retry(() => renamed = _renameOver(temporary, Path));
             if(!renamed)
             {
-               // This volume cannot rename over an open file, so the file is closed first.
+               // This volume cannot rename over an open file, so the file is closed first. This
+               // move is refused while any handle is open on the file, a reader's included.
                stored.Dispose();
-               Retry(() => File.Move(temporary, Path, overwrite: true));
+               Retry(() => File.Move(temporary, Path, overwrite: true), IsBlockedByAHandle);
             }
          }
          replaced = true;
@@ -413,9 +442,9 @@ public sealed class AppSettingsStore
          if(!replaced)
          {
             TryDelete(temporary);
-            if(aside is not null)
+            if(copy is not null)
             {
-               TryDelete(aside);
+               TryDelete(copy);
             }
          }
       }
@@ -439,9 +468,14 @@ public sealed class AppSettingsStore
 
 
 
-   /// <summary>Repeats an operation only while another handle is in the way, a bounded number of times; the last failure is thrown.</summary>
-   private void Retry(Action operation)
+   /// <summary>
+   /// Repeats an operation only while another handle is in the way, a bounded number of times;
+   /// the last failure is thrown. <paramref name="inTheWay"/> says which failures mean that:
+   /// a sharing violation unless the operation reports an open handle differently.
+   /// </summary>
+   private void Retry(Action operation, Func<Exception, bool>? inTheWay = null)
    {
+      inTheWay ??= IsTransient;
       for(int attempt = 1; ; attempt++)
       {
          try
@@ -449,7 +483,7 @@ public sealed class AppSettingsStore
             operation();
             return;
          }
-         catch(IOException exception) when(attempt < MaximumAttempts && IsTransient(exception))
+         catch(Exception exception) when(attempt < MaximumAttempts && inTheWay(exception))
          {
             _wait(RetryDelay);
          }
@@ -459,7 +493,16 @@ public sealed class AppSettingsStore
 
 
    /// <summary>A sharing violation: another handle on the file that is expected to go away. Access denied is not transient.</summary>
-   private static bool IsTransient(IOException exception) => exception.HResult == SharingViolation;
+   private static bool IsTransient(Exception exception) => exception is IOException && exception.HResult == SharingViolation;
+
+
+
+   /// <summary>
+   /// What a move over an existing file fails with while another handle is open on it. Unlike
+   /// an open or a rename, that move answers access denied, which therefore has to be waited out
+   /// there even though a read-only file gives the same answer.
+   /// </summary>
+   private static bool IsBlockedByAHandle(Exception exception) => exception is UnauthorizedAccessException || IsTransient(exception);
 
 
 

@@ -850,6 +850,170 @@ public class AppSettingsStoreTests
 
 
 
+   /// <summary>A failed save over invalid content leaves every earlier kept-aside copy as it was, the last one included.</summary>
+   [Fact]
+   public void Update_InvalidContentAndFailedSaveWithEveryNameUsed_KeepsTheEarlierCopies()
+   {
+      using var temp = new TempDirectory();
+      File.WriteAllText(temp.File("settings.json.corrupt"), "kept 1");
+      for(int slot = 2; slot <= AppSettingsStore.MaximumKeptAside; slot++)
+      {
+         string number = slot.ToString(System.Globalization.CultureInfo.InvariantCulture);
+         File.WriteAllText(temp.File("settings.json.corrupt-" + number), "kept " + number);
+      }
+      File.WriteAllText(temp.File("settings.json"), "newest invalid");
+      string[] before = FileNames(temp.Path);
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), _ => { });
+      using(new FileStream(temp.File("settings.json"), FileMode.Open, FileAccess.Read, FileShare.Read))
+      {
+         Assert.Null(store.Update(settings => settings));
+      }
+      Assert.Equal([SettingsFault.Corrupt, SettingsFault.WriteFailed], faults);
+      Assert.Equal("kept 9", File.ReadAllText(temp.File("settings.json.corrupt-9")));
+      Assert.Equal("kept 1", File.ReadAllText(temp.File("settings.json.corrupt")));
+      Assert.Equal("newest invalid", File.ReadAllText(temp.File("settings.json")));
+      Assert.Equal([.. before, "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>A file past the size bound is replaced without being copied: copying it would stall the window and fill the disk with something that was never settings.</summary>
+   [Fact]
+   public void Update_OversizedFile_IsReplacedWithoutACopy()
+   {
+      using var temp = new TempDirectory();
+      using(var oversized = new FileStream(temp.File("settings.json"), FileMode.CreateNew))
+      {
+         oversized.SetLength(AppSettingsStore.MaximumBytes + 1);
+      }
+      var faults = new List<(SettingsFault Fault, Exception? Exception)>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, exception) => faults.Add((fault, exception)));
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Dark";
+         return settings;
+      }));
+      Assert.Equal([SettingsFault.Corrupt, SettingsFault.NotKeptAside], faults.Select(entry => entry.Fault));
+      Assert.Null(faults[1].Exception);
+      Assert.Equal("Dark", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>
+   /// On a volume that cannot rename over an open file, the move that replaces it is refused with
+   /// access denied while a reader has the file open. That is waited out like any other handle,
+   /// each pause being the store's retry delay.
+   /// </summary>
+   [Fact]
+   public void Update_FallbackMoveBlockedByAReader_WaitsForIt()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      FileStream? reader = new(temp.File("settings.json"), FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+      var delays = new List<TimeSpan>();
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(temp.File("settings.json"), (fault, _) => faults.Add(fault), delay =>
+      {
+         delays.Add(delay);
+         if(delays.Count == 2)
+         {
+            reader.Dispose();
+         }
+      }, (_, _) => false);
+      Assert.NotNull(store.Update(settings =>
+      {
+         settings.Theme = "Light";
+         return settings;
+      }));
+      Assert.Equal([AppSettingsStore.RetryDelay, AppSettingsStore.RetryDelay], delays);
+      Assert.Empty(faults);
+      Assert.Equal("Light", store.Load().Theme);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+   }
+
+
+
+   /// <summary>The same move on a read-only file is refused for good: the store gives up after its bounded wait and leaves the file and the folder as they were.</summary>
+   [Fact]
+   public void Update_FallbackMoveOnAReadOnlyFile_GivesUpAfterTheWait()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      byte[] before = File.ReadAllBytes(temp.File("settings.json"));
+      File.SetAttributes(temp.File("settings.json"), FileAttributes.ReadOnly);
+      try
+      {
+         int waits = 0;
+         var faults = new List<(SettingsFault Fault, Exception? Exception)>();
+         var store = new AppSettingsStore(temp.File("settings.json"), (fault, exception) => faults.Add((fault, exception)), _ => waits++, (_, _) => false);
+         Assert.Null(store.Update(settings => settings));
+         Assert.Equal(AppSettingsStore.MaximumAttempts - 1, waits);
+         Assert.Equal(SettingsFault.WriteFailed, Assert.Single(faults).Fault);
+         Assert.IsType<UnauthorizedAccessException>(faults[0].Exception);
+         Assert.Equal(before, File.ReadAllBytes(temp.File("settings.json")));
+         Assert.Equal(["settings.json", "settings.json.lock"], FileNames(temp.Path));
+      }
+      finally
+      {
+         File.SetAttributes(temp.File("settings.json"), FileAttributes.Normal);
+      }
+   }
+
+
+
+   /// <summary>
+   /// The data folder can be anywhere the person points it. A path past the classic 260-character
+   /// limit, and a folder whose name is not well-formed UTF-16 (which the file system allows),
+   /// are saved to again and again like any other.
+   /// </summary>
+   [Theory]
+   [InlineData(true)]
+   [InlineData(false)]
+   public void Update_UnusualFolderPath_SavesRepeatedly(bool longPath)
+   {
+      using var temp = new TempDirectory();
+      string folder = longPath
+         ? Path.Combine(temp.Path, new string('a', 120), new string('b', 120), new string('c', 60))
+         : Path.Combine(temp.Path, "profile \uD800 name");
+      var faults = new List<SettingsFault>();
+      var store = new AppSettingsStore(Path.Combine(folder, "settings.json"), (fault, _) => faults.Add(fault));
+      Assert.Equal(longPath, store.Path.Length > 260);
+      foreach(string theme in new[] { "Dark", "Light", "Dark" })
+      {
+         Assert.NotNull(store.Update(settings =>
+         {
+            settings.Theme = theme;
+            return settings;
+         }));
+         Assert.Equal(theme, store.Load().Theme);
+      }
+      Assert.Empty(faults);
+      Assert.Equal(["settings.json", "settings.json.lock"], FileNames(folder));
+   }
+
+
+
+   /// <summary>Without a wait supplied, the store really pauses between attempts instead of spinning through them.</summary>
+   [Fact]
+   public void Update_LockHeld_DefaultWaitPausesBetweenAttempts()
+   {
+      using var temp = new TempDirectory();
+      Seed(temp);
+      var store = new AppSettingsStore(temp.File("settings.json"));
+      using(new FileStream(temp.File("settings.json.lock"), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+      {
+         long started = System.Diagnostics.Stopwatch.GetTimestamp();
+         Assert.Null(store.Update(settings => settings));
+         TimeSpan elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started);
+         Assert.True(elapsed >= AppSettingsStore.RetryDelay * (AppSettingsStore.MaximumAttempts - 1) / 2, "The store waited only " + elapsed + ".");
+      }
+   }
+
+
+
    /// <summary>A change that throws leaves the file, the lock and the folder as they were; the next save works.</summary>
    [Fact]
    public void Update_ChangeThrows_LeavesTheFileAndReleasesTheLock()

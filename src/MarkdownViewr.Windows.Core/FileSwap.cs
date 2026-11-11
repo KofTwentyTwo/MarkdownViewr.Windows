@@ -5,7 +5,6 @@
 
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 
@@ -40,13 +39,14 @@ internal static partial class FileSwap
    /// </summary>
    public static bool TryRenameOver(string source, string destination)
    {
-      using SafeFileHandle handle = CreateFile(source, DeleteAccess, ShareAll, 0, OpenExisting, 0, 0);
+      using SafeFileHandle handle = CreateFile(Verbatim(source), DeleteAccess, ShareAll, 0, OpenExisting, 0, 0);
       if(handle.IsInvalid)
       {
          throw Failure(Marshal.GetLastPInvokeError());
       }
       // FILE_RENAME_INFO: flags, root directory handle, name length in bytes, then the name itself.
-      byte[] name = Encoding.Unicode.GetBytes(destination);
+      // The name is copied as stored: a file name may hold text that is not well-formed UTF-16.
+      byte[] name = MemoryMarshal.AsBytes(Verbatim(destination).AsSpan()).ToArray();
       int lengthOffset = 2 * IntPtr.Size;
       int nameOffset = lengthOffset + sizeof(int);
       byte[] rename = new byte[nameOffset + name.Length + sizeof(char)];
@@ -59,6 +59,22 @@ internal static partial class FileSwap
       }
       int error = Marshal.GetLastPInvokeError();
       return IsUnsupported(error) ? false : throw Failure(error);
+   }
+
+
+
+   /// <summary>
+   /// The form of a full path that Windows takes as written, without the 260-character limit the
+   /// plain form has in a process that has not opted in to long paths. The managed file calls add
+   /// it themselves; a direct Windows call has to.
+   /// </summary>
+   internal static string Verbatim(string fullPath)
+   {
+      if(fullPath.StartsWith(@"\\?\", StringComparison.Ordinal) || fullPath.StartsWith(@"\\.\", StringComparison.Ordinal))
+      {
+         return fullPath;
+      }
+      return fullPath.StartsWith(@"\\", StringComparison.Ordinal) ? string.Concat(@"\\?\UNC\", fullPath.AsSpan(2)) : @"\\?\" + fullPath;
    }
 
 

@@ -52,7 +52,7 @@ written. An empty file reads as defaults at once.
 | Empty file | Defaults | Replaced after the wait; nothing kept aside |
 | Valid settings | The stored values | Replaced |
 | Some invalid properties | Valid properties kept, invalid ones as defaults | Replaced; a copy of the original is kept aside |
-| Not settings at all | Defaults | Replaced; a copy of the original is kept aside |
+| Not settings at all | Defaults | Replaced; a copy of the original is kept aside, unless it is over 16 MiB |
 | Unreadable or being written | Defaults | Refused; nothing is written |
 
 A trailing comma, a comment and a quoted number are valid: they are what a hand edit
@@ -69,27 +69,41 @@ old file and allow deletion go on reading it. `File.Replace` is not used because
 is two renames with the file missing between them, and `File.Move` with overwrite is
 not used because it refuses while any handle is open on the destination.
 
+The rename is given the path in the form Windows takes as written, so a data folder
+whose path is longer than 260 characters, or whose name is not well-formed UTF-16,
+behaves like any other.
+
 On a volume that does not implement that rename, the store closes its own read
 handle and falls back to `File.Move` with overwrite. If the file did not exist when
 it was read, the temporary file is renamed into place without overwriting. A failed
 update leaves the stored file as it was and removes its temporary file.
 
-**Kept-aside copies.** Before invalid content is replaced it is copied to
-`settings.json.corrupt`, or to the first free of `settings.json.corrupt-2` to
-`settings.json.corrupt-9`; the last name is overwritten once all exist. The copy is a
-courtesy for recovering a hand edit: if it cannot be made the fault is reported and
-the save proceeds, because refusing would block every later change too. A save that
-then fails removes the copy it made. Nothing reads the copies back. They contain
-whatever the file contained, including recent-document paths, so clearing recent
-files deletes them.
+**Kept-aside copies.** Before invalid content is replaced it is copied to a temporary
+file. Once the save has succeeded the copy is renamed to `settings.json.corrupt`, or
+to the first free of `settings.json.corrupt-2` to `settings.json.corrupt-9`; the last
+name is overwritten once all exist. A save that fails removes its temporary copy and
+leaves every earlier copy as it was, and the invalid file is still in place. The copy
+is a courtesy for recovering a hand edit, with these limits:
+
+- a file over 16 MiB is replaced without a copy, since it was never this
+  application's settings and copying it would stall the window;
+- a copy that cannot be given its name is removed and reported, and the save stands,
+  because refusing would block every later change too;
+- a process killed between the save and the rename of the copy loses that copy.
+
+Nothing reads the copies back. They contain whatever the file contained, including
+recent-document paths, so clearing recent files deletes them.
 
 **Abandoned temporary files.** A process killed between its write and its rename
-leaves a temporary file. The next update, holding the lock, removes files that match
-this store's own name pattern and no others.
+leaves a temporary file, and possibly a temporary copy. The next update, holding the
+lock, removes files that match this store's own name pattern and no others.
 
 **Waiting.** Only a sharing violation is waited out: at most 20 attempts, 50 ms
 apart, for the lock, the read and the rename. Access denied is treated as permanent
-and reported at once, so a read-only profile does not stall a window.
+and reported at once, so a read-only profile does not stall a window. The fallback
+move is the exception: it answers access denied while any handle is open on the
+file, a reader's included, so there access denied is waited out as well, and a
+read-only file costs the full wait before the save is refused.
 
 **Reporting.** Faults are reported by kind with the exception type and HRESULT. No
 path and no operating-system message text reaches the log.

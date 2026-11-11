@@ -9,6 +9,20 @@ namespace MarkdownViewr.Windows.Core.Tests;
 /// <summary>Renaming one real file over another, with other real handles open on the destination.</summary>
 public sealed class FileSwapTests
 {
+   /// <summary>A full path is given the form Windows takes as written: a drive path, a network path, and paths that already have it.</summary>
+   [Theory]
+   [InlineData(@"C:\data\settings.json", @"\\?\C:\data\settings.json")]
+   [InlineData(@"\\server\share\settings.json", @"\\?\UNC\server\share\settings.json")]
+   [InlineData(@"\\?\C:\data\settings.json", @"\\?\C:\data\settings.json")]
+   [InlineData(@"\\?\UNC\server\share\settings.json", @"\\?\UNC\server\share\settings.json")]
+   [InlineData(@"\\.\C:\data\settings.json", @"\\.\C:\data\settings.json")]
+   public void Verbatim_FullPath_IsPrefixedOnce(string path, string expected)
+   {
+      Assert.Equal(expected, FileSwap.Verbatim(path));
+   }
+
+
+
    /// <summary>The rename replaces the destination and removes the source name.</summary>
    [Fact]
    public void TryRenameOver_ExistingDestination_ReplacesIt()
