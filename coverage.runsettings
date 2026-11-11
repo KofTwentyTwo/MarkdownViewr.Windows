@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Coverage contract for the 100% gate (K22-TEST-10): every hand-written line of the
-     UI-free core and the command line counts. There is deliberately no Include filter:
-     coverlet measures the projects the unit tests reference whose sources are in this
-     repository (Core and the CLI), never test assemblies or NuGet packages, and an Include
-     filter would silently drop the CLI, whose assembly name (the app id) contains dashes.
+     UI-free core counts. There is deliberately no Include filter: coverlet measures the
+     projects the unit tests reference whose sources are in this repository, never test
+     assemblies or NuGet packages, and the gate names the package it requires.
      Excluded, with intent:
      - GeneratedCodeAttribute: source-generated JSON contexts and MVVM Toolkit members.
      - ExcludeFromCodeCoverageAttribute: thin adapters a test cannot reach, each with a

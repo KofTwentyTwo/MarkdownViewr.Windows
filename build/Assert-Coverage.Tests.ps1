@@ -19,16 +19,19 @@ BeforeAll `
       [CmdletBinding()]
       param(
          [Parameter(Mandatory)] [string] $Directory,
-         [Parameter(Mandatory)] [ValidateRange(0, 1)] [double] $Rate
+         [Parameter(Mandatory)] [ValidateRange(0, 1)] [double] $Rate,
+         [switch] $NoLines
       )
 
       $rateText = $Rate.ToString([Globalization.CultureInfo]::InvariantCulture)
       $secondLineHits = if ($Rate -eq 1) { 1 } else { 0 }
+      $lines = if ($NoLines) { '' } else { "<line number=`"1`" hits=`"1`" /><line number=`"2`" hits=`"$secondLineHits`" />" }
       $report = @"
 <coverage><packages><package name="Probe" line-rate="$rateText"><classes>
-<class filename="Probe.cs"><lines><line number="1" hits="1" /><line number="2" hits="$secondLineHits" /></lines></class>
+<class filename="Probe.cs"><lines>$lines</lines></class>
 </classes></package></packages></coverage>
 "@
+      New-Item -ItemType Directory -Force -Path $Directory | Out-Null
       Set-Content -LiteralPath (Join-Path $Directory 'coverage.cobertura.xml') -Value $report
    }
 }
@@ -70,5 +73,48 @@ Describe 'Required coverage gate' `
       $output = (& pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory -Packages Probe 2>&1) -join "`n"
       $LASTEXITCODE | Should -Be 0
       $output | Should -Match 'Coverage gate passed'
+   }
+
+   It 'names the uncovered lines of a package below the bar' `
+   {
+      Write-CoverageReport -Directory $script:ReportsDirectory -Rate 0.5
+      $output = (& pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory 2>&1) -join "`n"
+      $LASTEXITCODE | Should -Be 1
+      $output | Should -Match 'uncovered: Probe\.cs lines 2(\s|$)'
+   }
+
+   It 'rejects a package no report measured a line of' `
+   {
+      Write-CoverageReport -Directory $script:ReportsDirectory -Rate 1 -NoLines
+      $output = (& pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory -Packages Probe 2>&1) -join "`n"
+      $LASTEXITCODE | Should -Be 1
+      $output | Should -Match 'no measured lines'
+   }
+
+   It 'ignores an empty report when another test project measured the package' `
+   {
+      Write-CoverageReport -Directory (Join-Path $script:ReportsDirectory 'first') -Rate 1 -NoLines
+      Write-CoverageReport -Directory (Join-Path $script:ReportsDirectory 'second') -Rate 0.5
+      $output = (& pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory -Packages Probe 2>&1) -join "`n"
+      $LASTEXITCODE | Should -Be 1
+      $output | Should -Match 'Probe line coverage: 50% of 2 lines'
+   }
+
+   It 'takes the test project that covers the package best' `
+   {
+      Write-CoverageReport -Directory (Join-Path $script:ReportsDirectory 'first') -Rate 0.5
+      Write-CoverageReport -Directory (Join-Path $script:ReportsDirectory 'second') -Rate 1
+      $output = (& pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory 2>&1) -join "`n"
+      $LASTEXITCODE | Should -Be 0
+      $output | Should -Match 'Probe line coverage: 100% of 2 lines .*second'
+   }
+
+   It 'holds the package to a lower bar when one is given' `
+   {
+      Write-CoverageReport -Directory $script:ReportsDirectory -Rate 0.5
+      & pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory -MinimumPercent 50 | Out-Null
+      $LASTEXITCODE | Should -Be 0
+      & pwsh -NoProfile -File $script:CoverageGate -ResultsDirectory $script:ReportsDirectory -MinimumPercent 51 2>&1 | Out-Null
+      $LASTEXITCODE | Should -Be 1
    }
 }

@@ -30,7 +30,7 @@ This Product follows the [KofTwentyTwo standards](https://github.com/KofTwentyTw
 - Preserve original MIT notices and dependency credits.
 - Disclose substantial AI assistance and include a `Co-Authored-By:` trailer naming the model.
 
-Required CI covers build/coverage/style, reader and installed-update acceptance, parser fuzzing, tooling tests, dependency/secret/workflow scans, CodeQL, PR title, and DCO.
+CI runs on every push and covers the build, formatting, core tests with the coverage gate, Windows adapter tests, parser fuzzing, and tooling tests. Desktop and installed-update acceptance, the dependency, secret, and workflow scans, and CodeQL are not automated at present; [DEVELOPERS.md](DEVELOPERS.md#what-runs-where) lists what to run by hand. Local hooks check the commit title, the sign-off, and secrets.
 
 Under the single-maintainer policy, `review / automated` also requires a genuine current-commit acknowledgement from the configured human maintainer. An agent cannot provide that acknowledgement. See [repository setup](docs/repository-setup.md).
 

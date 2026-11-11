@@ -5,6 +5,13 @@ Releases follow the
 Pushing a protected `v*` tag on `main` runs [`.github/workflows/release.yml`](../.github/workflows/release.yml),
 which calls the shared `release-velopack.yml` workflow in KofTwentyTwo/standards.
 
+## Current state
+
+The repository moved to Gitea, and GitHub is now a mirror with GitHub Actions switched
+off. The release workflow below exists only on GitHub, so until Actions is switched on
+there, or a signing release job exists on Gitea, pushing a `v*` tag builds and tests the
+tag on Gitea and publishes nothing. Do not tag expecting a release.
+
 ## Workflow baseline
 
 The signing release builder is pinned to standards v1.1.1 (`96cbdf208a15c9c524676bd15ff9e323228a952b`); other shared gates retain v0.1.2. The release caller checks main ancestry and reruns build, coverage, formatting, UI tests, security scans and CodeQL before publication.

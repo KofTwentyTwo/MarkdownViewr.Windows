@@ -6,7 +6,6 @@ on:
 jobs:
   windows:
     uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/windows.yaml@v1
-    secrets: inherit
     with:
       commands: |
         dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
@@ -16,8 +15,18 @@ jobs:
         $env:Platform = 'x64'
         dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
         Remove-Item Env:Platform
+        # The host runner keeps its workspace between runs; the coverage gate must see this run's report only.
+        if (Test-Path TestResults) { Remove-Item TestResults -Recurse -Force }
         dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --logger trx --results-directory TestResults
         pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+        # Windows adapters (files, watcher, registry) against the real operating system. The Desktop
+        # category drives the app with mouse and keyboard and needs an interactive session.
+        dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category!=Desktop" --logger trx --results-directory TestResults
+        # Seeded parser campaigns: a longer run on main and on tags than on topic branches.
+        $env:K22_FUZZ_ITERATIONS = ($env:GITHUB_REF_NAME -eq 'main' -or $env:GITHUB_REF_TYPE -eq 'tag') ? '10000' : '500'
+        dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --filter "Category=Fuzz"
+        dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Fuzz"
+        Remove-Item Env:K22_FUZZ_ITERATIONS
         # PowerShell build scripts: analyzer and Pester boundary tests with pinned modules saved to the job's temp directory.
         $modules = Join-Path ($env:RUNNER_TEMP ?? [IO.Path]::GetTempPath()) "psmodules-$env:GITHUB_RUN_ID"
         New-Item -ItemType Directory -Force -Path $modules | Out-Null

@@ -9,11 +9,15 @@ its Windows desktop reference architecture.
 ```powershell
 dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
 dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror
-dotnet test MarkdownViewr.Windows.slnx -p:Platform=x64 --no-build --filter "FullyQualifiedName!~UiTests" --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory TestResults
-./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
-dotnet test tests/MarkdownViewr.Windows.UiTests --no-build      # launches the app on the desktop
+dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory TestResults   # TestResults must start empty
+pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category!=Desktop"   # Windows adapters; no window, no input
+dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Desktop"    # drives the app with mouse and keyboard
 dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
 ```
+
+Build through the solution. Passing `-p:Platform=x64` to one test project selects a different
+output folder, so a following `--no-build` test run would use stale binaries.
 
 ## Rules
 

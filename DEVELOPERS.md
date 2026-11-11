@@ -28,26 +28,40 @@ To isolate preview data, set `MARKDOWNVIEWR_WINDOWS_DATA_DIR` for that process t
 
 ## Tests and quality gates
 
+After the solution build above:
+
 ```powershell
-dotnet test tests/MarkdownViewr.Windows.Core.Tests --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory TestResults
-./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
+if (Test-Path TestResults) { Remove-Item TestResults -Recurse -Force }
+dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory TestResults
+pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category!=Desktop"
 dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
 npm ci --ignore-scripts
 npm run lint
 npm test
 ```
 
-Core tests use xUnit and Coverlet; retain 100% measured core line coverage. Name tests `Method_Scenario_Expectation` and add meaningful regression coverage for fixes. Deterministic tests inject time and filesystem boundaries.
+Core tests use xUnit and Coverlet; retain 100% measured core line coverage. The coverage gate reads every report under the results directory, so start from an empty one, and run the gate as its own process: called in-process, a failure does not stop the calling script. Name tests `Method_Scenario_Expectation` and add meaningful regression coverage for fixes. Deterministic tests inject time and filesystem boundaries.
 
-Native desktop tests use FlaUI/UIA3 and require an available interactive desktop:
+The `UiTests` assembly holds two kinds of test. Adapter tests exercise the Windows file, watcher, and registry code against the real operating system without opening a window. Tests in the `Desktop` category use FlaUI/UIA3 to drive the app with the mouse and keyboard and need an interactive desktop:
 
 ```powershell
-dotnet test tests/MarkdownViewr.Windows.UiTests
+dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Desktop"
 ```
 
-Reserve the desktop before running physical-input tests. Hosted CI also exercises published output and actual stable/dev installation, update/restart, registration, and coexistence. See [installed-update acceptance](docs/installed-updates.md). Synthetic unsigned fixtures do not establish production signing.
+Reserve the desktop before running them. Build through the solution: passing `-p:Platform=x64` to one test project selects a different output folder, and a following `--no-build` run would test stale binaries.
 
-For PowerShell, use PSScriptAnalyzer 1.25.0 with `PSScriptAnalyzerSettings.psd1`, then Pester 5.7.1 against `build/*.Tests.ps1`. Reproduce the exact sequential analyzer partitions and negative fixtures in [scripts.yml](.github/workflows/scripts.yml); engine exceptions and rule findings are failures.
+For PowerShell, use PSScriptAnalyzer 1.25.0 with `PSScriptAnalyzerSettings.psd1`, then Pester 5.7.1 against `build/*.Tests.ps1`. Reproduce the exact sequential analyzer partitions in [build.yaml](.gitea/workflows/build.yaml); engine exceptions and rule findings are failures.
+
+### What runs where
+
+The repository is hosted on Gitea, with GitHub as a mirror. [build.yaml](.gitea/workflows/build.yaml) runs on every push to any branch: locked restore, zero-warning build, formatting, core tests with the coverage gate, the adapter tests, the seeded parser campaigns, script analysis with Pester, and the JavaScript lint and tests. A pull request shows the result for its head commit.
+
+The workflows under `.github/` belong to the mirror, where GitHub Actions is currently switched off. Until it is switched on again, these checks have no automated run and are run by hand before a release:
+
+- the `Desktop` tests, against a local build and against published output;
+- [installed-update acceptance](docs/installed-updates.md): actual stable and development installation, update and restart, registration, and coexistence. Its synthetic unsigned fixtures do not establish production signing;
+- secret, dependency, and workflow scans, and CodeQL.
 
 Run the [seeded parser campaigns](docs/security/fuzzing.md) when changing parser or activation boundaries. Never use private documents as a corpus.
 

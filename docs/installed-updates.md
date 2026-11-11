@@ -14,10 +14,8 @@ dotnet tool install vpk --version 1.2.161 --tool-path artifacts/smoke-tools
 
 The harness publishes the actual starter app four times with locked dependencies,
 self-contained .NET and Windows App SDK settings matching the release builder.
-Core and CLI declare the Windows runtime identifiers so their committed locks
-support runtime-specific publishing. Their single-file analyzer setting also locks
-the SDK's ILLink tool dependency used when publishing the CLI as one executable.
-The harness publishes and runs each CLI version when that head exists.
+Core declares the Windows runtime identifiers so its committed lock supports
+runtime-specific publishing.
 Keep `VelopackApp.Build().Run()` directly in
 the app's entry point: the packer's startup check cannot recognize an indirect
 AppKit wrapper call. Do not disable that pack-time check.
