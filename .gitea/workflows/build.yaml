@@ -22,11 +22,15 @@ jobs:
         # Windows adapters (files, watcher, registry) against the real operating system. The Desktop
         # category drives the app with mouse and keyboard and needs an interactive session.
         dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category!=Desktop" --logger trx --results-directory TestResults
-        # Seeded parser campaigns: a longer run on main and on tags than on topic branches.
-        $env:K22_FUZZ_ITERATIONS = ($env:GITHUB_REF_NAME -eq 'main' -or $env:GITHUB_REF_TYPE -eq 'tag') ? '10000' : '500'
-        dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --filter "Category=Fuzz"
-        dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Fuzz"
-        Remove-Item Env:K22_FUZZ_ITERATIONS
+        # The runs above include the seeded parser campaigns at 500 iterations. Main and tags repeat
+        # them at 10000; a filter that matches no test fails, so a renamed category cannot pass unseen.
+        if ($env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF -like 'refs/tags/*') {
+          $env:K22_FUZZ_ITERATIONS = '10000'
+          Write-Output "Parser campaigns at $env:K22_FUZZ_ITERATIONS iterations for $env:GITHUB_REF"
+          dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --filter "Category=Fuzz" -- RunConfiguration.TreatNoTestsAsError=true
+          dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Fuzz" -- RunConfiguration.TreatNoTestsAsError=true
+          Remove-Item Env:K22_FUZZ_ITERATIONS
+        }
         # PowerShell build scripts: analyzer and Pester boundary tests with pinned modules saved to the job's temp directory.
         $modules = Join-Path ($env:RUNNER_TEMP ?? [IO.Path]::GetTempPath()) "psmodules-$env:GITHUB_RUN_ID"
         New-Item -ItemType Directory -Force -Path $modules | Out-Null

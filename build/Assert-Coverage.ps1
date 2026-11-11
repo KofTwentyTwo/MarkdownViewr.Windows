@@ -1,26 +1,32 @@
 #Requires -Version 7.4
+# Copyright (c) 2026 James Maes
+# SPDX-License-Identifier: MIT
 <#
 .SYNOPSIS
     Fails when any named assembly is below the required line coverage.
 
 .DESCRIPTION
     Reads every coverage.cobertura.xml under -ResultsDirectory (one per test project
-    run) and, for each package, takes the best line rate any report measured. A package
-    can be split across test projects, and the report that exercises it most is
-    authoritative. Without -Packages, every package the reports measured is gated:
-    coverage.runsettings already limits measurement to the assemblies held to the bar.
+    run) and, for each package, takes the report that covers it best. A package can be
+    split across test projects, and the report that exercises it most is authoritative.
+    Without -Packages, every package the reports measured is gated: coverage.runsettings
+    already limits measurement to the assemblies held to the bar.
+
+    The rate is counted from the lines each report lists, not read from its summary
+    attributes, so a report cannot state a rate its lines do not support.
+
     Exits 1 on any shortfall, when a package named in -Packages is missing, or when no
     report measured a single line of it.
 
     Every report under the directory counts, including one left by an earlier run, so
-    collect into an empty directory. Run the script as its own process
-    (pwsh -NoProfile -File): called in-process, its exit code does not stop the caller.
+    collect into an empty directory. Run the script as its own process: called
+    in-process, its exit code does not stop the caller.
 
 .EXAMPLE
-    ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
+    pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
 
 .EXAMPLE
-    ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+    pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
 #>
 [CmdletBinding()]
 param(
@@ -42,17 +48,23 @@ if ($files.Count -eq 0)
    exit 1
 }
 
-# One entry per package per report: where it was measured, how many lines, and how well.
+# One entry per package per report: where it was measured, how many lines, and how many of them ran.
 $measured = foreach ($file in $files)
 {
    $document = [xml](Get-Content -LiteralPath $file.FullName -Raw)
    foreach ($package in $document.SelectNodes('/coverage/packages/package'))
    {
+      $lines = $package.SelectNodes('classes/class/lines/line')
+      $covered = 0
+      foreach ($line in $lines)
+      {
+         if ([int]::Parse($line.GetAttribute('hits'), [Globalization.CultureInfo]::InvariantCulture) -gt 0) { $covered++ }
+      }
       [pscustomobject]@{
          Name    = $package.GetAttribute('name')
          Report  = $file.FullName
-         Lines   = $package.SelectNodes('classes/class/lines/line').Count
-         Rate    = [double]::Parse($package.GetAttribute('line-rate'), [Globalization.CultureInfo]::InvariantCulture)
+         Lines   = $lines.Count
+         Covered = $covered
          Package = $package
       }
    }
@@ -67,12 +79,11 @@ if ($Packages.Count -eq 0)
       exit 1
    }
 }
-$required = $MinimumPercent / 100
 $failed = $false
 
 foreach ($name in $Packages)
 {
-   $found = @($measured | Where-Object { $_.Name -eq $name })
+   $found = @($measured | Where-Object { $_.Name -ceq $name })
    if ($found.Count -eq 0)
    {
       Write-Error "Package '$name' not found in any coverage report." -ErrorAction Continue
@@ -80,7 +91,7 @@ foreach ($name in $Packages)
       continue
    }
 
-   # A package with no measured lines reports a perfect rate; it proves nothing.
+   # A package with no measured lines proves nothing.
    $counted = @($found | Where-Object { $_.Lines -gt 0 })
    if ($counted.Count -eq 0)
    {
@@ -89,9 +100,13 @@ foreach ($name in $Packages)
       continue
    }
 
-   $best = $counted | Sort-Object -Property Rate -Descending | Select-Object -First 1
-   Write-Output ("{0} line coverage: {1}% of {2} lines (required {3}%), from {4}" -f $name, [math]::Round($best.Rate * 100, 2), $best.Lines, $MinimumPercent, $best.Report)
-   if ($best.Rate -lt $required)
+   # Best covered share first; between equal shares, the report that measured more lines.
+   $best = $counted | Sort-Object -Property @{ Expression = { $_.Covered / $_.Lines }; Descending = $true }, @{ Expression = { $_.Lines }; Descending = $true } | Select-Object -First 1
+   $percent = 100 * $best.Covered / $best.Lines
+   # Rounded down, so a package just under the bar is never shown as having reached it.
+   $shown = [math]::Floor($percent * 100) / 100
+   Write-Output ("{0} line coverage: {1}% ({2} of {3} lines, required {4}%), from {5}" -f $name, $shown, $best.Covered, $best.Lines, $MinimumPercent, $best.Report)
+   if ($percent -lt $MinimumPercent)
    {
       foreach ($class in $best.Package.SelectNodes('classes/class'))
       {

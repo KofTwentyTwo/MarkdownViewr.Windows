@@ -14,7 +14,7 @@
          "tests/MarkdownViewr.Windows.UiTests/ActivationFuzzTests.cs"
       ],
       "command": "dotnet test tests/MarkdownViewr.Windows.Core.Tests -c Release -p:Platform=x64 --no-build --no-restore --filter Category=Fuzz",
-      "workflow": ".github/workflows/fuzz.yml",
+      "workflow": ".gitea/workflows/build.yaml",
       "evidence": "docs/security/fuzzing.md"
    }
 }

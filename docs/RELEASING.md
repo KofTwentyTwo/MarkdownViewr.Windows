@@ -8,9 +8,9 @@ which calls the shared `release-velopack.yml` workflow in KofTwentyTwo/standards
 ## Current state
 
 The repository moved to Gitea, and GitHub is now a mirror with GitHub Actions switched
-off. The release workflow below exists only on GitHub, so until Actions is switched on
-there, or a signing release job exists on Gitea, pushing a `v*` tag builds and tests the
-tag on Gitea and publishes nothing. Do not tag expecting a release.
+off. The release workflow this document describes exists only on GitHub, so until a
+signing release job exists on Gitea, pushing a `v*` tag builds and tests the tag on
+Gitea and publishes nothing. Do not tag expecting a release.
 
 ## Workflow baseline
 

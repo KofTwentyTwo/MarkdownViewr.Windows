@@ -61,7 +61,7 @@ The workflows under `.github/` belong to the mirror, where GitHub Actions is cur
 
 - the `Desktop` tests, against a local build and against published output;
 - [installed-update acceptance](docs/installed-updates.md): actual stable and development installation, update and restart, registration, and coexistence. Its synthetic unsigned fixtures do not establish production signing;
-- secret, dependency, and workflow scans, and CodeQL.
+- secret and workflow scans, and CodeQL.
 
 Run the [seeded parser campaigns](docs/security/fuzzing.md) when changing parser or activation boundaries. Never use private documents as a corpus.
 

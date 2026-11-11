@@ -11,8 +11,7 @@ namespace MarkdownViewr.Windows.UiTests;
 /// <summary>Registry adapters operate beneath an isolated UUID subtree, never the user's real Classes/default-app keys.</summary>
 internal sealed class RegistryFixture : IDisposable
 {
-   private const string Parent = "Software\\KofTwentyTwo\\MarkdownViewr.Windows.Tests";
-   private readonly string _path = Parent + "\\" + Guid.NewGuid().ToString("N");
+   private readonly string _path = "Software\\KofTwentyTwo\\MarkdownViewr.Windows.Tests\\" + Guid.NewGuid().ToString("N");
 
 
 
@@ -26,18 +25,10 @@ internal sealed class RegistryFixture : IDisposable
 
 
 
-   /// <summary>Deletes the UUID subtree created by this fixture, and the shared parent key once no other fixture has a subtree under it.</summary>
+   /// <summary>Deletes only the fixed-prefix UUID subtree created by this fixture.</summary>
    public void Dispose()
    {
       Root.Dispose();
       Registry.CurrentUser.DeleteSubKeyTree(_path, throwOnMissingSubKey: false);
-      try
-      {
-         Registry.CurrentUser.DeleteSubKey(Parent, throwOnMissingSubKey: false);
-      }
-      catch(InvalidOperationException)
-      {
-         // Another fixture still has a subtree under the parent.
-      }
    }
 }

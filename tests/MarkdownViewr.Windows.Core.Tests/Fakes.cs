@@ -28,20 +28,16 @@ internal sealed class TempDirectory : IDisposable
 
 
 
-   /// <summary>
-   /// Deletes the directory, and the shared parent once no other test is using it. A handle left
-   /// open by a failed test keeps its folder: cleanup must not replace the failure being reported.
-   /// </summary>
+   /// <summary>Deletes the directory; a handle left open by a failed test is left for the OS.</summary>
    public void Dispose()
    {
       try
       {
          Directory.Delete(Path, recursive: true);
-         Directory.Delete(System.IO.Path.GetDirectoryName(Path)!);
       }
       catch(IOException)
       {
-         // The folder is in use, or the parent still holds another test's folder.
+         // Cleanup only; the test outcome is already decided.
       }
    }
 }

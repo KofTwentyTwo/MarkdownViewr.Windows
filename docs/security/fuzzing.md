@@ -35,13 +35,12 @@ dotnet test tests/MarkdownViewr.Windows.UiTests -c Release -p:Platform=x64 --fil
 $env:K22_FUZZ_ITERATIONS = '10000'
 ```
 
-Each target uses seeds 22023 and 99173. PR/main campaigns run 500 iterations per
-seed/target (5000 generated property evaluations total); weekly and every release
-reuse run 10000 (100000 total). `fuzz.yml` runs on PRs, `main`, weekly and manual
-requests; release.yml calls it and requires success before publication. The
-`fuzzing` check is declared in the repository protection plan; apply and verify
-that live protection after its first hosted run. The job has a 15-minute bound;
-iteration configuration outside 1–100000 fails explicitly.
+Each target uses seeds 22023 and 99173. Every push runs 500 iterations per
+seed/target (5000 generated property evaluations total) as part of the ordinary
+test runs in `.gitea/workflows/build.yaml`. Pushes to `main` and to a tag repeat
+the campaigns at 10000 (100000 total), and that step fails if its filter matches
+no test. There is no scheduled campaign. Iteration configuration outside 1–100000
+fails explicitly.
 
 Failures retain seed, target, zero-based iteration and JSON-escaped synthetic
 input in TRX/CI logs. To replay the sequence, use the same checkout/runtime/seed

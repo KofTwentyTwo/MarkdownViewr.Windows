@@ -77,8 +77,8 @@ checks do not establish the corruption's cause.
 
 ## Evidence and cleanup
 
-CI requires `installed-updates` and retains JSON results, process/installer logs
-and TRX UI reports. Local evidence stays under a fresh `artifacts/installed-smoke-*`
+The harness has no automated run at present; run it by hand before a release. It
+writes JSON results, process/installer logs and TRX UI reports. Local evidence stays under a fresh `artifacts/installed-smoke-*`
 directory. Existing output directories are refused so each attempt tests fresh
 packages and results. Packer children receive a private `VELOPACK_TEMP` directory
 named for the unique test package ID, isolating staging from other app builds.

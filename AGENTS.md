@@ -13,12 +13,13 @@ Use Windows and the .NET 10 SDK selected by `global.json`:
 ```powershell
 dotnet restore MarkdownViewr.Windows.slnx -p:Platform=x64 --locked-mode
 dotnet build MarkdownViewr.Windows.slnx -p:Platform=x64 -warnaserror
-dotnet test tests/MarkdownViewr.Windows.Core.Tests --settings coverage.runsettings --collect:'XPlat Code Coverage' --results-directory TestResults
-./build/Assert-Coverage.ps1 -ResultsDirectory TestResults
+dotnet test tests/MarkdownViewr.Windows.Core.Tests --no-build --settings coverage.runsettings --collect:'XPlat Code Coverage' --results-directory TestResults   # TestResults must start empty
+pwsh -NoProfile -File ./build/Assert-Coverage.ps1 -ResultsDirectory TestResults -Packages MarkdownViewr.Windows.Core
+dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category!=Desktop"
 dotnet format MarkdownViewr.Windows.slnx --verify-no-changes --severity warn --no-restore
 ```
 
-Desktop tests require an explicitly available interactive desktop. Run `dotnet test tests/MarkdownViewr.Windows.UiTests` only when input will not interfere with other work. Preserve 100% measured core coverage; use xUnit and deterministic injected time/filesystem boundaries. Follow `Method_Scenario_Expectation` test names.
+Desktop tests require an explicitly available interactive desktop. Run `dotnet test tests/MarkdownViewr.Windows.UiTests --no-build --filter "Category=Desktop"` only when input will not interfere with other work. Preserve 100% measured core coverage; use xUnit and deterministic injected time/filesystem boundaries. Follow `Method_Scenario_Expectation` test names.
 
 ## Style and Contributions
 
