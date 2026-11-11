@@ -349,6 +349,38 @@ public sealed class UntrustedInputValidationTests
 
 
 
+   /// <summary>
+   /// JSON writes emoji, no-break and ideographic spaces and private-use glyphs as six-character
+   /// escapes whatever the encoder. A theme as large as an import may be, made of nothing else,
+   /// can still be renamed, copied and edited: the stored limit leaves room for the growth.
+   /// </summary>
+   [Theory]
+   [InlineData("😀")]
+   [InlineData(" ")]
+   [InlineData("　")]
+   [InlineData("")]
+   public void Rename_ThemeAtTheImportLimitMadeOfEscapedCharacters_IsKept(string character)
+   {
+      string original = ThemeCatalog.Find("Nord").Json;
+      string opening = "\"name\": \"Nord\", \"note\": \"";
+      int room = ReaderTheme.MaximumCharacters - original.Length - (opening.Length - "\"name\": \"Nord\"".Length) - 1;
+      string filler = string.Concat(Enumerable.Repeat(character, room / character.Length)).PadRight(room, 'x');
+      string json = original.Replace("\"name\": \"Nord\"", opening + filler + "\"", StringComparison.Ordinal);
+      Assert.Equal(ReaderTheme.MaximumCharacters, json.Length);
+      var theme = ReaderTheme.Parse(json);
+      ReaderTheme renamed = theme.Rename("A considerably longer name than the one it had");
+      Assert.InRange(renamed.Json.Length, json.Length + 1, ReaderTheme.MaximumStoredCharacters);
+      Assert.Equal(renamed.Json.Length, renamed.Rename(renamed.Name).Json.Length);
+      Assert.EndsWith(" Copy", ThemeManagement.CopyTheme(new AppSettings(), renamed).Name, StringComparison.Ordinal);
+      ReaderTheme edited = renamed.Edit("Edited", new Dictionary<string, string>(StringComparer.Ordinal), new Dictionary<string, double>(StringComparer.Ordinal), new Dictionary<string, string>(StringComparer.Ordinal), "body { color: red }");
+      Assert.Equal("Edited", edited.Name);
+      var settings = new AppSettings { UserThemes = [edited.Json] };
+      settings.Sanitize();
+      Assert.Equal([edited.Json], settings.UserThemes);
+   }
+
+
+
    /// <summary>A string that is not well-formed UTF-16 is refused as an invalid theme, and a stored one is dropped, rather than failing as a programming error.</summary>
    [Fact]
    public void Parse_TextWithAnUnpairedSurrogate_IsRejectedAsAnInvalidTheme()
